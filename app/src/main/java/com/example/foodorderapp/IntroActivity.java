@@ -66,6 +66,8 @@ public class IntroActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+
     }
 
     private void updateDots() {
