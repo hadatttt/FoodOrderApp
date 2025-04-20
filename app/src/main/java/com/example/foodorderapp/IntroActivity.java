@@ -52,7 +52,7 @@ public class IntroActivity extends AppCompatActivity {
             if (currentIndex<3) {
                 updateDots();
             } else {
-                Intent intent = new Intent(IntroActivity.this, MainActivity.class);
+                Intent intent = new Intent(IntroActivity.this, LoginActivity.class);
                 startActivity(intent);
             }
             ivOrder.setImageResource(imageResources[currentIndex]);
@@ -62,12 +62,10 @@ public class IntroActivity extends AppCompatActivity {
         btnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(IntroActivity.this, MainActivity.class);
+                Intent intent = new Intent(IntroActivity.this, LoginActivity.class);
                 startActivity(intent);
             }
         });
-
-
     }
 
     private void updateDots() {
