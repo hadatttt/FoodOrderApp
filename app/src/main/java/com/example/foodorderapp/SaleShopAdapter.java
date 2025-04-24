@@ -56,7 +56,8 @@ public class SaleShopAdapter extends RecyclerView.Adapter<SaleShopAdapter.ShopVi
             imageShop.setImageResource(shop.getImageResource());
             textShopName.setText(shop.getShopName());
             textAddress.setText(shop.getAddress());
-            textDiscount.setText(shop.getDiscount());
+            // Format float discount as "Giảm X%"
+            textDiscount.setText(String.format("Giảm %.0f%%", shop.getDiscount()));
         }
     }
 }

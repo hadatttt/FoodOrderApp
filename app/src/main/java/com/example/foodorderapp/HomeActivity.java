@@ -47,9 +47,9 @@ public class HomeActivity extends AppCompatActivity {
         recyclerSaleShop= findViewById(R.id.recyclerSaleShop);
         recyclerSaleShop.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         shopList = new ArrayList<>();
-        shopList.add(new ShopModel(1, "Burger King", "123 Le Loi, Da Nang", "Giảm 10%", R.drawable.burger));
-        shopList.add(new ShopModel(2, "Peppe Pizzeria", "45 Tran Phu, Da Nang", "Giảm 15%", R.drawable.pizza));
-        shopList.add(new ShopModel(3, "KFC", "78 Nguyen Van Linh, Da Nang", "Giảm 12%", R.drawable.chicken));
+        shopList.add(new ShopModel(1, "Burger King", "123 Le Loi, Da Nang", 10.0f, R.drawable.burger));
+        shopList.add(new ShopModel(2, "Peppe Pizzeria", "45 Tran Phu, Da Nang", 15.0f, R.drawable.pizza));
+        shopList.add(new ShopModel(3, "KFC", "78 Nguyen Van Linh, Da Nang", 12.0f, R.drawable.chicken));
 
         saleShopAdapter = new SaleShopAdapter(shopList); // Updated to SaleShopAdapter
         recyclerSaleShop.setAdapter(saleShopAdapter);

@@ -4,11 +4,11 @@ public class ShopModel {
     private int id;
     private String shopName;
     private String address;
-    private String discount;
+    private float discount; // Changed from String to float
     private int imageResource;
 
     // Constructor
-    public ShopModel(int id, String shopName, String address, String discount, int imageResource) {
+    public ShopModel(int id, String shopName, String address, float discount, int imageResource) {
         this.id = id;
         this.shopName = shopName;
         this.address = address;
@@ -29,7 +29,7 @@ public class ShopModel {
         return address;
     }
 
-    public String getDiscount() {
+    public float getDiscount() { // Changed to return float
         return discount;
     }
 
