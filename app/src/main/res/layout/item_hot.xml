@@ -91,8 +91,8 @@
                 android:layout_height="wrap_content"
                 android:text="Đã bán: 120"
                 android:textColor="#888888"
-                android:textSize="14sp"
-                android:layout_marginTop="4dp" />
+                android:textSize="12sp"
+                android:layout_marginTop="1dp" />
 
         </LinearLayout>
     </LinearLayout>

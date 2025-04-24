@@ -1,0 +1,54 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:layout_margin="8dp"
+    android:background="@drawable/bg_card"
+    android:elevation="4dp"
+    android:gravity="center_horizontal">
+
+    <!-- Ảnh món ăn -->
+    <ImageView
+        android:id="@+id/imageFood"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/pizza" />
+
+    <!-- Tên món ăn -->
+    <TextView
+        android:id="@+id/textFoodName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="European Pizza"
+        android:textStyle="bold"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        android:layout_marginTop="8dp" />
+
+    <!-- Tên cửa hàng -->
+    <TextView
+        android:id="@+id/textShopName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Peppe Pizzeria"
+        android:textColor="#666666"
+        android:textSize="14sp"
+        android:layout_marginTop="2dp" />
+
+    <!-- Nhãn giảm giá -->
+    <TextView
+        android:id="@+id/Discount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Giảm 11%"
+        android:textColor="#E53935"
+        android:textSize="12sp"
+        android:background="@drawable/bg_discount"
+        android:paddingHorizontal="6dp"
+        android:paddingVertical="2dp"
+        android:layout_marginTop="6dp"
+        android:layout_gravity="center_horizontal" />
+
+</LinearLayout>
