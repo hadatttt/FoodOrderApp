@@ -49,10 +49,35 @@
             </LinearLayout>
 
             <!-- Icon giỏ hàng -->
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_cart" />
+            <FrameLayout
+                android:id="@+id/cartBadgeContainer"
+                android:layout_width="48dp"
+                android:layout_height="48dp">
+
+                <!-- Icon giỏ hàng -->
+
+                <!-- Badge số lượng -->
+                <ImageView
+                    android:id="@+id/imgCartIcon"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_discount"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_cart" />
+
+                <TextView
+                    android:id="@+id/textCartCount"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="top|end"
+                    android:background="@drawable/bg_circle_badge"
+                    android:text="2"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:visibility="visible" />
+
+            </FrameLayout>
         </LinearLayout>
 
         <!-- PHẦN 2: Chào người dùng + Tìm kiếm -->
