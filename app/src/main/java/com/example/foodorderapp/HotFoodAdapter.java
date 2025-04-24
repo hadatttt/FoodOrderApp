@@ -1,4 +1,4 @@
 package com.example.foodorderapp;
 
-public class HotAdapter {
+public class HotFoodAdapter {
 }

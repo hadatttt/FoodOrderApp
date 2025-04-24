@@ -40,13 +40,16 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:gravity="center_vertical">
-
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Từ " />
             <TextView
                 android:id="@+id/textFoodPrice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="100.000đ"
-                android:textColor="#888888" />
+                android:textColor="#F40F00" />
 
             <ImageView
                 android:layout_width="16dp"
@@ -59,10 +62,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="4.2"
-                android:textColor="#888888"
                 android:layout_marginStart="4dp" />
-        </LinearLayout>
 
+        </LinearLayout>
         <!-- Nút yêu thích + giỏ hàng -->
         <LinearLayout
             android:orientation="horizontal"
@@ -71,18 +73,26 @@
             android:gravity="center_vertical"
             android:layout_marginTop="8dp">
 
-            <ImageButton
-                android:id="@+id/btnFavorite"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:background="@drawable/unlike" />
+<!--            <ImageButton-->
+<!--                android:id="@+id/btnFavorite"-->
+<!--                android:layout_width="24dp"-->
+<!--                android:layout_height="24dp"-->
+<!--                android:background="@drawable/unlike" />-->
 
-            <ImageButton
-                android:id="@+id/btnAddToCart"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginStart="8dp"
-                android:background="@drawable/buy" />
+<!--            <ImageButton-->
+<!--                android:id="@+id/btnAddToCart"-->
+<!--                android:layout_width="24dp"-->
+<!--                android:layout_height="24dp"-->
+<!--                android:layout_marginStart="8dp"-->
+<!--                android:background="@drawable/buy" />-->
+            <TextView
+                android:id="@+id/textSoldAmount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Đã bán: 120"
+                android:textColor="#888888"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp" />
 
         </LinearLayout>
     </LinearLayout>
