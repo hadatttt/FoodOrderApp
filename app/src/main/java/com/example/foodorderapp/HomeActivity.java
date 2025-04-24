@@ -1,6 +1,8 @@
 package com.example.foodorderapp;
 
 import android.os.Bundle;
+import android.widget.Button;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -17,7 +19,8 @@ public class HomeActivity extends AppCompatActivity {
     private RecyclerView recyclerSaleShop;
     private SaleShopAdapter saleShopAdapter; // Updated to SaleShopAdapter
     private List<ShopModel> shopList;
-
+    private Button btnAll, btnSpaghetti, btnPotato, btnPizza, btnBurger, btnChicken;
+    private List<Button> categoryButtons; // Danh sách các Button để quản lý màu
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,5 +56,54 @@ public class HomeActivity extends AppCompatActivity {
 
         saleShopAdapter = new SaleShopAdapter(shopList); // Updated to SaleShopAdapter
         recyclerSaleShop.setAdapter(saleShopAdapter);
+        // button
+        btnAll = findViewById(R.id.btnAll);
+        btnSpaghetti = findViewById(R.id.btnSpaghetti);
+        btnPotato = findViewById(R.id.btnPotato);
+        btnPizza = findViewById(R.id.btnPizza);
+        btnBurger = findViewById(R.id.btnBurger);
+        btnChicken = findViewById(R.id.btnChicken);
+
+        // Thêm các Button vào danh sách để quản lý
+        categoryButtons = new ArrayList<>();
+        categoryButtons.add(btnAll);
+        categoryButtons.add(btnSpaghetti);
+        categoryButtons.add(btnPotato);
+        categoryButtons.add(btnPizza);
+        categoryButtons.add(btnBurger);
+        categoryButtons.add(btnChicken);
+        btnAll.setOnClickListener(v -> selectCategory("Tất cả", btnAll));
+        btnSpaghetti.setOnClickListener(v -> selectCategory("Mỳ ý", btnSpaghetti));
+        btnPotato.setOnClickListener(v -> selectCategory("Khoai tây chiên", btnPotato));
+        btnPizza.setOnClickListener(v -> selectCategory("Pizza", btnPizza));
+        btnBurger.setOnClickListener(v -> selectCategory("Burger", btnBurger));
+        btnChicken.setOnClickListener(v -> selectCategory("Gà rán", btnChicken));
+
+    }private void selectCategory(String category, Button selectedButton) {
+        // Lọc dữ liệu
+
+
+        // Cập nhật màu của các Button
+        for (Button button : categoryButtons) {
+            if (button == selectedButton) {
+                button.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFFD700)); // Màu vàng
+            } else {
+                button.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFEEEEEE)); // Màu xám
+            }
+        }
     }
+//    private void filterShops(String category) {
+//        shopList.clear();
+//        if (category.equals("Tất cả")) {
+//            shopList.addAll(fullShopList);
+//        } else {
+//            for (ShopModel shop : fullShopList) {
+//                if (shop.getCategory().equals(category)) {
+//                    shopList.add(shop);
+//                }
+//            }
+//        }
+//        saleShopAdapter.notifyDataSetChanged();
+//    }
+
 }

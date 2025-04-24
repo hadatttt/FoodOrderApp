@@ -139,8 +139,8 @@
 
                     <!-- Danh mục: Tất cả -->
                     <Button
-
-                        android:layout_width="match_parent"
+                        android:id="@+id/btnAll"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
                         android:backgroundTint="#FFD700"
@@ -148,7 +148,8 @@
                         android:textColor="#000" />
 
                     <Button
-                        android:layout_width="match_parent"
+                        android:id="@+id/btnSpaghetti"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
                         android:backgroundTint="#EEEEEE"
@@ -157,33 +158,38 @@
                         android:textColor="#000" />
 
                     <Button
-                        android:layout_width="match_parent"
+                        android:id="@+id/btnPotato"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
                         android:backgroundTint="#EEEEEE"
                         android:drawableLeft="@drawable/potato"
                         android:text="Khoai tây chiên"
                         android:textColor="#000" />
+
                     <Button
-                        android:layout_width="match_parent"
+                        android:id="@+id/btnPizza"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
                         android:backgroundTint="#EEEEEE"
+                        android:drawableLeft="@drawable/pizza"
                         android:text="Pizza"
-                        android:textColor="#000"
-                        android:drawableLeft="@drawable/pizza" />
+                        android:textColor="#000" />
 
                     <Button
-                        android:layout_width="match_parent"
+                        android:id="@+id/btnBurger"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
                         android:backgroundTint="#EEEEEE"
+                        android:drawableLeft="@drawable/burger"
                         android:text="Burger"
-                        android:textColor="#000"
-                        android:drawableLeft="@drawable/burger"/>
+                        android:textColor="#000" />
 
                     <Button
-                        android:layout_width="match_parent"
+                        android:id="@+id/btnChicken"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
                         android:backgroundTint="#EEEEEE"
