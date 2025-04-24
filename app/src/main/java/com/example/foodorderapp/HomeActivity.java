@@ -14,6 +14,9 @@ public class HomeActivity extends AppCompatActivity {
     private RecyclerView recyclerHotFood;
     private HotFoodAdapter hotFoodAdapter;
     private List<FoodModel> foodList;
+    private RecyclerView recyclerSaleShop;
+    private SaleShopAdapter saleShopAdapter; // Updated to SaleShopAdapter
+    private List<ShopModel> shopList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,9 +41,17 @@ public class HomeActivity extends AppCompatActivity {
         foodList.add(new FoodModel(1, 101, "Burger khổng lồ", "100.000đ", 4.2f, R.drawable.burger, 120));
         foodList.add(new FoodModel(2, 101, "Pizza phô mai", "150.000đ", 4.5f, R.drawable.pizza, 85));
         foodList.add(new FoodModel(3, 102, "Gà rán giòn", "90.000đ", 4.0f, R.drawable.chicken, 200));
-
-        // Initialize and set adapter
+//shop
         hotFoodAdapter = new HotFoodAdapter(foodList);
         recyclerHotFood.setAdapter(hotFoodAdapter);
+        recyclerSaleShop= findViewById(R.id.recyclerSaleShop);
+        recyclerSaleShop.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        shopList = new ArrayList<>();
+        shopList.add(new ShopModel(1, "Burger King", "123 Le Loi, Da Nang", "Giảm 10%", R.drawable.burger));
+        shopList.add(new ShopModel(2, "Peppe Pizzeria", "45 Tran Phu, Da Nang", "Giảm 15%", R.drawable.pizza));
+        shopList.add(new ShopModel(3, "KFC", "78 Nguyen Van Linh, Da Nang", "Giảm 12%", R.drawable.chicken));
+
+        saleShopAdapter = new SaleShopAdapter(shopList); // Updated to SaleShopAdapter
+        recyclerSaleShop.setAdapter(saleShopAdapter);
     }
 }
