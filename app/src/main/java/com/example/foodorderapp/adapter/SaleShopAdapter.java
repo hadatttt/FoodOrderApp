@@ -1,4 +1,4 @@
-package com.example.foodorderapp;
+package com.example.foodorderapp.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,8 +9,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.List;
+import com.example.foodorderapp.R;
+import com.example.foodorderapp.model.ShopModel;
 
+import java.util.List;
 public class SaleShopAdapter extends RecyclerView.Adapter<SaleShopAdapter.ShopViewHolder> {
 
     private List<ShopModel> shopList;
@@ -38,6 +40,12 @@ public class SaleShopAdapter extends RecyclerView.Adapter<SaleShopAdapter.ShopVi
         return shopList.size();
     }
 
+    // Phương thức để cập nhật dữ liệu trong adapter
+    public void updateData(List<ShopModel> newShopList) {
+        this.shopList = newShopList;
+        notifyDataSetChanged();  // Thông báo RecyclerView cập nhật dữ liệu
+    }
+
     public static class ShopViewHolder extends RecyclerView.ViewHolder {
         private final ImageView imageShop;
         private final TextView textShopName;
@@ -53,10 +61,13 @@ public class SaleShopAdapter extends RecyclerView.Adapter<SaleShopAdapter.ShopVi
         }
 
         public void bind(ShopModel shop) {
-            imageShop.setImageResource(shop.getImageResource());
+            // Chuyển từ tên tài nguyên drawable thành ID thực tế
+            int resId = itemView.getContext().getResources().getIdentifier(
+                    shop.getImageResource(), "drawable", itemView.getContext().getPackageName());
+            imageShop.setImageResource(resId);
             textShopName.setText(shop.getShopName());
             textAddress.setText(shop.getAddress());
-            // Format float discount as "Giảm X%"
+            // Hiển thị giảm giá
             textDiscount.setText(String.format("Giảm %.0f%%", shop.getDiscount()));
         }
     }

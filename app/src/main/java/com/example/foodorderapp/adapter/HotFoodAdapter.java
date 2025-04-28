@@ -1,4 +1,4 @@
-package com.example.foodorderapp;
+package com.example.foodorderapp.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +9,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.foodorderapp.R;
+import com.example.foodorderapp.model.FoodModel;
+
 import java.util.List;
 
 public class HotFoodAdapter extends RecyclerView.Adapter<HotFoodAdapter.FoodViewHolder> {
@@ -16,6 +19,12 @@ public class HotFoodAdapter extends RecyclerView.Adapter<HotFoodAdapter.FoodView
     private List<FoodModel> foodList;
 
     // Constructor
+    public void updateData(List<FoodModel> newList) {
+        foodList.clear();
+        foodList.addAll(newList);
+        notifyDataSetChanged();
+    }
+
     public HotFoodAdapter(List<FoodModel> foodList) {
         this.foodList = foodList;
     }

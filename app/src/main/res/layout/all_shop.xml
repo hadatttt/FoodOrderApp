@@ -1,0 +1,124 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!-- Toolbar with Back button and Search bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:background="#FFFFFF"
+        android:padding="8dp"
+        android:gravity="center_vertical">
+
+        <!-- Back Button -->
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="16dp"/>
+
+        <!-- Search Bar -->
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_search_box"
+            android:drawableStart="@drawable/ic_search"
+            android:hint="Tìm kiếm"
+            android:padding="12dp" />
+    </LinearLayout>
+
+    <!-- Danh mục đồ ăn -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Danh mục đồ ăn"
+        android:textSize="18sp"
+        android:textColor="#000"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:fontFamily="sans-serif-medium" />
+
+    <!-- Horizontal ScrollView for food categories -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <!-- Danh mục: Tất cả -->
+            <Button
+                android:id="@+id/btnAll"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="#FFD700"
+                android:text="Tất cả"
+                android:textColor="#000" />
+
+            <Button
+                android:id="@+id/btnSpaghetti"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="#EEEEEE"
+                android:drawableLeft="@drawable/spaghetti"
+                android:text="Mỳ ý"
+                android:textColor="#000" />
+
+            <Button
+                android:id="@+id/btnPotato"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="#EEEEEE"
+                android:drawableLeft="@drawable/potato"
+                android:text="Khoai tây chiên"
+                android:textColor="#000" />
+
+            <Button
+                android:id="@+id/btnPizza"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="#EEEEEE"
+                android:drawableLeft="@drawable/pizza"
+                android:text="Pizza"
+                android:textColor="#000" />
+
+            <Button
+                android:id="@+id/btnBurger"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="#EEEEEE"
+                android:drawableLeft="@drawable/burger"
+                android:text="Burger"
+                android:textColor="#000" />
+
+            <Button
+                android:id="@+id/btnChicken"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="#EEEEEE"
+                android:drawableLeft="@drawable/chicken"
+                android:text="Gà rán"
+                android:textColor="#000" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <!-- RecyclerView to display food items -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerFoodItems"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</LinearLayout>
