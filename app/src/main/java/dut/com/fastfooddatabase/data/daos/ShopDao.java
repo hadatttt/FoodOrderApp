@@ -39,4 +39,16 @@ public class ShopDao {
     public Task<Void> updateShop(Shop shop) {
         return shopRef.document(shop.getId()).set(shop);
     }
+
+    public Task<QuerySnapshot> getShopsByName(String query) {
+        if (query == null || query.trim().isEmpty()) {
+            return shopRef.get();
+        }
+
+        String lowercaseQuery = query.trim().toLowerCase();
+        return shopRef
+                .whereGreaterThanOrEqualTo("name_lowercase", lowercaseQuery)
+                .whereLessThanOrEqualTo("name_lowercase", lowercaseQuery + "\uf8ff")
+                .get();
+    }
 }

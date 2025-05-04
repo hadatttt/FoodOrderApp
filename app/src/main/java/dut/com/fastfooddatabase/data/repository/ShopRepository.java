@@ -32,4 +32,8 @@ public class ShopRepository {
     public void updateShop(Shop shop, OnCompleteListener<Void> listener) {
         shopDao.updateShop(shop).addOnCompleteListener(listener);
     }
+
+    public void searchShopsByName(String query, OnCompleteListener<QuerySnapshot> listener) {
+        shopDao.getShopsByName(query).addOnCompleteListener(listener);
+    }
 }

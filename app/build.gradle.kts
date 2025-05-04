@@ -55,5 +55,6 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
 
     implementation("com.github.bumptech.glide:glide:4.13.0")
+    implementation("org.osmdroid:osmdroid-android:6.1.17")
     annotationProcessor("com.github.bumptech.glide:compiler:4.13.0")
 }

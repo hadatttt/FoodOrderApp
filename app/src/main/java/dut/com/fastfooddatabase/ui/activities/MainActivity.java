@@ -12,6 +12,8 @@ import androidx.fragment.app.FragmentTransaction;
 import dut.com.fastfooddatabase.R;
 import dut.com.fastfooddatabase.databinding.ActivityMainBinding;
 import dut.com.fastfooddatabase.ui.fragments.HomeFragment;
+import dut.com.fastfooddatabase.ui.fragments.SearchFragment;
+import dut.com.fastfooddatabase.ui.fragments.ShopDetailFragment;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -25,9 +27,14 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         if (savedInstanceState == null) {
-            HomeFragment homeFragment = new HomeFragment();
+//            HomeFragment homeFragment = new HomeFragment();
+//            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+//            transaction.replace(R.id.home_fragment_container, homeFragment);
+//            transaction.commit();
+//            SearchFragment searchFragment = new SearchFragment();
+            ShopDetailFragment shopDetailFragment = new ShopDetailFragment("0");
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.home_fragment_container, homeFragment);
+            transaction.replace(R.id.home_fragment_container, shopDetailFragment);
             transaction.commit();
         }
     }

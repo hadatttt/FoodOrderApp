@@ -18,7 +18,7 @@ public class MenuItemRepository {
         menuItemDao.getMenuItemsByShop(restaurantId).addOnCompleteListener(listener);
     }
 
-    public void getRandomMenuItems(int numOfItems,OnCompleteListener<QuerySnapshot> listener) {
+    public void getRandomMenuItems(int numOfItems, OnCompleteListener<QuerySnapshot> listener) {
         menuItemDao.getRandomMenuItems(numOfItems).addOnCompleteListener(listener);
     }
 
@@ -38,7 +38,12 @@ public class MenuItemRepository {
     public void deleteMenuItem(String itemId, OnCompleteListener<Void> listener) {
         menuItemDao.deleteMenuItem(itemId).addOnCompleteListener(listener);
     }
+
     public void updateMenuItem(MenuItem item, OnCompleteListener<Void> listener) {
         menuItemDao.updateMenuItem(item).addOnCompleteListener(listener);
+    }
+
+    public void searchMenuItemsByName(String query, OnCompleteListener<QuerySnapshot> listener) {
+        menuItemDao.getMenuItemByName(query).addOnCompleteListener(listener);
     }
 }

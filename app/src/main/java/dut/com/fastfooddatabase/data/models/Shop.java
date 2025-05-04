@@ -6,7 +6,7 @@ public class Shop {
     private String address;
     private String phone;
     private double rating;
-
+    private boolean isActive;
     private String description;
     private String imageUrl;
 
@@ -14,7 +14,7 @@ public class Shop {
         // Default constructor required for calls to DataSnapshot.getValue(Shop.class)
     }
 
-    public Shop(String id, String name, String description, String address, String phone, double rating, String imageUrl) {
+    public Shop(String id, String name, String description, boolean isActive, String address, String phone, double rating, String imageUrl) {
         this.id = id;
         this.name = name;
         this.address = address;
@@ -22,6 +22,7 @@ public class Shop {
         this.rating = rating;
         this.imageUrl = imageUrl;
         this.description = description;
+        this.isActive = isActive;
     }
 
     public String getId() {
@@ -74,5 +75,17 @@ public class Shop {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 }

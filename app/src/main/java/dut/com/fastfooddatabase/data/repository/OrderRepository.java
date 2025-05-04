@@ -22,6 +22,10 @@ public class OrderRepository {
         orderDao.getOrderById(orderId).addOnCompleteListener(listener);
     }
 
+    public void getMenuItemsByOrderId(String orderId, OnCompleteListener<QuerySnapshot> listener) {
+        orderDao.getMenuItemsByOrderId(orderId).addOnCompleteListener(listener);
+    }
+
     public void updateOrderStatus(String orderId, String status, OnCompleteListener<Void> listener) {
         orderDao.updateOrderStatus(orderId, status).addOnCompleteListener(listener);
     }

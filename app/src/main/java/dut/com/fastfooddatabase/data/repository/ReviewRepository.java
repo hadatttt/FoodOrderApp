@@ -14,7 +14,7 @@ public class ReviewRepository {
         reviewDao.addReview(review).addOnCompleteListener(listener);
     }
 
-    public void getReviewsByRestaurant(String restaurantId, OnCompleteListener<QuerySnapshot> listener) {
+    public void getReviewsByShop(String restaurantId, OnCompleteListener<QuerySnapshot> listener) {
         reviewDao.getReviewsByRestaurant(restaurantId).addOnCompleteListener(listener);
     }
 

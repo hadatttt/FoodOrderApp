@@ -7,6 +7,7 @@ public class ApplicationRepository {
     private final MenuItemRepository menuItemRepository;
     private final OrderRepository orderRepository;
     private final ReviewRepository reviewRepository;
+    private final SearchHistoryRepository searchHistoryRepository;
 
     private ApplicationRepository() {
         userRepository = new UserRepository();
@@ -14,7 +15,7 @@ public class ApplicationRepository {
         menuItemRepository = new MenuItemRepository();
         orderRepository = new OrderRepository();
         reviewRepository = new ReviewRepository();
-
+        searchHistoryRepository = new SearchHistoryRepository();
     }
 
     public static synchronized ApplicationRepository getInstance() {
@@ -34,5 +35,17 @@ public class ApplicationRepository {
 
     public MenuItemRepository getMenuItemRepository() {
         return menuItemRepository;
+    }
+
+    public OrderRepository getOrderRepository() {
+        return orderRepository;
+    }
+
+    public ReviewRepository getReviewRepository() {
+        return reviewRepository;
+    }
+
+    public SearchHistoryRepository getSearchHistoryRepository() {
+        return searchHistoryRepository;
     }
 }

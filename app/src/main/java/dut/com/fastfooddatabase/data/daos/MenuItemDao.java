@@ -50,4 +50,16 @@ public class MenuItemDao {
     public Task<QuerySnapshot> getMenuItemsByShopAndCategory(String restaurantId, String category) {
         return menuItemsRef.whereEqualTo("shopId", restaurantId).whereEqualTo("category", category).get();
     }
+
+    public Task<QuerySnapshot> getMenuItemByName(String query) {
+        if (query == null || query.trim().isEmpty()) {
+            return menuItemsRef.get();
+        }
+
+        String lowercaseQuery = query.trim().toLowerCase();
+        return menuItemsRef
+                .whereGreaterThanOrEqualTo("name_lowercase", lowercaseQuery)
+                .whereLessThanOrEqualTo("name_lowercase", lowercaseQuery + "\uf8ff")
+                .get();
+    }
 }

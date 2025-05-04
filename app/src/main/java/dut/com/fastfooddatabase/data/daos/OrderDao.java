@@ -31,4 +31,8 @@ public class OrderDao {
     public Task<DocumentSnapshot> getOrderById(String orderId) {
         return ordersRef.document(orderId).get();
     }
+
+    public Task<QuerySnapshot> getMenuItemsByOrderId(String orderId) {
+        return ordersRef.document(orderId).collection("items").get();
+    }
 }
