@@ -20,7 +20,6 @@ public class SearchFragment extends Fragment {
     private List<String> historyList;
 
     public SearchFragment() {
-        // Required empty public constructor
     }
 
     @Override
