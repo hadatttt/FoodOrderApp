@@ -53,7 +53,7 @@
                 android:background="@drawable/rounded_image"
                 android:scaleType="centerCrop"
                 android:clipToOutline="true"
-                android:src="@drawable/chicken"
+                android:src="@drawable/img_chicken"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/btnBack" />
@@ -63,7 +63,7 @@
                 android:layout_height="25dp"
                 android:layout_margin="20dp"
                 android:background="@null"
-                android:src="@drawable/white_heart"
+                android:src="@drawable/ic_white_heart"
                 android:scaleType="fitCenter"
                 app:layout_constraintBottom_toBottomOf="@id/imgFood"
                 app:layout_constraintEnd_toEndOf="@id/imgFood" />
@@ -76,7 +76,7 @@
                 android:textColor="#FF5722"
                 android:padding="10dp"
                 android:background="@drawable/bg_shop"
-                android:drawableLeft="@drawable/store"
+                android:drawableLeft="@drawable/ic_store"
                 android:drawablePadding="4dp"
                 android:textSize="14sp"
                 app:layout_constraintTop_toBottomOf="@id/imgFood"
@@ -118,6 +118,7 @@
                 android:layout_marginTop="12dp">
 
                 <TextView
+                    android:id="@+id/tvRate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:drawableLeft="@drawable/ic_star"
@@ -130,7 +131,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text=" Miễn phí "
-                    android:drawableLeft="@drawable/delivery"
+                    android:drawableLeft="@drawable/ic_delivery"
                     android:drawablePadding="4dp"
                     android:paddingRight="13dp"
                     android:textColor="#000" />
@@ -138,7 +139,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="20 Phút"
-                    android:drawableLeft="@drawable/clock"
+                    android:drawableLeft="@drawable/ic_clock"
                     android:drawablePadding="4dp"
                     android:textColor="#000" />
             </LinearLayout>
@@ -154,7 +155,7 @@
                     android:id="@+id/tvSizeLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="SIZE:"
+                    android:text="KÍCH CỠ:"
                     android:textColor="#000"
                     android:layout_marginRight="30dp"
                     app:layout_constraintTop_toBottomOf="@id/llInfo"
@@ -178,7 +179,7 @@
                         android:text="Nhỏ"
                         android:gravity="center"
                         android:layout_marginRight="10dp"
-                        android:textColor="@color/black"/>
+                        android:textColor="@drawable/txt_color_radio"/>
                     <RadioButton
                         android:id="@+id/sizeMedium"
                         android:layout_width="wrap_content"
@@ -188,7 +189,7 @@
                         android:text="Vừa"
                         android:gravity="center"
                         android:layout_marginRight="10dp"
-                        android:textColor="@color/black"/>
+                        android:textColor="@drawable/txt_color_radio"/>
                     <RadioButton
                         android:id="@+id/sizeLarge"
                         android:layout_width="wrap_content"
@@ -197,7 +198,7 @@
                         android:background="@drawable/bg_circle"
                         android:text="Lớn"
                         android:gravity="center"
-                        android:textColor="@color/black"/>
+                        android:textColor="@drawable/txt_color_radio"/>
                 </RadioGroup>
             </LinearLayout>
             <LinearLayout
@@ -221,34 +222,27 @@
                     <CheckBox
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:button="@null"
-                        android:layout_marginEnd="30dp"
-                        android:background="@drawable/salt"></CheckBox>
+                        android:button="@drawable/bg_checkbox"
+                        android:layout_marginEnd="50dp"
+                        android:background="@drawable/ic_salt"></CheckBox>
                     <CheckBox
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:button="@null"
-                        android:layout_marginEnd="30dp"
-                        android:background="@drawable/chickenbonus"></CheckBox>
+
+                        android:layout_marginEnd="50dp"
+                        android:background="@drawable/ic_onion"></CheckBox>
                     <CheckBox
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:button="@null"
-                        android:paddingBottom="10dp"
-                        android:layout_marginEnd="30dp"
-                        android:background="@drawable/onion"></CheckBox>
+                        android:layout_marginEnd="50dp"
+                        android:background="@drawable/ic_garlic"></CheckBox>
                     <CheckBox
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:button="@null"
-                        android:layout_marginEnd="30dp"
-                        android:background="@drawable/garlic"></CheckBox>
-                    <CheckBox
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:button="@null"
-                        android:paddingBottom="10dp"
-                        android:background="@drawable/pappers"></CheckBox>
+                        android:background="@drawable/ic_ginger"></CheckBox>
                 </LinearLayout>
             </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -264,7 +258,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Dòng hiển thị giá + cộng trừ -->
         <LinearLayout
             android:id="@+id/bottomBar"
             android:layout_width="match_parent"
@@ -294,15 +287,16 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:background="@null"
-                    android:src="@drawable/minus" />
+                    android:src="@drawable/ic_minus" />
 
                 <TextView
                     android:id="@+id/tvQuantity"
                     android:layout_width="36dp"
                     android:layout_height="36dp"
                     android:gravity="center"
-                    android:text="2"
+                    android:text="1"
                     android:textSize="16sp"
+                    android:textColor="@color/white"
                     android:textStyle="bold" />
 
                 <ImageButton
@@ -310,7 +304,7 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:background="@null"
-                    android:src="@drawable/plus" />
+                    android:src="@drawable/ic_plus" />
             </LinearLayout>
         </LinearLayout>
 
