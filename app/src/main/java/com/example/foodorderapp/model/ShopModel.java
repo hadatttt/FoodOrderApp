@@ -15,8 +15,7 @@ public class ShopModel {
     // ⚠️ Constructor rỗng bắt buộc để Firestore mapping
     public ShopModel() {}
 
-    public ShopModel(int storeid, String shopName, String address, float discount,
-                     String imageResource, String advertisement, List<String> categories) {
+    public ShopModel(int storeid, String shopName, String address, float discount, String imageResource, String advertisement, List<String> categories) {
         this.storeid = storeid;
         this.shopName = shopName;
         this.address = address;

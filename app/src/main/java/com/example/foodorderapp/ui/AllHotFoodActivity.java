@@ -1,8 +1,6 @@
-package com.example.foodorderapp;
+package com.example.foodorderapp.ui;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
@@ -14,6 +12,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.foodorderapp.R;
 import com.example.foodorderapp.adapter.HotFoodAdapter;
 import com.example.foodorderapp.model.FoodModel;
 

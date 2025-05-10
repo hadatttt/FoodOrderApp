@@ -3,11 +3,9 @@ package com.example.foodorderapp;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -19,9 +17,9 @@ import com.example.foodorderapp.adapter.HotFoodAdapter;
 import com.example.foodorderapp.adapter.SaleShopAdapter;
 import com.example.foodorderapp.model.FoodModel;
 import com.example.foodorderapp.model.ShopModel;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.DocumentReference;
+import com.example.foodorderapp.service.FoodService;
+import com.example.foodorderapp.ui.AllHotFoodActivity;
+import com.example.foodorderapp.ui.AllShopSaleActivity;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -61,18 +59,6 @@ public class HomeActivity extends AppCompatActivity {
             return insets;
         });
 
-        // Firebase test
-        Map<String, Object> user = new HashMap<>();
-        user.put("first", "Ada");
-        user.put("last", "Lovelace");
-        user.put("born", 1815);
-
-        db.collection("users")
-                .add(user)
-                .addOnSuccessListener(documentReference ->
-                        Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId()))
-                .addOnFailureListener(e ->
-                        Log.w(TAG, "Error adding document", e));
 
         // Hot food setup
         recyclerHotFood = findViewById(R.id.recyclerHotFood);
