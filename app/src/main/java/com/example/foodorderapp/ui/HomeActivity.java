@@ -1,8 +1,7 @@
-package com.example.foodorderapp;
+package com.example.foodorderapp.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -13,20 +12,16 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.foodorderapp.R;
 import com.example.foodorderapp.adapter.HotFoodAdapter;
 import com.example.foodorderapp.adapter.SaleShopAdapter;
 import com.example.foodorderapp.model.FoodModel;
 import com.example.foodorderapp.model.ShopModel;
-import com.example.foodorderapp.service.FoodService;
-import com.example.foodorderapp.ui.AllHotFoodActivity;
-import com.example.foodorderapp.ui.AllShopSaleActivity;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class HomeActivity extends AppCompatActivity {
     private static final String TAG = "HomeActivity";
