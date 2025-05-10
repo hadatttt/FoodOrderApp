@@ -156,6 +156,19 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView8"
             app:layout_constraintVertical_bias="0.031" />
+        <TextView
+            android:id="@+id/tv_register_error"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:text="Sai tài khoản hoặc mật khẩu"
+            android:textColor="@android:color/holo_red_dark"
+            android:textSize="14sp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.497"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/edt_password" />
 
         <Button
             android:id="@+id/btn_register"
@@ -170,7 +183,8 @@
             app:layout_constraintHorizontal_bias="0.492"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/edt_password"
-            app:layout_constraintVertical_bias="0.094" />
+            app:layout_constraintVertical_bias="0.239" />
+
         <TextView
             android:id="@+id/textView9"
             android:layout_width="wrap_content"

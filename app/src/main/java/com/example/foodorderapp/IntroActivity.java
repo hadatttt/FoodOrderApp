@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -17,6 +18,9 @@ public class IntroActivity extends AppCompatActivity {
     private ImageView ivOrder;
     private TextView tv;
     private int[] imageResources;
+
+
+    private EditText edtUsername, edtPassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +70,7 @@ public class IntroActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
     }
 
     private void updateDots() {
