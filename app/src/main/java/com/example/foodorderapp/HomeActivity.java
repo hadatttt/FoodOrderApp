@@ -5,6 +5,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -43,41 +44,43 @@ public class HomeActivity extends AppCompatActivity {
 
     private Button btnAll, btnSpaghetti, btnPotato, btnPizza, btnBurger, btnChicken;
     private List<Button> categoryButtons;
-
-
-
+    private TextView tvFullName, tvAddress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.home), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
-        // Create a new user with a first and last name
-        Map<String, Object> user = new HashMap<>();
-        user.put("first", "Ada");
-        user.put("last", "Lovelace");
-        user.put("born", 1815);
+        String userEmail = getIntent().getStringExtra("user_email");
 
-// Add a new document with a generated ID
-        db.collection("users")
-                .add(user)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error adding document", e);
-                    }
-                });
+        tvFullName = findViewById(R.id.tv_full_name);
+        tvAddress = findViewById(R.id.tv_address);
+
+        if (userEmail != null) {
+            db.collection("user")
+                    .whereEqualTo("email", userEmail)
+                    .get()
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        if (!queryDocumentSnapshots.isEmpty()) {
+                            Map<String, Object> userData = queryDocumentSnapshots.getDocuments().get(0).getData();
+
+                            String fullName = (String) userData.get("fullName");
+                            String phone = (String) userData.get("phone");
+                            String address = (String) userData.get("address");
+
+                            Log.d(TAG, "Họ tên: " + fullName + ", SĐT: " + phone + ", Địa chỉ: " + address);
+
+                            tvFullName.setText("Chào "+ fullName +", Ngon Miệng Nhé");
+                            tvAddress.setText(address);
+
+                        } else {
+                            Log.d(TAG, "Không tìm thấy người dùng với email: " + userEmail);
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "Lỗi khi truy vấn người dùng", e);
+                    });
+        }
 
         recyclerHotFood = findViewById(R.id.recyclerHotFood);
         recyclerHotFood.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
