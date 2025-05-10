@@ -83,6 +83,7 @@
 
         <!-- PHẦN 2: Chào người dùng + Tìm kiếm -->
         <TextView
+            android:id="@+id/tv_full_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
@@ -213,6 +214,7 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/allHot"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Thêm >"
@@ -242,6 +244,7 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/allSale"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Thêm >"

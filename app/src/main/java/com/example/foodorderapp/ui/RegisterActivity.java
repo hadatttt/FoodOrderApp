@@ -25,6 +25,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
 import java.util.Map;
+import com.example.foodorderapp.R;
 
 public class RegisterActivity extends AppCompatActivity {
     private EditText edtName, edtEmail, edtPhone, edtPassword;
@@ -81,7 +82,9 @@ public class RegisterActivity extends AppCompatActivity {
                                         .set(userMap)
                                         .addOnSuccessListener(aVoid -> {
                                             tvRegisterError.setVisibility(View.GONE);
-                                            startActivity(new Intent(RegisterActivity.this, HomeActivity.class));
+                                            Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
+                                            intent.putExtra("user_email", email);
+                                            startActivity(intent);
                                             finish();
                                         })
                                         .addOnFailureListener(e -> Toast.makeText(RegisterActivity.this, "Lỗi lưu Firestore: " + e.getMessage(), Toast.LENGTH_SHORT).show());
@@ -134,8 +137,40 @@ public class RegisterActivity extends AppCompatActivity {
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        startActivity(new Intent(RegisterActivity.this, HomeActivity.class));
-                        finish();
+                        String email = mAuth.getCurrentUser().getEmail();
+                        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+                        db.collection("users")
+                                .whereEqualTo("email", email)
+                                .get()
+                                .addOnSuccessListener(queryDocumentSnapshots -> {
+                                    if (queryDocumentSnapshots.isEmpty()) {
+                                        // Email chưa tồn tại -> thêm mới
+                                        Map<String, Object> user = new HashMap<>();
+                                        String username = email.split("@")[0];
+                                        user.put("fullName", username);
+                                        user.put("email", email);
+                                        user.put("phone", "");
+                                        user.put("address", "");
+
+                                        db.collection("users")
+                                                .add(user)
+                                                .addOnSuccessListener(documentReference -> {
+                                                    Log.d("Firestore", "Thêm người dùng mới thành công");
+                                                })
+                                                .addOnFailureListener(e -> {
+                                                    Log.w("Firestore", "Lỗi khi thêm người dùng mới", e);
+                                                });
+                                    }
+                                    // Dù thêm mới hay không, vẫn vào Home
+                                    Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
+                                    intent.putExtra("user_email", email);
+                                    startActivity(intent);
+                                    finish();
+                                })
+                                .addOnFailureListener(e -> {
+                                    Toast.makeText(this, "Lỗi kiểm tra người dùng", Toast.LENGTH_SHORT).show();
+                                });
                     } else {
                         Toast.makeText(this, "Google đăng nhập thất bại", Toast.LENGTH_SHORT).show();
                     }
