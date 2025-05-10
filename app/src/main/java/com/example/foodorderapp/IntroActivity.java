@@ -58,9 +58,13 @@ public class IntroActivity extends AppCompatActivity {
         for (int i = 0; i < foodNames.length; i++) {
             FoodModel food = new FoodModel();
             food.setFoodId(i + 1); // Cung cấp ID khác nhau cho mỗi món ăn
-            food.setStoreId(1); // Giả sử món ăn này đến từ store có ID = 1
+
+            // Gán storeId từ 1 đến 12
+            int storeId = (i % 12) + 1; // Điều chỉnh storeId sao cho giá trị từ 1 đến 12
+            food.setStoreId(storeId);
+
             food.setName(foodNames[i]);
-            food.setPrice(100.000); // Giá là 100.000 VND cho món ăn
+            food.setPrice(100000); // Giá là 100.000 VND cho món ăn (loại bỏ dấu chấm)
             food.setRating(0f); // Rating ban đầu là 0
             food.setImageResId(123); // Sử dụng hình ảnh mặc định cho tất cả
             food.setSold(0); // Món ăn chưa bán được
@@ -69,6 +73,7 @@ public class IntroActivity extends AppCompatActivity {
             // Thêm món ăn vào Firestore
             foodService.addFood(food);
         }
+
         imageResources = new int[]{
                 R.drawable.order,
                 R.drawable.chef,
