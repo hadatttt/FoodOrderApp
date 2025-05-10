@@ -70,7 +70,7 @@ public class HotFoodAdapter extends RecyclerView.Adapter<HotFoodAdapter.FoodView
         public void bind(FoodModel food) {
             imageFood.setImageResource(food.getImageResId());
             textFoodName.setText(food.getName());
-            textFoodPrice.setText(food.getPrice());
+            textFoodPrice.setText(String.format("$%.2f", food.getPrice())+"đ");
             textRating.setText(String.valueOf(food.getRating()));
             textSoldAmount.setText("Đã bán: " + food.getSold());
         }

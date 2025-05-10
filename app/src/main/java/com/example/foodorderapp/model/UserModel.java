@@ -7,13 +7,11 @@ public class UserModel {
     public UserModel() {
         // Required for Firestore
     }
-
     public UserModel(String fullName, String phone, String address) {
         this.fullName = fullName;
         this.phone = phone;
         this.address = address;
     }
-
     // Getters and setters
     public String getFullName() {
         return fullName;

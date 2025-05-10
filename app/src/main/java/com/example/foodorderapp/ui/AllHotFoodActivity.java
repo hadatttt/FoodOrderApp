@@ -54,10 +54,6 @@ public class AllHotFoodActivity extends AppCompatActivity {
 
         // Danh sách món ăn hot
         fullFoodList = new ArrayList<>();
-        fullFoodList.add(new FoodModel(1, 101, "Burger khổng lồ", "100.000đ", 4.2f, R.drawable.burger1, 120, "Burger"));
-        fullFoodList.add(new FoodModel(2, 101, "Pizza phô mai", "150.000đ", 4.5f, R.drawable.pizza1, 85, "Pizza"));
-        fullFoodList.add(new FoodModel(3, 102, "Gà rán giòn", "90.000đ", 4.0f, R.drawable.chicken1, 200, "Chicken"));
-        fullFoodList.add(new FoodModel(4, 102, "Mỳ Ý", "110.000đ", 4.1f, R.drawable.spaggetti1, 55, "Spaghetti"));
         foodList = new ArrayList<>(fullFoodList);
 
         hotFoodAdapter = new HotFoodAdapter(foodList);
