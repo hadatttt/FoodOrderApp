@@ -57,8 +57,11 @@ public class HomeActivity extends AppCompatActivity {
         userService.getUser().addOnSuccessListener(documentSnapshot -> {
             if (documentSnapshot.exists()) {
                 String name = documentSnapshot.getString("fullName"); // Hoặc documentSnapshot.get("name").toString();
+                String addr = documentSnapshot.getString("address");
                 TextView nameTextView = findViewById(R.id.txt_name);
+                TextView addressTextView = findViewById(R.id.txt_address);
                 nameTextView.setText("Chào " +name+", Ngon Miệng Nhé");
+                addressTextView.setText(addr);
             } else {
                 // Document không tồn tại
                 Log.d("UserService", "User document does not exist.");
