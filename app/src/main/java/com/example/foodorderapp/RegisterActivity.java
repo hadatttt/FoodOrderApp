@@ -81,7 +81,7 @@ public class RegisterActivity extends AppCompatActivity {
                                         .set(userMap)
                                         .addOnSuccessListener(aVoid -> {
                                             tvRegisterError.setVisibility(View.GONE);
-                                            startActivity(new Intent(RegisterActivity.this, IntroActivity.class));
+                                            startActivity(new Intent(RegisterActivity.this, HomeActivity.class));
                                             finish();
                                         })
                                         .addOnFailureListener(e -> Toast.makeText(RegisterActivity.this, "Lỗi lưu Firestore: " + e.getMessage(), Toast.LENGTH_SHORT).show());
@@ -134,7 +134,7 @@ public class RegisterActivity extends AppCompatActivity {
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        startActivity(new Intent(RegisterActivity.this, IntroActivity.class));
+                        startActivity(new Intent(RegisterActivity.this, HomeActivity.class));
                         finish();
                     } else {
                         Toast.makeText(this, "Google đăng nhập thất bại", Toast.LENGTH_SHORT).show();

@@ -13,32 +13,24 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FoodOrderApp"
         tools:targetApi="31">
-        <!-- Khai báo Facebook SDK -->
-        <meta-data android:name="com.facebook.sdk.ApplicationId"
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id"/>
-        <meta-data android:name="com.facebook.sdk.ClientToken"
-            android:value="703fbef54da7f76cb6517d6584b4f0bf" />
-        <activity android:name="com.facebook.FacebookActivity"
-            android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
-            android:label="@string/app_name" />
-        <activity android:name="com.facebook.CustomTabActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="@string/fb_login_protocol_scheme" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".RegisterActivity"
-            android:exported="false" />
+        <meta-data
+            android:name="com.facebook.sdk.ClientToken"
+            android:value="2a3ecf67f9991c85b9ab6eb75e82eb449bc1aaed490a66a20b8c245fa60ae642" />
         <activity
             android:name=".LoginActivity"
-            android:exported="false" />
+            android:exported="false"></activity>
         <activity
             android:name=".ForgetActivity"
-            android:exported="false" />
+            android:exported="false"></activity>
+        <activity
+            android:name=".HomeActivity"
+            android:exported="false"></activity>
+        <activity
+            android:name=".RegisterActivity"
+            android:exported="false"></activity>
         <activity
             android:name=".IntroActivity"
             android:exported="true">

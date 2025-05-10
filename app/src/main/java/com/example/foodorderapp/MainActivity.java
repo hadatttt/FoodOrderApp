@@ -13,8 +13,10 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.ViewCompat;
 
 public class MainActivity extends AppCompatActivity {
     private TextView tvSignup;
@@ -50,5 +52,6 @@ public class MainActivity extends AppCompatActivity {
         tvSignup.setText(spannableString);
         tvSignup.setMovementMethod(LinkMovementMethod.getInstance());
         tvSignup.setHighlightColor(Color.TRANSPARENT); // Tắt màu nền khi click
+
     }
 }
