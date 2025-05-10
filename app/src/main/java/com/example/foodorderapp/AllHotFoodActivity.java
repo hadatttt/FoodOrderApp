@@ -2,12 +2,11 @@ package com.example.foodorderapp;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
+import android.widget.ImageView;
 
-import androidx.annotation.NonNull;
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -16,91 +15,54 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.foodorderapp.adapter.HotFoodAdapter;
-import com.example.foodorderapp.adapter.SaleShopAdapter;
 import com.example.foodorderapp.model.FoodModel;
-import com.example.foodorderapp.model.ShopModel;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-public class HomeActivity extends AppCompatActivity {
-    private static final String TAG = "HomeActivity";
+public class AllHotFoodActivity extends AppCompatActivity {
 
     private RecyclerView recyclerHotFood;
     private HotFoodAdapter hotFoodAdapter;
-    private List<FoodModel> foodList;
     private List<FoodModel> fullFoodList;
-
-    private List<ShopModel> fullShopList;
-    private RecyclerView recyclerSaleShop;
-    private SaleShopAdapter saleShopAdapter;
-    private List<ShopModel> shopList;
+    private List<FoodModel> foodList;
 
     private Button btnAll, btnSpaghetti, btnPotato, btnPizza, btnBurger, btnChicken;
     private List<Button> categoryButtons;
 
-    private TextView tvAllHot;
-
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_all_hot_food);
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.home), (v, insets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.allhotfood), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        // Firebase test
-        Map<String, Object> user = new HashMap<>();
-        user.put("first", "Ada");
-        user.put("last", "Lovelace");
-        user.put("born", 1815);
+        // Nút quay về
+        ImageView btnBack = findViewById(R.id.btnBack);
+        btnBack.setOnClickListener(v -> {
+            finish(); // Quay về mà không khởi động lại HomeActivity
+        });
 
-        db.collection("users")
-                .add(user)
-                .addOnSuccessListener(documentReference ->
-                        Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId()))
-                .addOnFailureListener(e ->
-                        Log.w(TAG, "Error adding document", e));
-
-        // Hot food setup
+        // Khởi tạo RecyclerView HotFood
         recyclerHotFood = findViewById(R.id.recyclerHotFood);
-        recyclerHotFood.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        recyclerHotFood.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
 
+        // Danh sách món ăn hot
         fullFoodList = new ArrayList<>();
         fullFoodList.add(new FoodModel(1, 101, "Burger khổng lồ", "100.000đ", 4.2f, R.drawable.burger1, 120, "Burger"));
         fullFoodList.add(new FoodModel(2, 101, "Pizza phô mai", "150.000đ", 4.5f, R.drawable.pizza1, 85, "Pizza"));
         fullFoodList.add(new FoodModel(3, 102, "Gà rán giòn", "90.000đ", 4.0f, R.drawable.chicken1, 200, "Chicken"));
         fullFoodList.add(new FoodModel(4, 102, "Mỳ Ý", "110.000đ", 4.1f, R.drawable.spaggetti1, 55, "Spaghetti"));
-        fullFoodList.add(new FoodModel(5, 102, "Gà rán giòn", "90.000đ", 4.0f, R.drawable.chicken1, 200, "Chicken"));
         foodList = new ArrayList<>(fullFoodList);
 
         hotFoodAdapter = new HotFoodAdapter(foodList);
         recyclerHotFood.setAdapter(hotFoodAdapter);
-
-        // Sale shop setup
-        fullShopList = new ArrayList<>();
-        fullShopList.add(new ShopModel(1, "Burger King", "123 Le Loi, Da Nang", 10.0f, "burger1", "Giảm 10% cho combo siêu ngon hôm nay!", Arrays.asList("burger", "fastfood", "drink")));
-        fullShopList.add(new ShopModel(2, "Peppe Pizzeria", "45 Tran Phu, Da Nang", 15.0f, "pizza1", "Pizza nướng lò chuẩn Ý – Mua 2 tặng 1!", Arrays.asList("pizza", "fastfood", "dessert")));
-        fullShopList.add(new ShopModel(3, "KFC", "78 Nguyen Van Linh, Da Nang", 12.0f, "chicken1", "Gà rán giòn rụm – Free Pepsi cho hóa đơn trên 100k!", Arrays.asList("fried chicken", "burger", "drink")));
-
-        shopList = new ArrayList<>(fullShopList);
-
-        recyclerSaleShop = findViewById(R.id.recyclerSaleShop);
-        recyclerSaleShop.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        saleShopAdapter = new SaleShopAdapter(shopList);
-        recyclerSaleShop.setAdapter(saleShopAdapter);
 
         // Category buttons
         btnAll = findViewById(R.id.btnAll);
@@ -112,6 +74,7 @@ public class HomeActivity extends AppCompatActivity {
 
         categoryButtons = Arrays.asList(btnAll, btnSpaghetti, btnPotato, btnPizza, btnBurger, btnChicken);
 
+        // Set click listeners
         btnAll.setOnClickListener(v -> selectCategory("Tất cả", btnAll));
         btnSpaghetti.setOnClickListener(v -> selectCategory("Spaghetti", btnSpaghetti));
         btnPotato.setOnClickListener(v -> selectCategory("Potato", btnPotato));
@@ -119,17 +82,8 @@ public class HomeActivity extends AppCompatActivity {
         btnBurger.setOnClickListener(v -> selectCategory("Burger", btnBurger));
         btnChicken.setOnClickListener(v -> selectCategory("Chicken", btnChicken));
 
-        // "Thêm >" textView click
-        tvAllHot = findViewById(R.id.allHot);
-        tvAllHot.setOnClickListener(v -> {
-            Intent intent = new Intent(HomeActivity.this, AllHotFoodActivity.class);
-            startActivity(intent);
-        });
-        tvAllHot = findViewById(R.id.allSale);
-        tvAllHot.setOnClickListener(v -> {
-            Intent intent = new Intent(HomeActivity.this, AllShopSaleActivity.class);
-            startActivity(intent);
-        });
+        // Mặc định chọn All
+        selectCategory("Tất cả", btnAll);
     }
 
     private void selectCategory(String category, Button selectedButton) {

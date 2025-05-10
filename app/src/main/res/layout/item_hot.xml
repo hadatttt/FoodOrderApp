@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:padding="16dp"
@@ -8,7 +8,7 @@
     android:elevation="4dp"
     android:layout_margin="12dp">
 
-    <!-- Ảnh món ăn -->
+
     <ImageView
         android:id="@+id/imageFood"
         android:layout_width="120dp"
@@ -16,27 +16,27 @@
         android:scaleType="centerCrop"
         android:src="@drawable/burger" />
 
-    <!-- Phần thông tin chi tiết -->
+
     <LinearLayout
         android:orientation="vertical"
         android:layout_marginStart="16dp"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent">
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
 
-        <!-- Tên món -->
+
         <TextView
             android:id="@+id/textFoodName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Bugger khổng lồ"
+            android:text="Burger khổng lồ"
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="#000000" />
 
-        <!-- Giá + Đánh giá trên cùng 1 hàng -->
         <LinearLayout
             android:orientation="horizontal"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:gravity="center_vertical">
@@ -69,7 +69,6 @@
 
         </LinearLayout>
 
-        <!-- Số lượng đã bán -->
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"

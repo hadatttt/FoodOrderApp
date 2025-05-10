@@ -212,8 +212,11 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/allHot"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="22dp"
+                android:clickable="true"
+                android:focusable="true"
                 android:text="Thêm >"
                 android:textColor="#888888" />
         </LinearLayout>
@@ -241,10 +244,13 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/allSale"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Thêm >"
-                android:textColor="#888888" />
+                android:textColor="#888888"
+                android:clickable="true"
+                android:focusable="true"/>
         </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
