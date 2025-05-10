@@ -10,6 +10,8 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.foodorderapp.ui.LoginActivity;
+
 public class IntroActivity extends AppCompatActivity {
 
     private ImageView[] dots;

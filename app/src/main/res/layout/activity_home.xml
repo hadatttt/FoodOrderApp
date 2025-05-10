@@ -214,6 +214,7 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/allHot"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Thêm >"
@@ -243,6 +244,7 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/allSale"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Thêm >"

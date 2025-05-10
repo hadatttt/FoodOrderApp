@@ -1,4 +1,5 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/allshopsale"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -17,7 +18,10 @@
             android:id="@+id/btnBack"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_marginEnd="16dp"/>
+            android:layout_marginEnd="16dp"
+            android:src="@drawable/ic_back"
+            android:contentDescription="Back button" />
+
 
         <!-- Search Bar -->
         <EditText
@@ -118,7 +122,7 @@
 
     <!-- RecyclerView to display food items -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerFoodItems"
+        android:id="@+id/recyclerShopSale"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="wrap_content"/>
 </LinearLayout>

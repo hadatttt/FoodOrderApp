@@ -1,34 +1,34 @@
 package com.example.foodorderapp.model;
-
 public class UserModel {
-    private String uid;
-    private String name;
+    private String fullName;
+    private String phone;
     private String address;
 
     public UserModel() {
         // Required for Firestore
     }
 
-    public UserModel(String uid, String name, String address) {
-        this.uid = uid;
-        this.name = name;
+    public UserModel(String fullName, String phone, String address) {
+        this.fullName = fullName;
+        this.phone = phone;
         this.address = address;
     }
 
-    public String getUid() {
-        return uid;
+    // Getters and setters
+    public String getFullName() {
+        return fullName;
     }
 
-    public void setUid(String uid) {
-        this.uid = uid;
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
-    public String getName() {
-        return name;
+    public String getPhone() {
+        return phone;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public String getAddress() {

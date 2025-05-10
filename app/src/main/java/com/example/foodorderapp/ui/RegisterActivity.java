@@ -1,28 +1,16 @@
-package com.example.foodorderapp;
+package com.example.foodorderapp.ui;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.TextPaint;
-import android.text.method.LinkMovementMethod;
-import android.text.style.ClickableSpan;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -35,87 +23,85 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.util.Arrays;
+import com.example.foodorderapp.R;
 import java.util.HashMap;
 import java.util.Map;
 
-public class LoginActivity extends AppCompatActivity {
-    private TextView tvSignup, tvLoginError;
-    private ClickableSpan clickableSpan;
-    private Button btnForget, btnLogin;
+public class RegisterActivity extends AppCompatActivity {
+    private EditText edtName, edtEmail, edtPhone, edtPassword;
+    private Button btnRegister;
     private FirebaseAuth mAuth;
-
-    private EditText edtUsername, edtPassword;
+    private FirebaseFirestore db;
+    private TextView tvRegisterError;
     private static final int RC_SIGN_IN = 9001;
     private GoogleSignInClient mGoogleSignInClient;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_register);
 
-        tvSignup = findViewById(R.id.tv_signup);
+        edtName = findViewById(R.id.edt_name);
+        edtEmail = findViewById(R.id.edt_email);
+        edtPhone = findViewById(R.id.edt_phonenumber);
+        edtPassword = findViewById(R.id.edt_password);
+        btnRegister = findViewById(R.id.btn_register);
+        tvRegisterError = findViewById(R.id.tv_register_error);
+        tvRegisterError.setVisibility(View.GONE);  // Ẩn khi chưa có lỗi
+
         mAuth = FirebaseAuth.getInstance();
-        String text = "Nếu bạn chưa có tài khoản, vui lòng Đăng kí.";
-        SpannableString spannableString = new SpannableString(text);
+        db = FirebaseFirestore.getInstance();
 
-        btnForget = findViewById(R.id.btn_forget);
-        btnLogin = findViewById(R.id.btn_login);
-
-        int start = text.indexOf("Đăng kí");
-        int end = start + "Đăng kí".length();
-        clickableSpan = new ClickableSpan() {
-            @Override
-            public void onClick(View widget) {
-                Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
-                startActivity(intent);
-            }
-
-            @Override
-            public void updateDrawState(TextPaint ds) {
-                super.updateDrawState(ds);
-                ds.setColor(ContextCompat.getColor(LoginActivity.this, R.color.red));
-                ds.setUnderlineText(false);
-            }
-        };
-
-        spannableString.setSpan(clickableSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        tvSignup.setText(spannableString);
-        tvSignup.setMovementMethod(LinkMovementMethod.getInstance());
-        tvSignup.setHighlightColor(Color.TRANSPARENT);
-
-        tvLoginError = findViewById(R.id.tv_login_error);
-
-        btnForget.setOnClickListener(new View.OnClickListener() {
+        btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(LoginActivity.this, ForgetActivity.class);
-                startActivity(intent);
-            }
-        });
-        btnLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                edtUsername = findViewById(R.id.edt_email);
-                edtPassword = findViewById(R.id.edt_password);
-                String inputEmail = edtUsername.getText().toString().trim();
-                String inputPassword = edtPassword.getText().toString().trim();
-                if (inputEmail.isEmpty() || inputPassword.isEmpty()) {
-                    tvLoginError.setVisibility(View.VISIBLE);
-                    tvLoginError.setText("Vui lòng nhập đủ thông tin");
+                String name = edtName.getText().toString().trim();
+                String email = edtEmail.getText().toString().trim();
+                String phone = edtPhone.getText().toString().trim();
+                String password = edtPassword.getText().toString().trim();
+
+                if (email.isEmpty() || password.isEmpty() || name.isEmpty() || phone.isEmpty()) {
+                    tvRegisterError.setText("Vui lòng điền đầy đủ thông tin");
+                    tvRegisterError.setVisibility(View.VISIBLE);
                     return;
                 }
 
-                mAuth.signInWithEmailAndPassword(inputEmail, inputPassword)
+                mAuth.createUserWithEmailAndPassword(email, password)
                         .addOnCompleteListener(task -> {
                             if (task.isSuccessful()) {
-                                Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-                                intent.putExtra("user_email", inputEmail);
-                                startActivity(intent);
-                                finish();
+                                String userId = mAuth.getCurrentUser().getUid();
+
+                                // Thêm thông tin người dùng vào Firestore
+                                Map<String, Object> userMap = new HashMap<>();
+                                userMap.put("fullName", name);
+                                userMap.put("email", email);
+                                userMap.put("phone", phone);
+                                userMap.put("address", "");
+
+                                db.collection("users").document(userId)  // Dùng userId làm document ID
+                                        .set(userMap)
+                                        .addOnSuccessListener(aVoid -> {
+                                            tvRegisterError.setVisibility(View.GONE);
+                                            Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
+                                            intent.putExtra("user_email", email);
+                                            startActivity(intent);
+                                            finish();
+                                        })
+                                        .addOnFailureListener(e -> Toast.makeText(RegisterActivity.this, "Lỗi lưu Firestore: " + e.getMessage(), Toast.LENGTH_SHORT).show());
                             } else {
-                                tvLoginError.setVisibility(View.VISIBLE);
-                                tvLoginError.setText("Sai tài khoản hoặc mật khẩu");
+                                // Xử lý lỗi đăng ký
+                                String errorMessage = task.getException().getMessage();
+                                if (errorMessage != null) {
+                                    if (errorMessage.contains("The email address is already in use")) {
+                                        tvRegisterError.setText("Email này đã được đăng ký.");
+                                    } else if (errorMessage.contains("The password is invalid")) {
+                                        tvRegisterError.setText("Mật khẩu không hợp lệ.");
+                                    } else if (errorMessage.contains("The email address is badly formatted")) {
+                                        tvRegisterError.setText("Email không đúng định dạng.");
+                                    }
+                                    tvRegisterError.setVisibility(View.VISIBLE);
+                                }
                             }
                         });
             }
@@ -178,7 +164,7 @@ public class LoginActivity extends AppCompatActivity {
                                                 });
                                     }
                                     // Dù thêm mới hay không, vẫn vào Home
-                                    Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                                    Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
                                     intent.putExtra("user_email", email);
                                     startActivity(intent);
                                     finish();
