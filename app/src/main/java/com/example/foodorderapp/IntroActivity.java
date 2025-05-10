@@ -11,7 +11,9 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.foodorderapp.model.FoodModel;
 import com.example.foodorderapp.model.ShopModel;
+import com.example.foodorderapp.service.FoodService;
 import com.example.foodorderapp.service.ShopService;
 import com.example.foodorderapp.ui.LoginActivity;
 
@@ -37,159 +39,36 @@ public class IntroActivity extends AppCompatActivity {
         //test
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_intro);
+        FoodService foodService = new FoodService();
 
-        ShopService shopService = new ShopService();
+        String[] foodNames = {
+                "Spaghetti Aglio e Olio", "Spaghetti Carbonara", "Spaghetti Bolognese", "Spaghetti Pesto", "Spaghetti Marinara",
+                "Potato Fries", "Mashed Potatoes", "Baked Potato", "Potato Salad", "Potato Wedges",
+                "Pepperoni Pizza", "Margherita Pizza", "Hawaiian Pizza", "Vegetarian Pizza", "BBQ Chicken Pizza",
+                "Cheeseburger", "Chicken Burger", "Veggie Burger", "Double Cheeseburger", "Chicken Nuggets"
+        };
 
-        List<String> categories3 = Arrays.asList("Fast Food", "Burger");
-        ShopModel shop3 = new ShopModel(
-                3,
-                "Pizza Hut",
-                "789 Trần Phú, Đà Nẵng",
-                12.0f,
-                "https://example.com/pizzahut.jpg",
-                "Mua 1 tặng 1 vào thứ 4 hàng tuần!",
-                categories3
-        );
+        String[] categories = {
+                "Spaghetti", "Spaghetti", "Spaghetti", "Spaghetti", "Spaghetti",
+                "Potato", "Potato", "Potato", "Potato", "Potato",
+                "Pizza", "Pizza", "Pizza", "Pizza", "Pizza",
+                "Burger", "Burger", "Burger", "Burger", "Chicken"
+        };
 
-        List<String> categories4 = Arrays.asList("Coffee", "Dessert");
-        ShopModel shop4 = new ShopModel(
-                4,
-                "Highlands Coffee",
-                "321 Bạch Đằng, Đà Nẵng",
-                5.0f,
-                "https://example.com/highlands.jpg",
-                "Giảm 20% cho đơn hàng đầu tiên!",
-                categories4
-        );
+        for (int i = 0; i < foodNames.length; i++) {
+            FoodModel food = new FoodModel();
+            food.setFoodId(i + 1); // Cung cấp ID khác nhau cho mỗi món ăn
+            food.setStoreId(1); // Giả sử món ăn này đến từ store có ID = 1
+            food.setName(foodNames[i]);
+            food.setPrice(100.000); // Giá là 100.000 VND cho món ăn
+            food.setRating(0f); // Rating ban đầu là 0
+            food.setImageResId(123); // Sử dụng hình ảnh mặc định cho tất cả
+            food.setSold(0); // Món ăn chưa bán được
+            food.setCategory(categories[i]); // Cài đặt category cho món ăn
 
-        List<String> categories5 = Arrays.asList("Fried Chicken", "Fast Food");
-        ShopModel shop5 = new ShopModel(
-                5,
-                "KFC",
-                "555 Lê Lợi, Đà Nẵng",
-                9.0f,
-                "https://example.com/kfc.jpg",
-                "Combo gà rán giá chỉ từ 49k!",
-                categories5
-        );
-
-        List<String> categories6 = Arrays.asList("Noodles", "Asian");
-        ShopModel shop6 = new ShopModel(
-                6,
-                "Phở 24",
-                "888 Hùng Vương, Đà Nẵng",
-                6.5f,
-                "https://example.com/pho24.jpg",
-                "Phở bò tái ngon tuyệt hảo!",
-                categories6
-        );
-
-        List<String> categories7 = Arrays.asList("BBQ", "Korean");
-        ShopModel shop7 = new ShopModel(
-                7,
-                "Gogi House",
-                "777 Nguyễn Tri Phương, Đà Nẵng",
-                18.0f,
-                "https://example.com/gogi.jpg",
-                "Thịt nướng không khói chuẩn Hàn Quốc!",
-                categories7
-        );
-
-        List<String> categories8 = Arrays.asList("Seafood", "Vietnamese");
-        ShopModel shop8 = new ShopModel(
-                8,
-                "Hải Sản Bé Mặn",
-                "999 Võ Nguyên Giáp, Đà Nẵng",
-                25.0f,
-                "https://example.com/beman.jpg",
-                "Hải sản tươi sống, giá cả phải chăng!",
-                categories8
-        );
-
-        List<String> categories9 = Arrays.asList("Milk Tea", "Beverage");
-        ShopModel shop9 = new ShopModel(
-                9,
-                "TocoToco",
-                "222 Nguyễn Chí Thanh, Đà Nẵng",
-                4.5f,
-                "https://example.com/tocotoco.jpg",
-                "Trà sữa trân châu hoàng kim!",
-                categories9
-        );
-
-        List<String> categories10 = Arrays.asList("Vegetarian", "Healthy");
-        ShopModel shop10 = new ShopModel(
-                10,
-                "Loving Hut",
-                "444 Lê Thanh Nghị, Đà Nẵng",
-                7.0f,
-                "https://example.com/lovinghut.jpg",
-                "Ăn chay thanh đạm, sống khỏe mạnh!",
-                categories10
-        );
-
-        List<String> categories11 = Arrays.asList("Bakery", "Dessert");
-        ShopModel shop11 = new ShopModel(
-                11,
-                "Tous les Jours",
-                "101 Hoàng Diệu, Đà Nẵng",
-                8.5f,
-                "https://example.com/touslesjours.jpg",
-                "Bánh ngọt Pháp chính hiệu!",
-                categories11
-        );
-
-        List<String> categories12 = Arrays.asList("Ice Cream", "Dessert");
-        ShopModel shop12 = new ShopModel(
-                12,
-                "Baskin Robbins",
-                "202 Trưng Nữ Vương, Đà Nẵng",
-                6.0f,
-                "https://example.com/baskinrobbins.jpg",
-                "Kem 31 vị ngon khó cưỡng!",
-                categories12
-        );
-
-        shopService.addShop(shop3)
-                .addOnSuccessListener(ref -> Log.d("AddShop", "Đã thêm shop3: " + ref.getId()))
-                .addOnFailureListener(e -> Log.e("AddShop", "Lỗi thêm shop3", e));
-
-        shopService.addShop(shop4)
-                .addOnSuccessListener(ref -> Log.d("AddShop", "Đã thêm shop4: " + ref.getId()))
-                .addOnFailureListener(e -> Log.e("AddShop", "Lỗi thêm shop4", e));
-
-        shopService.addShop(shop5)
-                .addOnSuccessListener(ref -> Log.d("AddShop", "Đã thêm shop5: " + ref.getId()))
-                .addOnFailureListener(e -> Log.e("AddShop", "Lỗi thêm shop5", e));
-
-        shopService.addShop(shop6)
-                .addOnSuccessListener(ref -> Log.d("AddShop", "Đã thêm shop6: " + ref.getId()))
-                .addOnFailureListener(e -> Log.e("AddShop", "Lỗi thêm shop6", e));
-
-        shopService.addShop(shop7)
-                .addOnSuccessListener(ref -> Log.d("AddShop", "Đã thêm shop7: " + ref.getId()))
-                .addOnFailureListener(e -> Log.e("AddShop", "Lỗi thêm shop7", e));
-
-        shopService.addShop(shop8)
-                .addOnSuccessListener(ref -> Log.d("AddShop", "Đã thêm shop8: " + ref.getId()))
-                .addOnFailureListener(e -> Log.e("AddShop", "Lỗi thêm shop8", e));
-
-        shopService.addShop(shop9)
-                .addOnSuccessListener(ref -> Log.d("AddShop", "Đã thêm shop9: " + ref.getId()))
-                .addOnFailureListener(e -> Log.e("AddShop", "Lỗi thêm shop9", e));
-
-        shopService.addShop(shop10)
-                .addOnSuccessListener(ref -> Log.d("AddShop", "Đã thêm shop10: " + ref.getId()))
-                .addOnFailureListener(e -> Log.e("AddShop", "Lỗi thêm shop10", e));
-
-        shopService.addShop(shop11)
-                .addOnSuccessListener(ref -> Log.d("AddShop", "Đã thêm shop11: " + ref.getId()))
-                .addOnFailureListener(e -> Log.e("AddShop", "Lỗi thêm shop11", e));
-
-        shopService.addShop(shop12)
-                .addOnSuccessListener(ref -> Log.d("AddShop", "Đã thêm shop12: " + ref.getId()))
-                .addOnFailureListener(e -> Log.e("AddShop", "Lỗi thêm shop12", e));
-
+            // Thêm món ăn vào Firestore
+            foodService.addFood(food);
+        }
         imageResources = new int[]{
                 R.drawable.order,
                 R.drawable.chef,
