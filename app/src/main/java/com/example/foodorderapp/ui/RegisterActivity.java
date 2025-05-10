@@ -13,6 +13,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.foodorderapp.R;
+import com.example.foodorderapp.model.UserModel;
+import com.example.foodorderapp.service.UserService;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -36,7 +38,7 @@ public class RegisterActivity extends AppCompatActivity {
     private static final int RC_SIGN_IN = 9001;
     private GoogleSignInClient mGoogleSignInClient;
 
-
+    UserService userService = new UserService(); // để lưu người dùng vào firestore
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,16 +73,14 @@ public class RegisterActivity extends AppCompatActivity {
                         .addOnCompleteListener(task -> {
                             if (task.isSuccessful()) {
                                 String userId = mAuth.getCurrentUser().getUid();
-
+                                UserModel user = new UserModel();
+                                user.setFullName(name);
+                                user.setAddress("");
+                                user.setPhone(phone);
                                 // Thêm thông tin người dùng vào Firestore
-                                Map<String, Object> userMap = new HashMap<>();
-                                userMap.put("fullName", name);
-                                userMap.put("e-mail", email);
-                                userMap.put("phone", phone);
-
-                                db.collection("user").document(userId)  // Dùng userId làm document ID
-                                        .set(userMap)
+                                userService.addUser(user)
                                         .addOnSuccessListener(aVoid -> {
+                                            // Ẩn lỗi và chuyển sang màn hình Home
                                             tvRegisterError.setVisibility(View.GONE);
                                             startActivity(new Intent(RegisterActivity.this, HomeActivity.class));
                                             finish();

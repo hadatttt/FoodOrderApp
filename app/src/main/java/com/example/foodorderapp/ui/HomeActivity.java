@@ -2,6 +2,7 @@ package com.example.foodorderapp.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -17,6 +18,10 @@ import com.example.foodorderapp.adapter.HotFoodAdapter;
 import com.example.foodorderapp.adapter.SaleShopAdapter;
 import com.example.foodorderapp.model.FoodModel;
 import com.example.foodorderapp.model.ShopModel;
+import com.example.foodorderapp.model.UserModel;
+import com.example.foodorderapp.service.UserService;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -42,11 +47,26 @@ public class HomeActivity extends AppCompatActivity {
     private TextView tvAllHot;
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
+    UserService userService = new UserService();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+        UserService userService = new UserService();
+        userService.getUser().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                String name = documentSnapshot.getString("fullName"); // Hoặc documentSnapshot.get("name").toString();
+                TextView nameTextView = findViewById(R.id.txt_name);
+                nameTextView.setText("Chào " +name+", Ngon Miệng Nhé");
+            } else {
+                // Document không tồn tại
+                Log.d("UserService", "User document does not exist.");
+            }
+        }).addOnFailureListener(e -> {
+            // Xử lý lỗi
+            Log.e("UserService", "Failed to get user data", e);
+        });
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.home), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
