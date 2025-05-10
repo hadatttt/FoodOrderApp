@@ -23,7 +23,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import com.example.foodorderapp.R;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -75,17 +74,14 @@ public class RegisterActivity extends AppCompatActivity {
                                 // Thêm thông tin người dùng vào Firestore
                                 Map<String, Object> userMap = new HashMap<>();
                                 userMap.put("fullName", name);
-                                userMap.put("email", email);
+                                userMap.put("e-mail", email);
                                 userMap.put("phone", phone);
-                                userMap.put("address", "");
 
-                                db.collection("users").document(userId)  // Dùng userId làm document ID
+                                db.collection("user").document(userId)  // Dùng userId làm document ID
                                         .set(userMap)
                                         .addOnSuccessListener(aVoid -> {
                                             tvRegisterError.setVisibility(View.GONE);
-                                            Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
-                                            intent.putExtra("user_email", email);
-                                            startActivity(intent);
+                                            startActivity(new Intent(RegisterActivity.this, HomeActivity.class));
                                             finish();
                                         })
                                         .addOnFailureListener(e -> Toast.makeText(RegisterActivity.this, "Lỗi lưu Firestore: " + e.getMessage(), Toast.LENGTH_SHORT).show());
@@ -138,40 +134,8 @@ public class RegisterActivity extends AppCompatActivity {
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        String email = mAuth.getCurrentUser().getEmail();
-                        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-                        db.collection("users")
-                                .whereEqualTo("email", email)
-                                .get()
-                                .addOnSuccessListener(queryDocumentSnapshots -> {
-                                    if (queryDocumentSnapshots.isEmpty()) {
-                                        // Email chưa tồn tại -> thêm mới
-                                        Map<String, Object> user = new HashMap<>();
-                                        String username = email.split("@")[0];
-                                        user.put("fullName", username);
-                                        user.put("email", email);
-                                        user.put("phone", "");
-                                        user.put("address", "");
-
-                                        db.collection("users")
-                                                .add(user)
-                                                .addOnSuccessListener(documentReference -> {
-                                                    Log.d("Firestore", "Thêm người dùng mới thành công");
-                                                })
-                                                .addOnFailureListener(e -> {
-                                                    Log.w("Firestore", "Lỗi khi thêm người dùng mới", e);
-                                                });
-                                    }
-                                    // Dù thêm mới hay không, vẫn vào Home
-                                    Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
-                                    intent.putExtra("user_email", email);
-                                    startActivity(intent);
-                                    finish();
-                                })
-                                .addOnFailureListener(e -> {
-                                    Toast.makeText(this, "Lỗi kiểm tra người dùng", Toast.LENGTH_SHORT).show();
-                                });
+                        startActivity(new Intent(RegisterActivity.this, HomeActivity.class));
+                        finish();
                     } else {
                         Toast.makeText(this, "Google đăng nhập thất bại", Toast.LENGTH_SHORT).show();
                     }

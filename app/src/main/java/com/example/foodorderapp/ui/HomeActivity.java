@@ -27,7 +27,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 public class HomeActivity extends AppCompatActivity {
     private static final String TAG = "HomeActivity";
@@ -46,8 +45,6 @@ public class HomeActivity extends AppCompatActivity {
     private List<Button> categoryButtons;
 
     private TextView tvAllHot;
-
-    private TextView tvFullName, tvAddress;
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     UserService userService = new UserService();
