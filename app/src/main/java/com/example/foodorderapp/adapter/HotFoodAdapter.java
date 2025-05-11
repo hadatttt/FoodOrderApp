@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.model.FoodModel;
 
@@ -68,7 +69,9 @@ public class HotFoodAdapter extends RecyclerView.Adapter<HotFoodAdapter.FoodView
         }
 
         public void bind(FoodModel food) {
-            imageFood.setImageResource(food.getImageResId());
+            Glide.with(itemView.getContext())
+                    .load(food.getImageUrl()) // URL dạng string
+                    .into(imageFood);
             textFoodName.setText(food.getName());
             textFoodPrice.setText(String.format("$%.2f", food.getPrice())+"đ");
             textRating.setText(String.valueOf(food.getRating()));

@@ -6,7 +6,7 @@ public class FoodModel {
     private String name;
     private double price;
     private float rating;
-    private int imageResId;
+    private String imageUrl;
     private int sold;
     private String category;
 
@@ -14,13 +14,13 @@ public class FoodModel {
         // Required empty constructor for Firestore
     }
 
-    public FoodModel(int foodId, int storeId, String name, double price, float rating, int imageResId, int sold, String category) {
+    public FoodModel(int foodId, int storeId, String name, double price, float rating, int imagUrl, int sold, String category) {
         this.foodId = foodId;
         this.storeId = storeId;
         this.name = name;
         this.price = price;
         this.rating = rating;
-        this.imageResId = imageResId;
+        this.imageUrl = imageUrl;
         this.sold = sold;
         this.category = category;
     }
@@ -40,8 +40,8 @@ public class FoodModel {
     public float getRating() { return rating; }
     public void setRating(float rating) { this.rating = rating; }
 
-    public int getImageResId() { return imageResId; }
-    public void setImageResId(int imageResId) { this.imageResId = imageResId; }
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
     public int getSold() { return sold; }
     public void setSold(int sold) { this.sold = sold; }
