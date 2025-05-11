@@ -39,40 +39,40 @@ public class IntroActivity extends AppCompatActivity {
         //test
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_intro);
-        FoodService foodService = new FoodService();
-
-        String[] foodNames = {
-                "Spaghetti Aglio e Olio", "Spaghetti Carbonara", "Spaghetti Bolognese", "Spaghetti Pesto", "Spaghetti Marinara",
-                "Potato Fries", "Mashed Potatoes", "Baked Potato", "Potato Salad", "Potato Wedges",
-                "Pepperoni Pizza", "Margherita Pizza", "Hawaiian Pizza", "Vegetarian Pizza", "BBQ Chicken Pizza",
-                "Cheeseburger", "Chicken Burger", "Veggie Burger", "Double Cheeseburger", "Chicken Nuggets"
-        };
-
-        String[] categories = {
-                "Spaghetti", "Spaghetti", "Spaghetti", "Spaghetti", "Spaghetti",
-                "Potato", "Potato", "Potato", "Potato", "Potato",
-                "Pizza", "Pizza", "Pizza", "Pizza", "Pizza",
-                "Burger", "Burger", "Burger", "Burger", "Chicken"
-        };
-
-        for (int i = 0; i < foodNames.length; i++) {
-            FoodModel food = new FoodModel();
-            food.setFoodId(i + 1); // Cung cấp ID khác nhau cho mỗi món ăn
-
-            // Gán storeId từ 1 đến 12
-            int storeId = (i % 12) + 1; // Điều chỉnh storeId sao cho giá trị từ 1 đến 12
-            food.setStoreId(storeId);
-
-            food.setName(foodNames[i]);
-            food.setPrice(100000); // Giá là 100.000 VND cho món ăn (loại bỏ dấu chấm)
-            food.setRating(0f); // Rating ban đầu là 0
-            food.setImageResId(123); // Sử dụng hình ảnh mặc định cho tất cả
-            food.setSold(0); // Món ăn chưa bán được
-            food.setCategory(categories[i]); // Cài đặt category cho món ăn
-
-            // Thêm món ăn vào Firestore
-            foodService.addFood(food);
-        }
+//        FoodService foodService = new FoodService();
+//
+//        String[] foodNames = {
+//                "Spaghetti Aglio e Olio", "Spaghetti Carbonara", "Spaghetti Bolognese", "Spaghetti Pesto", "Spaghetti Marinara",
+//                "Potato Fries", "Mashed Potatoes", "Baked Potato", "Potato Salad", "Potato Wedges",
+//                "Pepperoni Pizza", "Margherita Pizza", "Hawaiian Pizza", "Vegetarian Pizza", "BBQ Chicken Pizza",
+//                "Cheeseburger", "Chicken Burger", "Veggie Burger", "Double Cheeseburger", "Chicken Nuggets"
+//        };
+//
+//        String[] categories = {
+//                "Spaghetti", "Spaghetti", "Spaghetti", "Spaghetti", "Spaghetti",
+//                "Potato", "Potato", "Potato", "Potato", "Potato",
+//                "Pizza", "Pizza", "Pizza", "Pizza", "Pizza",
+//                "Burger", "Burger", "Burger", "Burger", "Chicken"
+//        };
+//
+//        for (int i = 0; i < foodNames.length; i++) {
+//            FoodModel food = new FoodModel();
+//            food.setFoodId(i + 1); // Cung cấp ID khác nhau cho mỗi món ăn
+//
+//            // Gán storeId từ 1 đến 12
+//            int storeId = (i % 12) + 1; // Điều chỉnh storeId sao cho giá trị từ 1 đến 12
+//            food.setStoreId(storeId);
+//
+//            food.setName(foodNames[i]);
+//            food.setPrice(100000); // Giá là 100.000 VND cho món ăn (loại bỏ dấu chấm)
+//            food.setRating(0f); // Rating ban đầu là 0
+//            food.setImageResId(123); // Sử dụng hình ảnh mặc định cho tất cả
+//            food.setSold(0); // Món ăn chưa bán được
+//            food.setCategory(categories[i]); // Cài đặt category cho món ăn
+//
+//            // Thêm món ăn vào Firestore
+//            foodService.addFood(food);
+//        }
 
         imageResources = new int[]{
                 R.drawable.order,
