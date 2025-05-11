@@ -27,7 +27,7 @@ public class AllShopSaleActivity extends AppCompatActivity {
     private List<ShopModel> fullShopList;
     private List<ShopModel> shopList;
 
-    private Button btnAll, btnSpaghetti, btnPotato, btnPizza, btnBurger, btnChicken;
+    private Button btnAll, btnSpaghetti, btnPotato, btnPizza, btnBurger, btnChicken, btnDrink;
     private List<Button> categoryButtons;
 
     @Override
@@ -65,6 +65,7 @@ public class AllShopSaleActivity extends AppCompatActivity {
         btnPizza = findViewById(R.id.btnPizza);
         btnBurger = findViewById(R.id.btnBurger);
         btnChicken = findViewById(R.id.btnChicken);
+        btnDrink = findViewById(R.id.btnDrink);
 
         categoryButtons = Arrays.asList(btnAll, btnSpaghetti, btnPotato, btnPizza, btnBurger, btnChicken);
 
@@ -75,6 +76,7 @@ public class AllShopSaleActivity extends AppCompatActivity {
         btnPizza.setOnClickListener(v -> selectCategory("Pizza", btnPizza));
         btnBurger.setOnClickListener(v -> selectCategory("Burger", btnBurger));
         btnChicken.setOnClickListener(v -> selectCategory("Chicken", btnChicken));
+        btnDrink.setOnClickListener(v -> selectCategory("Drink", btnDrink));
 
         // Mặc định chọn All
         selectCategory("Tất cả", btnAll);
