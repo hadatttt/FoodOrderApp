@@ -3,6 +3,7 @@ package com.example.foodorderapp.ui;
 import static android.content.ContentValues.TAG;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -54,8 +55,7 @@ public class AllHotFoodActivity extends AppCompatActivity {
         });
 
         // Initialize back button to finish the activity
-        ImageView btnBack = findViewById(R.id.btnBack);
-        btnBack.setOnClickListener(v -> finish());
+        setupBackButton();
 
         // Initialize RecyclerView for Hot Foods
         recyclerHotFood = findViewById(R.id.recyclerHotFood);
@@ -93,6 +93,15 @@ public class AllHotFoodActivity extends AppCompatActivity {
         foodService = new FoodService();
         loadAllFoods();
     }
+    private void setupBackButton() {
+        ImageView btnBack = findViewById(R.id.btnBack);
+        btnBack.setOnClickListener(v -> {
+            Intent intent = new Intent(AllHotFoodActivity.this, HomeActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            finish();
+        });
+    }
 
     private void selectCategory(String category, Button selectedButton) {
         filterFoods(category);
@@ -101,6 +110,7 @@ public class AllHotFoodActivity extends AppCompatActivity {
             button.setBackgroundTintList(android.content.res.ColorStateList.valueOf(color));
         }
     }
+
 
     private void filterFoods(String category) {
         List<FoodModel> filteredFoodList = new ArrayList<>();

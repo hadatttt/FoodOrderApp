@@ -3,6 +3,7 @@ package com.example.foodorderapp.ui;
 import static android.content.ContentValues.TAG;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -96,8 +97,14 @@ public class AllShopSaleActivity extends AppCompatActivity {
 
     private void setupBackButton() {
         ImageView btnBack = findViewById(R.id.btnBack);
-        btnBack.setOnClickListener(v -> finish());
+        btnBack.setOnClickListener(v -> {
+            Intent intent = new Intent(AllShopSaleActivity.this, HomeActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            finish();
+        });
     }
+
 
     private void selectCategory(String category, Button selectedButton) {
         this.selectedCategory = category;
