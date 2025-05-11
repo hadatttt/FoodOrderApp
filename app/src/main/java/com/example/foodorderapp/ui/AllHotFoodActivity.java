@@ -1,6 +1,9 @@
 package com.example.foodorderapp.ui;
 
+import static android.content.ContentValues.TAG;
+
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageView;
 
@@ -15,6 +18,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.adapter.HotFoodAdapter;
 import com.example.foodorderapp.model.FoodModel;
+import com.example.foodorderapp.service.FoodService;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +31,7 @@ public class AllHotFoodActivity extends AppCompatActivity {
     private HotFoodAdapter hotFoodAdapter;
     private List<FoodModel> fullFoodList;
     private List<FoodModel> foodList;
+    private FoodService foodService;
 
     private Button btnAll, btnSpaghetti, btnPotato, btnPizza, btnBurger, btnChicken;
     private List<Button> categoryButtons;
@@ -36,30 +42,27 @@ public class AllHotFoodActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_all_hot_food);
 
+        // Set padding to avoid layout obstruction by system bars
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.allhotfood), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        // Nút quay về
+        // Initialize back button to finish the activity
         ImageView btnBack = findViewById(R.id.btnBack);
-        btnBack.setOnClickListener(v -> {
-            finish(); // Quay về mà không khởi động lại HomeActivity
-        });
+        btnBack.setOnClickListener(v -> finish());
 
-        // Khởi tạo RecyclerView HotFood
+        // Initialize RecyclerView for Hot Foods
         recyclerHotFood = findViewById(R.id.recyclerHotFood);
-        recyclerHotFood.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        recyclerHotFood.setLayoutManager(new LinearLayoutManager(this));
 
-        // Danh sách món ăn hot
         fullFoodList = new ArrayList<>();
         foodList = new ArrayList<>(fullFoodList);
-
         hotFoodAdapter = new HotFoodAdapter(foodList);
         recyclerHotFood.setAdapter(hotFoodAdapter);
 
-        // Category buttons
+        // Category Buttons
         btnAll = findViewById(R.id.btnAll);
         btnSpaghetti = findViewById(R.id.btnSpaghetti);
         btnPotato = findViewById(R.id.btnPotato);
@@ -69,7 +72,7 @@ public class AllHotFoodActivity extends AppCompatActivity {
 
         categoryButtons = Arrays.asList(btnAll, btnSpaghetti, btnPotato, btnPizza, btnBurger, btnChicken);
 
-        // Set click listeners
+        // Set category button click listeners
         btnAll.setOnClickListener(v -> selectCategory("Tất cả", btnAll));
         btnSpaghetti.setOnClickListener(v -> selectCategory("Spaghetti", btnSpaghetti));
         btnPotato.setOnClickListener(v -> selectCategory("Potato", btnPotato));
@@ -77,19 +80,20 @@ public class AllHotFoodActivity extends AppCompatActivity {
         btnBurger.setOnClickListener(v -> selectCategory("Burger", btnBurger));
         btnChicken.setOnClickListener(v -> selectCategory("Chicken", btnChicken));
 
-        // Mặc định chọn All
+        // Default selection for All category
         selectCategory("Tất cả", btnAll);
+
+        // Initialize FoodService and load data
+        foodService = new FoodService();
+        loadAllFoods();
     }
 
     private void selectCategory(String category, Button selectedButton) {
         filterFoods(category);
 
         for (Button button : categoryButtons) {
-            if (button == selectedButton) {
-                button.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFFD700)); // vàng
-            } else {
-                button.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFEEEEEE)); // xám nhạt
-            }
+            int color = (button == selectedButton) ? 0xFFFFD700 : 0xFFEEEEEE; // gold for selected, light gray for others
+            button.setBackgroundTintList(android.content.res.ColorStateList.valueOf(color));
         }
     }
 
@@ -107,5 +111,29 @@ public class AllHotFoodActivity extends AppCompatActivity {
         }
 
         hotFoodAdapter.updateData(filteredFoodList);
+    }
+
+    private void loadAllFoods() {
+        foodService.getAllFoods().addOnSuccessListener(querySnapshots -> {
+            fullFoodList.clear();
+            for (DocumentSnapshot doc : querySnapshots) {
+                FoodModel food = new FoodModel(
+                        doc.getLong("foodId").intValue(),
+                        doc.getLong("storeId").intValue(),
+                        doc.getString("name"),
+                        doc.getDouble("price"),
+                        doc.getDouble("rating").floatValue(),
+                        R.drawable.burger1, // Placeholder for image
+                        doc.getLong("sold").intValue(),
+                        doc.getString("category")
+                );
+                fullFoodList.add(food);
+            }
+
+            // Load all food data into the list and notify adapter
+            foodList.clear();
+            foodList.addAll(fullFoodList);
+            hotFoodAdapter.notifyDataSetChanged();
+        }).addOnFailureListener(e -> Log.e(TAG, "Error loading food data", e));
     }
 }

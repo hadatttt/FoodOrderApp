@@ -2,87 +2,71 @@ package com.example.foodorderapp.service;
 
 import com.example.foodorderapp.model.FoodModel;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.firestore.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class FoodService {
-    private FirebaseFirestore db;
+    private final FirebaseFirestore db;
+    private final CollectionReference foodCollection;
 
     public FoodService() {
         db = FirebaseFirestore.getInstance();
+        foodCollection = db.collection("foods");
     }
 
-    // Lấy thông tin chi tiết thực phẩm từ Firestore
+    // Lấy toàn bộ danh sách món ăn
+    public Task<QuerySnapshot> getAllFoods() {
+        return foodCollection.get();
+    }
+
+    // Lấy thông tin món ăn theo foodId
     public Task<QuerySnapshot> getFoodDetails(int foodId) {
-        CollectionReference foodCollection = db.collection("foods");
-        return foodCollection.whereEqualTo("foodId", foodId).get(); // Trả về Task<QuerySnapshot>
+        return foodCollection.whereEqualTo("foodId", foodId).get();
     }
 
-    // Thêm món ăn vào Firestore
+    // Thêm món ăn mới
     public Task<DocumentReference> addFood(FoodModel food) {
-        CollectionReference foodCollection = db.collection("foods");
-
-        // Chuyển đối tượng FoodModel thành Map để lưu vào Firestore
-        Map<String, Object> foodData = new HashMap<>();
-        foodData.put("foodId", food.getFoodId());
-        foodData.put("storeId", food.getStoreId());
-        foodData.put("name", food.getName());
-        foodData.put("price", food.getPrice());
-        foodData.put("rating", food.getRating());
-        foodData.put("imageResId", food.getImageResId());
-        foodData.put("sold", food.getSold());
-        foodData.put("category", food.getCategory());
-
-        return foodCollection.add(foodData); // Thêm món ăn vào Firestore
+        return foodCollection.add(convertFoodToMap(food));
     }
 
-    // Cập nhật thông tin món ăn trong Firestore
+    // Cập nhật thông tin món ăn theo foodId
     public Task<Void> updateFood(int foodId, FoodModel food) {
-        CollectionReference foodCollection = db.collection("foods");
-
-        // Lấy tài liệu thực phẩm theo foodId
-        return foodCollection.whereEqualTo("foodId", foodId).get().continueWithTask(task -> {
-            if (task.isSuccessful() && task.getResult() != null) {
-                // Tìm document cần cập nhật
-                for (DocumentSnapshot document : task.getResult()) {
-                    DocumentReference docRef = document.getReference();
-
-                    // Cập nhật dữ liệu trong tài liệu
-                    Map<String, Object> updatedFoodData = new HashMap<>();
-                    updatedFoodData.put("name", food.getName());
-                    updatedFoodData.put("price", food.getPrice());
-                    updatedFoodData.put("rating", food.getRating());
-                    updatedFoodData.put("imageResId", food.getImageResId());
-                    updatedFoodData.put("sold", food.getSold());
-                    updatedFoodData.put("category", food.getCategory());
-
-                    return docRef.update(updatedFoodData); // Cập nhật dữ liệu
-                }
-            }
-            return null; // Nếu không tìm thấy món ăn, trả về null
-        });
+        return foodCollection.whereEqualTo("foodId", foodId).get()
+                .continueWithTask(task -> {
+                    if (task.isSuccessful() && task.getResult() != null && !task.getResult().isEmpty()) {
+                        DocumentReference docRef = task.getResult().getDocuments().get(0).getReference();
+                        return docRef.update(convertFoodToMap(food));
+                    }
+                    return Tasks.forException(new Exception("Food not found"));
+                });
     }
 
-    // Xóa món ăn khỏi Firestore
+    // Xóa món ăn theo foodId
     public Task<Void> deleteFood(int foodId) {
-        CollectionReference foodCollection = db.collection("foods");
+        return foodCollection.whereEqualTo("foodId", foodId).get()
+                .continueWithTask(task -> {
+                    if (task.isSuccessful() && task.getResult() != null && !task.getResult().isEmpty()) {
+                        DocumentReference docRef = task.getResult().getDocuments().get(0).getReference();
+                        return docRef.delete();
+                    }
+                    return Tasks.forException(new Exception("Food not found"));
+                });
+    }
 
-        // Tìm món ăn theo foodId và xóa
-        return foodCollection.whereEqualTo("foodId", foodId).get().continueWithTask(task -> {
-            if (task.isSuccessful() && task.getResult() != null) {
-                // Xóa tài liệu của món ăn
-                for (DocumentSnapshot document : task.getResult()) {
-                    DocumentReference docRef = document.getReference();
-                    return docRef.delete(); // Xóa tài liệu
-                }
-            }
-            return null; // Nếu không tìm thấy món ăn, trả về null
-        });
+    // Chuyển đổi FoodModel sang Map để lưu Firestore
+    private Map<String, Object> convertFoodToMap(FoodModel food) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("foodId", food.getFoodId());
+        data.put("storeId", food.getStoreId());
+        data.put("name", food.getName());
+        data.put("price", food.getPrice());
+        data.put("rating", food.getRating());
+        data.put("imageResId", food.getImageResId());
+        data.put("sold", food.getSold());
+        data.put("category", food.getCategory());
+        return data;
     }
 }
