@@ -12,6 +12,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.foodorderapp.R;
+import com.example.foodorderapp.model.UserModel;
+import com.example.foodorderapp.service.UserService;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -22,10 +25,10 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.auth.User;
 
 import java.util.HashMap;
 import java.util.Map;
-import com.example.foodorderapp.R;
 
 public class RegisterActivity extends AppCompatActivity {
     private EditText edtName, edtEmail, edtPhone, edtPassword;
@@ -36,7 +39,7 @@ public class RegisterActivity extends AppCompatActivity {
     private static final int RC_SIGN_IN = 9001;
     private GoogleSignInClient mGoogleSignInClient;
 
-
+    UserService userService = new UserService(); // để lưu người dùng vào firestore
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,20 +74,16 @@ public class RegisterActivity extends AppCompatActivity {
                         .addOnCompleteListener(task -> {
                             if (task.isSuccessful()) {
                                 String userId = mAuth.getCurrentUser().getUid();
-
+                                UserModel user = new UserModel();
+                                user.setFullName(name);
+                                user.setAddress("");
+                                user.setPhone(phone);
                                 // Thêm thông tin người dùng vào Firestore
-                                Map<String, Object> userMap = new HashMap<>();
-                                userMap.put("fullName", name);
-                                userMap.put("e-mail", email);
-                                userMap.put("phone", phone);
-
-                                db.collection("user").document(userId)  // Dùng userId làm document ID
-                                        .set(userMap)
+                                userService.addUser(user)
                                         .addOnSuccessListener(aVoid -> {
+                                            // Ẩn lỗi và chuyển sang màn hình Home
                                             tvRegisterError.setVisibility(View.GONE);
-                                            Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
-                                            intent.putExtra("user_email", email);
-                                            startActivity(intent);
+                                            startActivity(new Intent(RegisterActivity.this, HomeActivity.class));
                                             finish();
                                         })
                                         .addOnFailureListener(e -> Toast.makeText(RegisterActivity.this, "Lỗi lưu Firestore: " + e.getMessage(), Toast.LENGTH_SHORT).show());
@@ -138,39 +137,33 @@ public class RegisterActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         String email = mAuth.getCurrentUser().getEmail();
-                        FirebaseFirestore db = FirebaseFirestore.getInstance();
+                        UserModel userModel = new UserModel();
+                        userModel.setFullName(email.split("@")[0]);
+                        userModel.setPhone("");
+                        userModel.setAddress("");
 
-                        db.collection("users")
-                                .whereEqualTo("email", email)
-                                .get()
-                                .addOnSuccessListener(queryDocumentSnapshots -> {
-                                    if (queryDocumentSnapshots.isEmpty()) {
-                                        // Email chưa tồn tại -> thêm mới
-                                        Map<String, Object> user = new HashMap<>();
-                                        String username = email.split("@")[0];
-                                        user.put("fullName", username);
-                                        user.put("email", email);
-                                        user.put("phone", "");
-                                        user.put("address", "");
-
-                                        db.collection("users")
-                                                .add(user)
-                                                .addOnSuccessListener(documentReference -> {
-                                                    Log.d("Firestore", "Thêm người dùng mới thành công");
+                        // Kiểm tra người dùng đã tồn tại (lấy theo UID)
+                        userService.getUser()
+                                .addOnSuccessListener(documentSnapshot -> {
+                                    if (!documentSnapshot.exists()) {
+                                        // Người dùng chưa tồn tại => thêm
+                                        userService.addUser(userModel)
+                                                .addOnSuccessListener(aVoid -> {
+                                                    Log.d("UserService", "Thêm người dùng mới thành công");
                                                 })
                                                 .addOnFailureListener(e -> {
-                                                    Log.w("Firestore", "Lỗi khi thêm người dùng mới", e);
+                                                    Log.w("UserService", "Lỗi khi thêm người dùng", e);
                                                 });
                                     }
-                                    // Dù thêm mới hay không, vẫn vào Home
+                                    // Vào Home dù thêm mới hay không
                                     Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
-                                    intent.putExtra("user_email", email);
                                     startActivity(intent);
                                     finish();
                                 })
                                 .addOnFailureListener(e -> {
                                     Toast.makeText(this, "Lỗi kiểm tra người dùng", Toast.LENGTH_SHORT).show();
                                 });
+
                     } else {
                         Toast.makeText(this, "Google đăng nhập thất bại", Toast.LENGTH_SHORT).show();
                     }

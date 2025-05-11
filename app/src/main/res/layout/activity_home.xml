@@ -44,7 +44,7 @@
                     android:id="@+id/tv_address"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="245 Au Co, Hoa Khanh, Da Nang"
+                    android:text="null"
                     android:textColor="#000000"
                     android:textSize="14sp" />
             </LinearLayout>
@@ -87,7 +87,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Chào Đạt, Ngon Miệng Nhé"
+            android:text="null"
             android:textSize="16sp"
             android:textStyle="bold" />
 

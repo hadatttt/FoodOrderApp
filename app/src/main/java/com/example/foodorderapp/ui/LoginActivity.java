@@ -21,6 +21,7 @@ import androidx.core.content.ContextCompat;
 
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.model.UserModel;
+import com.example.foodorderapp.service.UserService;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -41,6 +42,7 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private static final int RC_SIGN_IN = 9001;
     private GoogleSignInClient mGoogleSignInClient;
+    public UserService userService = new UserService();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,49 +148,34 @@ public class LoginActivity extends AppCompatActivity {
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        FirebaseUser firebaseUser = mAuth.getCurrentUser();
-                        if (firebaseUser != null) {
-                            String uid = firebaseUser.getUid();
-                            String name = firebaseUser.getDisplayName();
-                            String email = firebaseUser.getEmail();
+                        String email = mAuth.getCurrentUser().getEmail();
+                        UserModel userModel = new UserModel();
+                        userModel.setFullName(email.split("@")[0]);
+                        userModel.setPhone("");
+                        userModel.setAddress("");
 
-                            FirebaseFirestore db = FirebaseFirestore.getInstance();
+                        // Kiểm tra người dùng đã tồn tại (lấy theo UID)
+                        userService.getUser()
+                                .addOnSuccessListener(documentSnapshot -> {
+                                    if (!documentSnapshot.exists()) {
+                                        // Người dùng chưa tồn tại => thêm
+                                        userService.addUser(userModel)
+                                                .addOnSuccessListener(aVoid -> {
+                                                    Log.d("UserService", "Thêm người dùng mới thành công");
+                                                })
+                                                .addOnFailureListener(e -> {
+                                                    Log.w("UserService", "Lỗi khi thêm người dùng", e);
+                                                });
+                                    }
+                                    // Vào Home dù thêm mới hay không
+                                    Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                })
+                                .addOnFailureListener(e -> {
+                                    Toast.makeText(this, "Lỗi kiểm tra người dùng", Toast.LENGTH_SHORT).show();
+                                });
 
-                            // Kiểm tra user đã có trong Firestore chưa
-                            db.collection("users").document(uid).get()
-                                    .addOnSuccessListener(documentSnapshot -> {
-                                        if (documentSnapshot.exists()) {
-                                            // Đã tồn tại → sang Home
-                                            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-                                            intent.putExtra("uid", uid);
-                                            startActivity(intent);
-                                            finish();
-                                        } else {
-                                            // Chưa có → Tạo mới và lưu vào Firestore
-                                            UserModel user = new UserModel();
-                                            user.setFullName(name);
-                                            user.setAddress("");
-                                            user.setPhone("");
-
-                                            db.collection("users").document(uid)
-                                                    .set(user)
-                                                    .addOnSuccessListener(aVoid -> {
-                                                        Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-                                                        intent.putExtra("uid", uid);
-                                                        startActivity(intent);
-                                                        finish();
-                                                    })
-                                                    .addOnFailureListener(e -> {
-                                                        Toast.makeText(this, "Lỗi lưu Firestore: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                                    });
-                                        }
-                                    })
-                                    .addOnFailureListener(e -> {
-                                        Toast.makeText(this, "Lỗi kiểm tra người dùng: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                    });
-                        } else {
-                            Toast.makeText(this, "Không thể lấy thông tin người dùng.", Toast.LENGTH_SHORT).show();
-                        }
                     } else {
                         Toast.makeText(this, "Google đăng nhập thất bại", Toast.LENGTH_SHORT).show();
                     }

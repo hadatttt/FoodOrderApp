@@ -10,12 +10,10 @@ public class ShopModel {
     private String imageResource;
     private float rating;
     private String advertisement;
-    private List<String> categories;
 
-    // ⚠️ Constructor rỗng bắt buộc để Firestore mapping
     public ShopModel() {}
 
-    public ShopModel(int storeid, String shopName, String address, float discount, String imageResource, String advertisement, List<String> categories) {
+    public ShopModel(int storeid, String shopName, String address, float discount, String imageResource, String advertisement) {
         this.storeid = storeid;
         this.shopName = shopName;
         this.address = address;
@@ -23,7 +21,7 @@ public class ShopModel {
         this.imageResource = imageResource;
         this.rating = 0;
         this.advertisement = advertisement;
-        this.categories = categories;
+
     }
 
     // Getters and Setters
@@ -48,6 +46,4 @@ public class ShopModel {
     public String getAdvertisement() { return advertisement; }
     public void setAdvertisement(String advertisement) { this.advertisement = advertisement; }
 
-    public List<String> getCategories() { return categories; }
-    public void setCategories(List<String> categories) { this.categories = categories; }
 }
