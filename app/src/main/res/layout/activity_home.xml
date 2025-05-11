@@ -193,6 +193,15 @@
                         android:drawableLeft="@drawable/chicken"
                         android:text="Gà rán"
                         android:textColor="#000" />
+                    <Button
+                        android:id="@+id/btnDrink"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:backgroundTint="#EEEEEE"
+                        android:drawableLeft="@drawable/drink"
+                        android:text="Đồ uống"
+                        android:textColor="#000" />
                 </LinearLayout>
             </HorizontalScrollView>
         </LinearLayout>
