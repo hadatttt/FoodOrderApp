@@ -13,6 +13,7 @@ import com.bumptech.glide.Glide;
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.model.ShopModel;
 
+import java.util.Collections;
 import java.util.List;
 public class SaleShopAdapter extends RecyclerView.Adapter<SaleShopAdapter.ShopViewHolder> {
 
@@ -43,8 +44,10 @@ public class SaleShopAdapter extends RecyclerView.Adapter<SaleShopAdapter.ShopVi
 
     // Phương thức để cập nhật dữ liệu trong adapter
     public void updateData(List<ShopModel> newShopList) {
+        // Sắp xếp giảm dần theo discount
+        Collections.sort(newShopList, (o1, o2) -> Double.compare(o2.getDiscount(), o1.getDiscount()));
         this.shopList = newShopList;
-        notifyDataSetChanged();  // Thông báo RecyclerView cập nhật dữ liệu
+        notifyDataSetChanged();
     }
 
     public static class ShopViewHolder extends RecyclerView.ViewHolder {
@@ -62,15 +65,23 @@ public class SaleShopAdapter extends RecyclerView.Adapter<SaleShopAdapter.ShopVi
         }
 
         public void bind(ShopModel shop) {
-            // Sử dụng Glide để tải ảnh từ URL
-            Glide.with(itemView.getContext())  // Sử dụng itemView.getContext() để lấy context
-                    .load(shop.getImageUrl())  // Lấy link ảnh từ ShopModel
-                    .into(imageShop);  // Hiển thị ảnh vào ImageView
+            // Load ảnh
+            Glide.with(itemView.getContext())
+                    .load(shop.getImageUrl())
+                    .into(imageShop);
 
+            // Set tên và địa chỉ
             textShopName.setText(shop.getShopName());
             textAddress.setText(shop.getAddress());
-            // Hiển thị giảm giá
-            textDiscount.setText(String.format("Giảm %.0f%%", shop.getDiscount()));
+
+            // Hiển thị hoặc ẩn giảm giá
+            if (shop.getDiscount() > 0) {
+                textDiscount.setVisibility(View.VISIBLE);
+                textDiscount.setText(String.format("Giảm %.0f%%", shop.getDiscount()));
+            } else {
+                textDiscount.setVisibility(View.GONE); // Ẩn khung nếu không có giảm giá
+            }
         }
+
     }
 }
