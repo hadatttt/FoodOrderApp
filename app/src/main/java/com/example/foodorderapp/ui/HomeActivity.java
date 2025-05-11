@@ -1,5 +1,6 @@
 package com.example.foodorderapp.ui;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -37,6 +38,7 @@ public class HomeActivity extends AppCompatActivity {
     private TextView tvAllHot, tvAllSale;
     private UserService userService;
     private FoodService foodService;
+    public Context context;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,7 +74,7 @@ public class HomeActivity extends AppCompatActivity {
         recyclerHotFood.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         fullFoodList = new ArrayList<>();
         foodList = new ArrayList<>();
-        hotFoodAdapter = new HotFoodAdapter(foodList);
+        hotFoodAdapter = new HotFoodAdapter(context,foodList);
         recyclerHotFood.setAdapter(hotFoodAdapter);
         loadAllFoods();
         // Khởi tạo danh sách shop giảm giá (dữ liệu tạm hardcode)
@@ -133,12 +135,13 @@ public class HomeActivity extends AppCompatActivity {
                         doc.getString("name"),
                         doc.getDouble("price"),
                         doc.getDouble("rating").floatValue(),
-                        R.drawable.burger1,
                         doc.getLong("sold").intValue(),
-                        doc.getString("category")
+                        doc.getString("category"),
+                        doc.getString("imageUrl") // ✅ lấy ảnh từ Firestore
                 );
                 fullFoodList.add(food);
             }
+
             foodList.clear();
             foodList.addAll(fullFoodList);
             hotFoodAdapter.notifyDataSetChanged();
@@ -146,6 +149,7 @@ public class HomeActivity extends AppCompatActivity {
             Log.e(TAG, "Lỗi khi tải dữ liệu món ăn", e);
         });
     }
+
     private void selectCategory(String category, Button selectedButton) {
         filterFoods(category);
         for (Button button : categoryButtons) {

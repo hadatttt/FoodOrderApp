@@ -6,23 +6,23 @@ public class FoodModel {
     private String name;
     private double price;
     private float rating;
-    private int imageResId;
     private int sold;
     private String category;
+    private String imageUrl; // ✅ thêm link ảnh
 
     public FoodModel() {
         // Required empty constructor for Firestore
     }
 
-    public FoodModel(int foodId, int storeId, String name, double price, float rating, int imageResId, int sold, String category) {
+    public FoodModel(int foodId, int storeId, String name, double price, float rating, int sold, String category, String imageUrl) {
         this.foodId = foodId;
         this.storeId = storeId;
         this.name = name;
         this.price = price;
         this.rating = rating;
-        this.imageResId = imageResId;
         this.sold = sold;
         this.category = category;
+        this.imageUrl = imageUrl;
     }
 
     public int getFoodId() { return foodId; }
@@ -34,18 +34,18 @@ public class FoodModel {
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
-    public double getPrice() { return price; }  // Sửa thành double
-    public void setPrice(double price) { this.price = price; }  // Sửa thành double
+    public double getPrice() { return price; }
+    public void setPrice(double price) { this.price = price; }
 
     public float getRating() { return rating; }
     public void setRating(float rating) { this.rating = rating; }
-
-    public int getImageResId() { return imageResId; }
-    public void setImageResId(int imageResId) { this.imageResId = imageResId; }
 
     public int getSold() { return sold; }
     public void setSold(int sold) { this.sold = sold; }
 
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
+
+    public String getImageUrl() { return imageUrl; } // ✅ Getter
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; } // ✅ Setter
 }
