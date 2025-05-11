@@ -27,6 +27,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class HomeActivity extends AppCompatActivity {
     private static final String TAG = "HomeActivity";
@@ -48,35 +49,43 @@ public class HomeActivity extends AppCompatActivity {
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     UserService userService = new UserService();
+    private TextView tvFullName, tvAddress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        UserService userService = new UserService();
-        userService.getUser().addOnSuccessListener(documentSnapshot -> {
-            if (documentSnapshot.exists()) {
-                String name = documentSnapshot.getString("fullName"); // Hoặc documentSnapshot.get("name").toString();
-                String addr = documentSnapshot.getString("address");
-                TextView nameTextView = findViewById(R.id.txt_name);
-                TextView addressTextView = findViewById(R.id.txt_address);
-                nameTextView.setText("Chào " +name+", Ngon Miệng Nhé");
-                addressTextView.setText(addr);
-            } else {
-                // Document không tồn tại
-                Log.d("UserService", "User document does not exist.");
-            }
-        }).addOnFailureListener(e -> {
-            // Xử lý lỗi
-            Log.e("UserService", "Failed to get user data", e);
-        });
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.home), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+        String userEmail = getIntent().getStringExtra("user_email");
 
+        tvFullName = findViewById(R.id.tv_full_name);
+        tvAddress = findViewById(R.id.tv_address);
+
+        if (userEmail != null) {
+            db.collection("users")
+                    .whereEqualTo("email", userEmail)
+                    .get()
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        if (!queryDocumentSnapshots.isEmpty()) {
+                            Map<String, Object> userData = queryDocumentSnapshots.getDocuments().get(0).getData();
+
+                            String fullName = (String) userData.get("fullName");
+                            String phone = (String) userData.get("phone");
+                            String address = (String) userData.get("address");
+
+                            Log.d(TAG, "Họ tên: " + fullName + ", SĐT: " + phone + ", Địa chỉ: " + address);
+
+                            tvFullName.setText("Chào "+ fullName +", Ngon Miệng Nhé");
+                            tvAddress.setText(address);
+
+                        } else {
+                            Log.d(TAG, "Không tìm thấy người dùng với email: " + userEmail);
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "Lỗi khi truy vấn người dùng", e);
+                    });
+        }
 
         // Hot food setup
         recyclerHotFood = findViewById(R.id.recyclerHotFood);

@@ -172,38 +172,6 @@
             app:layout_constraintVertical_bias="0.0" />
 
         <LinearLayout
-            android:id="@+id/btn_login_facebook"
-            android:layout_width="301dp"
-            android:layout_height="64dp"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/button_outline"
-            android:gravity="center"
-            android:orientation="horizontal"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.504"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView7"
-            app:layout_constraintVertical_bias="0.204">
-
-            <ImageView
-                android:layout_width="0dp"
-                android:layout_height="30dp"
-                android:layout_weight="1"
-                app:layout_constraintStart_toStartOf="parent"
-                app:srcCompat="@drawable/facebook" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center|left"
-                android:textColor="@color/black"
-                android:text="Đăng nhập bằng Facebook"
-                android:textSize="16sp" />
-        </LinearLayout>
-
-        <LinearLayout
             android:id="@+id/btn_login_google"
             android:layout_width="301dp"
             android:layout_height="64dp"
@@ -212,10 +180,9 @@
             android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.522"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btn_login_facebook"
-            app:layout_constraintVertical_bias="0.403">
+            app:layout_constraintTop_toBottomOf="@+id/textView7"
+            app:layout_constraintVertical_bias="0.194">
 
             <ImageView
                 android:layout_width="0dp"
@@ -229,8 +196,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center|left"
-                android:textColor="@color/black"
                 android:text="Đăng nhập bằng Google"
+                android:textColor="@color/black"
                 android:textSize="16sp" />
         </LinearLayout>
 

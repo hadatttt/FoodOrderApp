@@ -12,22 +12,20 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.example.foodorderapp.R;
-import com.facebook.AccessToken;
-import com.facebook.CallbackManager;
-import com.facebook.FacebookCallback;
-import com.facebook.FacebookException;
-import com.facebook.FacebookSdk;
-import com.facebook.appevents.AppEventsLogger;
-import com.facebook.login.LoginManager;
-import com.facebook.login.LoginResult;
+import com.example.foodorderapp.ui.ForgetActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -35,12 +33,13 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class LoginActivity extends AppCompatActivity {
     private TextView tvSignup, tvLoginError;
@@ -52,15 +51,10 @@ public class LoginActivity extends AppCompatActivity {
     private static final int RC_SIGN_IN = 9001;
     private GoogleSignInClient mGoogleSignInClient;
 
-    private CallbackManager callbackManager;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
-        FacebookSdk.sdkInitialize(getApplicationContext());
-        AppEventsLogger.activateApp(getApplication());
 
         tvSignup = findViewById(R.id.tv_signup);
         mAuth = FirebaseAuth.getInstance();
@@ -118,6 +112,7 @@ public class LoginActivity extends AppCompatActivity {
                         .addOnCompleteListener(task -> {
                             if (task.isSuccessful()) {
                                 Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                                intent.putExtra("user_email", inputEmail);
                                 startActivity(intent);
                                 finish();
                             } else {
@@ -138,31 +133,6 @@ public class LoginActivity extends AppCompatActivity {
             Intent signInIntent = mGoogleSignInClient.getSignInIntent();
             startActivityForResult(signInIntent, RC_SIGN_IN);
         });
-
-        callbackManager = CallbackManager.Factory.create();
-
-        LinearLayout facebookLogin = findViewById(R.id.btn_login_facebook);
-        facebookLogin.setOnClickListener(v -> {
-            LoginManager.getInstance().logInWithReadPermissions(LoginActivity.this, Arrays.asList("public_profile"));
-            LoginManager.getInstance().registerCallback(callbackManager,
-                    new FacebookCallback<LoginResult>() {
-                        @Override
-                        public void onSuccess(LoginResult loginResult) {
-                            handleFacebookAccessToken(loginResult.getAccessToken());
-                        }
-
-                        @Override
-                        public void onCancel() {
-//                            Toast.makeText(LoginActivity.this, "Đăng nhập Facebook bị huỷ", Toast.LENGTH_SHORT).show();
-                        }
-
-                        @Override
-                        public void onError(FacebookException exception) {
-//                            Toast.makeText(LoginActivity.this, "Đăng nhập Facebook thất bại", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-        });
-
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -176,8 +146,6 @@ public class LoginActivity extends AppCompatActivity {
             } catch (ApiException e) {
                 Log.w("GoogleSignIn", "Google sign in failed", e);
             }
-        } else {
-            callbackManager.onActivityResult(requestCode, resultCode, data);
         }
     }
 
@@ -186,31 +154,42 @@ public class LoginActivity extends AppCompatActivity {
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        FirebaseUser firebaseUser = mAuth.getCurrentUser();
-                        if (firebaseUser != null) {
-                            String uid = firebaseUser.getUid();
-                            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-                            intent.putExtra("uid", uid);
-                            startActivity(intent);
-                            finish();
-                        } else {
-                            Toast.makeText(this, "Không thể lấy thông tin người dùng.", Toast.LENGTH_SHORT).show();
-                        }
+                        String email = mAuth.getCurrentUser().getEmail();
+                        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+                        db.collection("users")
+                                .whereEqualTo("email", email)
+                                .get()
+                                .addOnSuccessListener(queryDocumentSnapshots -> {
+                                    if (queryDocumentSnapshots.isEmpty()) {
+                                        // Email chưa tồn tại -> thêm mới
+                                        Map<String, Object> user = new HashMap<>();
+                                        String username = email.split("@")[0];
+                                        user.put("fullName", username);
+                                        user.put("email", email);
+                                        user.put("phone", "");
+                                        user.put("address", "");
+
+                                        db.collection("users")
+                                                .add(user)
+                                                .addOnSuccessListener(documentReference -> {
+                                                    Log.d("Firestore", "Thêm người dùng mới thành công");
+                                                })
+                                                .addOnFailureListener(e -> {
+                                                    Log.w("Firestore", "Lỗi khi thêm người dùng mới", e);
+                                                });
+                                    }
+                                    // Dù thêm mới hay không, vẫn vào Home
+                                    Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                                    intent.putExtra("user_email", email);
+                                    startActivity(intent);
+                                    finish();
+                                })
+                                .addOnFailureListener(e -> {
+                                    Toast.makeText(this, "Lỗi kiểm tra người dùng", Toast.LENGTH_SHORT).show();
+                                });
                     } else {
                         Toast.makeText(this, "Google đăng nhập thất bại", Toast.LENGTH_SHORT).show();
-                    }
-                });
-    }
-
-    private void handleFacebookAccessToken(AccessToken token) {
-        AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
-        mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, task -> {
-                    if (task.isSuccessful()) {
-                        startActivity(new Intent(LoginActivity.this, HomeActivity.class));
-                        finish();
-                    } else {
-                        Toast.makeText(LoginActivity.this, "Firebase xác thực Facebook thất bại.", Toast.LENGTH_SHORT).show();
                     }
                 });
     }

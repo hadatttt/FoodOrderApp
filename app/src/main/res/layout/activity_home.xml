@@ -41,10 +41,10 @@
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/txt_address"
+                    android:id="@+id/tv_address"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Chưa có địa chỉ"
+                    android:text="245 Au Co, Hoa Khanh, Da Nang"
                     android:textColor="#000000"
                     android:textSize="14sp" />
             </LinearLayout>
@@ -72,7 +72,7 @@
                     android:layout_height="20dp"
                     android:layout_gravity="top|end"
                     android:background="@drawable/bg_circle_badge"
-                    android:text="0"
+                    android:text="2"
                     android:textColor="#FFFFFF"
                     android:textSize="12sp"
                     android:gravity="center"
@@ -83,11 +83,11 @@
 
         <!-- PHẦN 2: Chào người dùng + Tìm kiếm -->
         <TextView
-            android:id="@+id/txt_name"
+            android:id="@+id/tv_full_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="null"
+            android:text="Chào Đạt, Ngon Miệng Nhé"
             android:textSize="16sp"
             android:textStyle="bold" />
 
@@ -216,9 +216,7 @@
             <TextView
                 android:id="@+id/allHot"
                 android:layout_width="wrap_content"
-                android:layout_height="22dp"
-                android:clickable="true"
-                android:focusable="true"
+                android:layout_height="wrap_content"
                 android:text="Thêm >"
                 android:textColor="#888888" />
         </LinearLayout>
@@ -250,9 +248,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Thêm >"
-                android:textColor="#888888"
-                android:clickable="true"
-                android:focusable="true"/>
+                android:textColor="#888888" />
         </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView

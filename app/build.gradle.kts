@@ -54,6 +54,5 @@ dependencies {
 
     implementation("com.github.bumptech.glide:glide:4.13.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.13.0")
-    implementation("com.facebook.android:facebook-android-sdk:latest.release")
     implementation("com.google.android.gms:play-services-auth:20.5.0")
 }
