@@ -54,32 +54,32 @@ public class DetailActivity extends AppCompatActivity {
                 updatePrice();
             }
         });
-        FoodApiService apiService = ApiClient.getClient().create(FoodApiService.class);
-        Call<List<FoodModel>> call = apiService.getAllFoods();
-
-        call.enqueue(new Callback<List<FoodModel>>() {
-            @Override
-            public void onResponse(Call<List<FoodModel>> call, Response<List<FoodModel>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<FoodModel> foodList = response.body();
-                    for (FoodModel food : foodList) {
-                        Log.d(TAG, "Food: " + food.getName() + ", Price: " + food.getPrice());
-                        binding.tvFoodName.setText(food.getName());
-                        binding.tvDesc.setText(food.getDesc());
-                        binding.tvStore.setText(food.getStoreId());
-                        //binding.tvRate.setText(food.getRating());
-                        binding.tvPrice.setText(food.getPrice());
-                    }
-                } else {
-                    Log.e(TAG, "API Response Error");
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<FoodModel>> call, Throwable t) {
-                Log.e(TAG, "API Call Failure: " + t.getMessage());
-            }
-        });
+//        FoodApiService apiService = ApiClient.getClient().create(FoodApiService.class);
+//        Call<List<FoodModel>> call = apiService.getAllFoods();
+//
+//        call.enqueue(new Callback<List<FoodModel>>() {
+//            @Override
+//            public void onResponse(Call<List<FoodModel>> call, Response<List<FoodModel>> response) {
+//                if (response.isSuccessful() && response.body() != null) {
+//                    List<FoodModel> foodList = response.body();
+//                    for (FoodModel food : foodList) {
+//                        Log.d(TAG, "Food: " + food.getName() + ", Price: " + food.getPrice());
+//                        binding.tvFoodName.setText(food.getName());
+//                        binding.tvDesc.setText(food.getDesc());
+//                        binding.tvStore.setText(food.getStoreId());
+//                        //binding.tvRate.setText(food.getRating());
+//                        binding.tvPrice.setText(food.getPrice());
+//                    }
+//                } else {
+//                    Log.e(TAG, "API Response Error");
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<List<FoodModel>> call, Throwable t) {
+//                Log.e(TAG, "API Call Failure: " + t.getMessage());
+//            }
+//        });
 
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
