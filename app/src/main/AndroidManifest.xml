@@ -13,11 +13,14 @@
         android:theme="@style/Theme.FoodOrderApp"
         tools:targetApi="31">
         <activity
-            android:name=".DetailActivity"
-            android:exported="true" />
+            android:name=".MenuProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".EditInfoActivity"
+            android:exported="false" />
         <activity
             android:name=".MainActivity"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

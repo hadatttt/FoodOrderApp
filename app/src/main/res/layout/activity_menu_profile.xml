@@ -7,7 +7,8 @@
     android:orientation="vertical"
     android:id="@+id/main"
     tools:context=".MenuProfileActivity"
-    android:background="#F5F5F5" android:padding="16dp">
+    android:background="#F5F5F5"
+    android:padding="20dp">
     <LinearLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
@@ -43,6 +44,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:paddingLeft="20dp"
         android:gravity="center_vertical"
         android:layout_marginBottom="24dp">
 
@@ -84,7 +86,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="20dp">
 
             <LinearLayout
                 android:id="@+id/btnInfo"
@@ -150,7 +152,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="20dp">
 
             <LinearLayout
                 android:id="@+id/btnOrders"
@@ -237,7 +239,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="20dp">
 
             <LinearLayout
                 android:id="@+id/btnFAQs"
