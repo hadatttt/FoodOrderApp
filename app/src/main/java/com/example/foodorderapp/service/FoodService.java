@@ -64,7 +64,7 @@ public class FoodService {
         data.put("name", food.getName());
         data.put("price", food.getPrice());
         data.put("rating", food.getRating());
-        data.put("imageResId", food.getImageUrl());
+        data.put("imageUrl", food.getImageUrl());
         data.put("sold", food.getSold());
         data.put("category", food.getCategory());
         return data;

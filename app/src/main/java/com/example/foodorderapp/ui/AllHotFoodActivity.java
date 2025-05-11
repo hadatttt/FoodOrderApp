@@ -2,6 +2,7 @@ package com.example.foodorderapp.ui;
 
 import static android.content.ContentValues.TAG;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -32,7 +33,7 @@ public class AllHotFoodActivity extends AppCompatActivity {
     private List<FoodModel> fullFoodList;
     private List<FoodModel> foodList;
     private FoodService foodService;
-
+    private Context context;
     private Button btnAll, btnSpaghetti, btnPotato, btnPizza, btnBurger, btnChicken, btnDrink;
     private List<Button> categoryButtons;
 
@@ -59,7 +60,7 @@ public class AllHotFoodActivity extends AppCompatActivity {
 
         fullFoodList = new ArrayList<>();
         foodList = new ArrayList<>(fullFoodList);
-        hotFoodAdapter = new HotFoodAdapter(foodList);
+        hotFoodAdapter = new HotFoodAdapter(context,foodList);
         recyclerHotFood.setAdapter(hotFoodAdapter);
 
         // Category Buttons
@@ -125,14 +126,12 @@ public class AllHotFoodActivity extends AppCompatActivity {
                         doc.getString("name"),
                         doc.getDouble("price"),
                         doc.getDouble("rating").floatValue(),
-                        R.drawable.burger1, // Placeholder for image
+                        doc.getString("imageUrl"),
                         doc.getLong("sold").intValue(),
-                        doc.getString("category")
+                        doc.getString("category") // ✅ Lấy ảnh từ link
                 );
                 fullFoodList.add(food);
-            }
-
-            // Load all food data into the list and notify adapter
+            }// Load all food data into the list and notify adapter
             foodList.clear();
             foodList.addAll(fullFoodList);
             hotFoodAdapter.notifyDataSetChanged();

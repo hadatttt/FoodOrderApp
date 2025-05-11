@@ -2,53 +2,41 @@
     android:id="@+id/allhotfood"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="16dp">
 
-    <!-- Toolbar with Back button and Search bar -->
-    <LinearLayout
+    <!-- Thanh công cụ gồm nút quay lại và tiêu đề -->
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:orientation="horizontal"
-        android:background="#FFFFFF"
-        android:padding="8dp"
-        android:gravity="center_vertical">
+        android:layout_height="wrap_content"
+        android:paddingBottom="8dp">
 
-        <!-- Back Button -->
         <ImageView
             android:id="@+id/btnBack"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_marginEnd="16dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
             android:src="@drawable/ic_back"
             android:contentDescription="Back button" />
-        <!-- Search Bar -->
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/bg_search_box"
-            android:drawableStart="@drawable/ic_search"
-            android:hint="Tìm kiếm"
-            android:padding="12dp" />
-    </LinearLayout>
 
-    <!-- Danh mục đồ ăn -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Danh mục đồ ăn"
-        android:textSize="18sp"
-        android:textColor="#000"
-        android:layout_marginTop="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:fontFamily="sans-serif-medium" />
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:fontFamily="sans-serif-medium"
+            android:text="Danh mục đồ ăn"
+            android:textColor="#000"
+            android:textSize="18sp" />
+    </RelativeLayout>
+
 
     <!-- Horizontal ScrollView for food categories -->
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="12dp"
         android:scrollbars="none">
 
         <LinearLayout
@@ -115,6 +103,7 @@
                 android:drawableLeft="@drawable/chicken"
                 android:text="Gà rán"
                 android:textColor="#000" />
+
             <Button
                 android:id="@+id/btnDrink"
                 android:layout_width="wrap_content"
@@ -131,5 +120,6 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerHotFood"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 </LinearLayout>

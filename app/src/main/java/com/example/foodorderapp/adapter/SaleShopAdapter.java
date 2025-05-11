@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.model.ShopModel;
 
@@ -61,10 +62,14 @@ public class SaleShopAdapter extends RecyclerView.Adapter<SaleShopAdapter.ShopVi
         }
 
         public void bind(ShopModel shop) {
-            // Chuyển từ tên tài nguyên drawable thành ID thực tế
-            int resId = itemView.getContext().getResources().getIdentifier(
-                    shop.getImageResource(), "drawable", itemView.getContext().getPackageName());
-            imageShop.setImageResource(resId);
+            Glide.with(itemView.getContext())
+                    .load(shop.getImageUrl()) // URL dạng string
+                    .into(imageShop);
+            // Dùng Glide để tải ảnh từ URL vào ImageView
+            Glide.with(itemView.getContext())  // Sử dụng itemView.getContext() để lấy context
+                    .load(shop.getImageUrl())  // Lấy link ảnh từ FoodModel
+                    // Ảnh lỗi nếu tải ảnh không thành công
+                    .into(imageShop);
             textShopName.setText(shop.getShopName());
             textAddress.setText(shop.getAddress());
             // Hiển thị giảm giá

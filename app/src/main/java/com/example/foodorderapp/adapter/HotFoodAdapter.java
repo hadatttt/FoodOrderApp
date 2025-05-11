@@ -1,5 +1,6 @@
 package com.example.foodorderapp.adapter;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,16 +19,18 @@ import java.util.List;
 public class HotFoodAdapter extends RecyclerView.Adapter<HotFoodAdapter.FoodViewHolder> {
 
     private List<FoodModel> foodList;
+    private Context context;
 
     // Constructor
+    public HotFoodAdapter(Context context, List<FoodModel> foodList) {
+        this.context = context;
+        this.foodList = foodList;
+    }
+
     public void updateData(List<FoodModel> newList) {
         foodList.clear();
         foodList.addAll(newList);
         notifyDataSetChanged();
-    }
-
-    public HotFoodAdapter(List<FoodModel> foodList) {
-        this.foodList = foodList;
     }
 
     @NonNull
@@ -72,10 +75,17 @@ public class HotFoodAdapter extends RecyclerView.Adapter<HotFoodAdapter.FoodView
             Glide.with(itemView.getContext())
                     .load(food.getImageUrl()) // URL dạng string
                     .into(imageFood);
+            // Dùng Glide để tải ảnh từ URL vào ImageView
+            Glide.with(itemView.getContext())  // Sử dụng itemView.getContext() để lấy context
+                    .load(food.getImageUrl())  // Lấy link ảnh từ FoodModel
+        // Ảnh lỗi nếu tải ảnh không thành công
+                    .into(imageFood);
+
             textFoodName.setText(food.getName());
-            textFoodPrice.setText(String.format("$%.2f", food.getPrice())+"đ");
+            textFoodPrice.setText(String.format("%.2f", food.getPrice()) + "đ");
             textRating.setText(String.valueOf(food.getRating()));
             textSoldAmount.setText("Đã bán: " + food.getSold());
         }
+
     }
 }

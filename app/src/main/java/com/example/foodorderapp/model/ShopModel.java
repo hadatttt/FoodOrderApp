@@ -1,28 +1,26 @@
 package com.example.foodorderapp.model;
 
-import java.util.List;
-
 public class ShopModel {
     private int storeid;
     private String shopName;
     private String address;
     private float discount;
-    private String imageResource;
+    private String imageUrl;  // Đổi tên biến ở đây
     private float rating;
     private String advertisement;
 
     public ShopModel() {}
 
-    public ShopModel(int storeid, String shopName, String address, float discount, String imageResource, String advertisement) {
+    public ShopModel(int storeid, String shopName, String address, float discount, String imageUrl, String advertisement, float rating) {
         this.storeid = storeid;
         this.shopName = shopName;
         this.address = address;
         this.discount = discount;
-        this.imageResource = imageResource;
-        this.rating = 0;
+        this.imageUrl = imageUrl;
+        this.rating = rating;  // Cập nhật constructor để nhận rating
         this.advertisement = advertisement;
-
     }
+
 
     // Getters and Setters
     public int getStoreid() { return storeid; }
@@ -37,13 +35,12 @@ public class ShopModel {
     public float getDiscount() { return discount; }
     public void setDiscount(float discount) { this.discount = discount; }
 
-    public String getImageResource() { return imageResource; }
-    public void setImageResource(String imageResource) { this.imageResource = imageResource; }
+    public String getImageUrl() { return imageUrl; }  // Sửa getter
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }  // Sửa setter
 
     public float getRating() { return rating; }
     public void setRating(float rating) { this.rating = rating; }
 
     public String getAdvertisement() { return advertisement; }
     public void setAdvertisement(String advertisement) { this.advertisement = advertisement; }
-
 }
