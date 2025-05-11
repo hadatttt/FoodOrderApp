@@ -1,5 +1,7 @@
 package com.example.foodorderapp.ui;
 
+import static android.content.ContentValues.TAG;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -18,6 +20,7 @@ import com.example.foodorderapp.adapter.SaleShopAdapter;
 import com.example.foodorderapp.model.FoodModel;
 import com.example.foodorderapp.model.ShopModel;
 import com.example.foodorderapp.service.FoodService;
+import com.example.foodorderapp.service.ShopService;
 import com.example.foodorderapp.service.UserService;
 import com.google.firebase.firestore.DocumentSnapshot;
 import java.util.ArrayList;
@@ -38,7 +41,9 @@ public class HomeActivity extends AppCompatActivity {
     private TextView tvAllHot, tvAllSale;
     private UserService userService;
     private FoodService foodService;
-    public Context context;
+    private ShopService shopService;
+    private Context context = this;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,6 +51,8 @@ public class HomeActivity extends AppCompatActivity {
 
         userService = new UserService();
         foodService = new FoodService();
+        shopService = new ShopService(); // Thêm dòng này
+
 
         // Setup thanh padding tránh che mất layout bởi status/navigation bar
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.home), (v, insets) -> {
@@ -53,7 +60,6 @@ public class HomeActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-
         // Hiển thị thông tin người dùng
         userService.getUser().addOnSuccessListener(documentSnapshot -> {
             if (documentSnapshot.exists()) {
@@ -76,18 +82,16 @@ public class HomeActivity extends AppCompatActivity {
         foodList = new ArrayList<>();
         hotFoodAdapter = new HotFoodAdapter(context,foodList);
         recyclerHotFood.setAdapter(hotFoodAdapter);
+        //lay all mon an
         loadAllFoods();
-        // Khởi tạo danh sách shop giảm giá (dữ liệu tạm hardcode)
         fullShopList = new ArrayList<>();
-//        fullShopList.add(new ShopModel(1, "Burger King", "123 Le Loi, Da Nang", 10.0f, "burger1", "Giảm 10% cho combo siêu ngon hôm nay!", Arrays.asList("burger", "fastfood", "drink")));
-//        fullShopList.add(new ShopModel(2, "Peppe Pizzeria", "45 Tran Phu, Da Nang", 15.0f, "pizza1", "Pizza nướng lò chuẩn Ý – Mua 2 tặng 1!", Arrays.asList("pizza", "fastfood", "dessert")));
-//        fullShopList.add(new ShopModel(3, "KFC", "78 Nguyen Van Linh, Da Nang", 12.0f, "chicken1", "Gà rán giòn rụm – Free Pepsi cho hóa đơn trên 100k!", Arrays.asList("fried chicken", "burger", "drink")));
+        // lay all food
+        loadAllShops();
         shopList = new ArrayList<>(fullShopList);
         recyclerSaleShop = findViewById(R.id.recyclerSaleShop);
         recyclerSaleShop.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         saleShopAdapter = new SaleShopAdapter(shopList);
         recyclerSaleShop.setAdapter(saleShopAdapter);
-
         // Gán sự kiện cho các button lọc
         btnAll = findViewById(R.id.btnAll);
         btnSpaghetti = findViewById(R.id.btnSpaghetti);
@@ -96,11 +100,7 @@ public class HomeActivity extends AppCompatActivity {
         btnBurger = findViewById(R.id.btnBurger);
         btnChicken = findViewById(R.id.btnChicken);
         btnDrink = findViewById(R.id.btnDrink);
-
-
         categoryButtons = Arrays.asList(btnAll, btnSpaghetti, btnPotato, btnPizza, btnBurger, btnChicken, btnDrink);
-
-
         btnAll.setOnClickListener(v -> selectCategory("Tất cả", btnAll));
         btnSpaghetti.setOnClickListener(v -> selectCategory("Spaghetti", btnSpaghetti));
         btnPotato.setOnClickListener(v -> selectCategory("Potato", btnPotato));
@@ -108,24 +108,19 @@ public class HomeActivity extends AppCompatActivity {
         btnBurger.setOnClickListener(v -> selectCategory("Burger", btnBurger));
         btnChicken.setOnClickListener(v -> selectCategory("Chicken", btnChicken));
         btnDrink.setOnClickListener(v -> selectCategory("Drink", btnDrink));
-
-
         // Chuyển sang xem toàn bộ hot food
         tvAllHot = findViewById(R.id.allHot);
         tvAllHot.setOnClickListener(v -> {
             Intent intent = new Intent(HomeActivity.this, AllHotFoodActivity.class);
             startActivity(intent);
         });
-
         // Chuyển sang xem toàn bộ shop giảm giá
         tvAllSale = findViewById(R.id.allSale);
         tvAllSale.setOnClickListener(v -> {
             Intent intent = new Intent(HomeActivity.this, AllShopSaleActivity.class);
             startActivity(intent);
         });
-    }
-
-    private void loadAllFoods() {
+    }private void loadAllFoods() {
         foodService.getAllFoods().addOnSuccessListener(querySnapshots -> {
             fullFoodList.clear();
             for (DocumentSnapshot doc : querySnapshots) {
@@ -152,6 +147,7 @@ public class HomeActivity extends AppCompatActivity {
 
     private void selectCategory(String category, Button selectedButton) {
         filterFoods(category);
+        filterShops(category);
         for (Button button : categoryButtons) {
             if (button == selectedButton) {
                 button.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFFD700)); // vàng
@@ -174,5 +170,49 @@ public class HomeActivity extends AppCompatActivity {
         foodList.clear();
         foodList.addAll(filtered);
         hotFoodAdapter.notifyDataSetChanged();
+    }
+    private void filterShops(String category) {
+        shopList.clear();
+
+        if (category.equals("Tất cả")) {
+            shopList.addAll(fullShopList);
+        } else {
+            for (ShopModel shop : fullShopList) {
+                int shopId = shop.getStoreid();
+                boolean hasFood = false;
+
+                for (FoodModel food : fullFoodList) {
+                    if (food.getStoreId() == shopId &&
+                            food.getCategory().equalsIgnoreCase(category)) {
+                        hasFood = true;
+                        break;
+                    }
+                }
+
+                if (hasFood) {
+                    shopList.add(shop);
+                }
+            }
+        }
+
+        saleShopAdapter.updateData(shopList);
+    }
+    private void loadAllShops() {
+        shopService.getAllShops().addOnSuccessListener(querySnapshot -> {
+            fullShopList.clear();
+            for (DocumentSnapshot doc : querySnapshot) {
+                ShopModel shop = new ShopModel(
+                        doc.getLong("storeid").intValue(),
+                        doc.getString("shopName"),
+                        doc.getString("address"),
+                        doc.getDouble("discount").floatValue(),
+                        doc.getString("imageUrl"),
+                        doc.getString("advertisement"),
+                        doc.getDouble("rating").floatValue()
+                );
+                fullShopList.add(shop);
+            }
+            filterShops("Tất cả");
+        }).addOnFailureListener(e -> Log.e(TAG, "Error loading shop data", e));
     }
 }

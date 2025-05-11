@@ -18,7 +18,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.adapter.HotFoodAdapter;
+import com.example.foodorderapp.adapter.SaleShopAdapter;
 import com.example.foodorderapp.model.FoodModel;
+import com.example.foodorderapp.model.ShopModel;
 import com.example.foodorderapp.service.FoodService;
 import com.google.firebase.firestore.DocumentSnapshot;
 
@@ -30,6 +32,7 @@ public class AllHotFoodActivity extends AppCompatActivity {
 
     private RecyclerView recyclerHotFood;
     private HotFoodAdapter hotFoodAdapter;
+    private SaleShopAdapter saleShopAdapter;
     private List<FoodModel> fullFoodList;
     private List<FoodModel> foodList;
     private FoodService foodService;
@@ -93,7 +96,6 @@ public class AllHotFoodActivity extends AppCompatActivity {
 
     private void selectCategory(String category, Button selectedButton) {
         filterFoods(category);
-
         for (Button button : categoryButtons) {
             int color = (button == selectedButton) ? 0xFFFFD700 : 0xFFEEEEEE; // gold for selected, light gray for others
             button.setBackgroundTintList(android.content.res.ColorStateList.valueOf(color));
@@ -137,4 +139,5 @@ public class AllHotFoodActivity extends AppCompatActivity {
             hotFoodAdapter.notifyDataSetChanged();
         }).addOnFailureListener(e -> Log.e(TAG, "Error loading food data", e));
     }
+
 }
