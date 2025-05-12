@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.adapter.CartAdapter;
 import com.example.foodorderapp.model.CartModel;
+import com.example.foodorderapp.model.OrderModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -99,50 +100,50 @@ public class CartActivity extends AppCompatActivity {
     }
 
     private void processOrder() {
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        String userId = mAuth.getCurrentUser().getUid();
-
-        // Chuyển giỏ hàng thành các đơn hàng
-        List<OrderItem> orderItems = new ArrayList<>();
-        double totalPrice = 0;
-
-        for (CartModel cartItem : cartList) {
-            OrderItem orderItem = new OrderItem(
-                    cartItem.getFoodId(),
-                    cartItem.getName(),
-                    cartItem.getSize(),
-                    cartItem.getQuantity(),
-                    cartItem.getPrice()
-            );
-            orderItems.add(orderItem);
-            totalPrice += cartItem.getPrice();
-        }
-
-        // Tạo OrderModel
-        String orderId = db.collection("orders").document().getId();
-        OrderModel order = new OrderModel(
-                orderId,
-                userId,
-                orderItems,
-                String.valueOf(System.currentTimeMillis()), // thời gian đơn hàng
-                "Processing" // trạng thái đơn hàng
-        );
-
-        // Thêm đơn hàng vào Firestore
-        db.collection("orders")
-                .document(orderId)
-                .set(order)
-                .addOnSuccessListener(aVoid -> {
-                    Log.d("CartActivity", "Đơn hàng đã được thêm thành công");
-
-                    // Xóa tất cả các sản phẩm trong giỏ hàng
-                    clearCart(userId);
-
-                    // Chuyển tới màn hình chính
-                    Intent intent = new Intent(CartActivity.this, HomeActivity.class);
-                    startActivity(intent);
-                })
-                .addOnFailureListener(e -> Log.e("CartActivity", "Lỗi thêm đơn hàng: " + e.getMessage()));
+//        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+//        String userId = mAuth.getCurrentUser().getUid();
+//
+//        // Chuyển giỏ hàng thành các đơn hàng
+//        List<OrderItem> orderItems = new ArrayList<>();
+//        double totalPrice = 0;
+//
+//        for (CartModel cartItem : cartList) {
+//            OrderItem orderItem = new OrderItem(
+//                    cartItem.getFoodId(),
+//                    cartItem.getName(),
+//                    cartItem.getSize(),
+//                    cartItem.getQuantity(),
+//                    cartItem.getPrice()
+//            );
+//            orderItems.add(orderItem);
+//            totalPrice += cartItem.getPrice();
+//        }
+//
+//        // Tạo OrderModel
+//        String orderId = db.collection("orders").document().getId();
+//        OrderModel order = new OrderModel(
+//                orderId,
+//                userId,
+//                orderItems,
+//                String.valueOf(System.currentTimeMillis()), // thời gian đơn hàng
+//                "Processing" // trạng thái đơn hàng
+//        );
+//
+//        // Thêm đơn hàng vào Firestore
+//        db.collection("orders")
+//                .document(orderId)
+//                .set(order)
+//                .addOnSuccessListener(aVoid -> {
+//                    Log.d("CartActivity", "Đơn hàng đã được thêm thành công");
+//
+//                    // Xóa tất cả các sản phẩm trong giỏ hàng
+//                    clearCart(userId);
+//
+//                    // Chuyển tới màn hình chính
+//                    Intent intent = new Intent(CartActivity.this, HomeActivity.class);
+//                    startActivity(intent);
+//                })
+//                .addOnFailureListener(e -> Log.e("CartActivity", "Lỗi thêm đơn hàng: " + e.getMessage()));
     }
 
     private void clearCart(String userId) {

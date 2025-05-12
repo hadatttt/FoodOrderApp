@@ -7,11 +7,10 @@ public class OrderModel {
     //card id
     //datetime
     //trang thai
-    private String orderId;
+    private int orderId;
     private String userId;
 
-    private String foodId;
-    private String size;
+    private int foodId;
     private int quantity;
     private double price;
 
@@ -21,22 +20,21 @@ public class OrderModel {
     public OrderModel() {
     }
 
-    public OrderModel(String orderId, String userId, String foodId, String size, int quantity, double price, String orderDate, String status) {
+    public OrderModel(int orderId, String userId, int foodId, int quantity, double price, String orderDate, String status) {
         this.orderId = orderId;
         this.userId = userId;
         this.foodId = foodId;
-        this.size = size;
         this.quantity = quantity;
         this.price = price;
         this.orderDate = orderDate;
         this.status = status;
     }
 
-    public String getOrderId() {
+    public int getOrderId() {
         return orderId;
     }
 
-    public void setOrderId(String orderId) {
+    public void setOrderId(int orderId) {
         this.orderId = orderId;
     }
 
@@ -64,20 +62,12 @@ public class OrderModel {
         this.status = status;
     }
 
-    public String getFoodId() {
+    public int getFoodId() {
         return foodId;
     }
 
-    public void setFoodId(String foodId) {
+    public void setFoodId(int foodId) {
         this.foodId = foodId;
-    }
-
-    public String getSize() {
-        return size;
-    }
-
-    public void setSize(String size) {
-        this.size = size;
     }
 
     public int getQuantity() {

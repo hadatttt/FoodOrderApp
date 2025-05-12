@@ -24,9 +24,9 @@ public class CartService {
     }
 
     // Cập nhật số lượng giỏ hàng
-    public Task<Void> updateCartItem(String userId, String foodId, CartModel updatedModel) {
+    public Task<Void> updateCartItem(String userId, int foodId, CartModel updatedModel) {
         // Lấy giá của món ăn từ FoodService
-        return foodService.getFoodDetails(Integer.parseInt(foodId))
+        return foodService.getFoodDetails(foodId)
                 .continueWithTask(task -> {
                     if (task.isSuccessful() && task.getResult() != null && !task.getResult().isEmpty()) {
                         // Lấy giá của món ăn từ Firestore
@@ -61,7 +61,7 @@ public class CartService {
 
 
 
-    public void deleteCartItemByFoodId(String userId, String foodId) {
+    public void deleteCartItemByFoodId(String userId, int foodId) {
         db.collection("carts")
                 .whereEqualTo("userId", userId)
                 .whereEqualTo("foodId", foodId)

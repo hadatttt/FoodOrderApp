@@ -53,7 +53,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         CartService cartService = new CartService();
         FoodService foodService = new FoodService();
 
-        foodService.getFoodDetails(Integer.parseInt(cartItem.getFoodId()))
+        foodService.getFoodDetails(cartItem.getFoodId())
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     if (!queryDocumentSnapshots.isEmpty()) {
                         DocumentSnapshot foodSnapshot = queryDocumentSnapshots.getDocuments().get(0);

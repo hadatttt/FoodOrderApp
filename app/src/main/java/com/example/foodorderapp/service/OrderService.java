@@ -34,9 +34,19 @@ public class OrderService {
 
     // Thêm đơn hàng mới
     public Task<Void> addOrder(OrderModel order) {
-        String orderId = UUID.randomUUID().toString();
-        order.setOrderId(orderId);
-        return orderCollection.document(orderId).set(convertOrderToMap(order));
+        return orderCollection.orderBy("orderId", Query.Direction.DESCENDING).limit(1).get()
+                .continueWithTask(task -> {
+                    int newOrderId = 1;
+                    if (task.isSuccessful() && task.getResult() != null && !task.getResult().isEmpty()) {
+                        DocumentSnapshot lastOrder = task.getResult().getDocuments().get(0);
+                        Long lastId = lastOrder.getLong("orderId"); // Firestore lưu số dưới dạng Long
+                        if (lastId != null) {
+                            newOrderId = lastId.intValue() + 1;
+                        }
+                    }
+                    order.setOrderId(newOrderId);
+                    return orderCollection.document(String.valueOf(newOrderId)).set(convertOrderToMap(order));
+                });
     }
 
     // Cập nhật đơn hàng theo orderId
@@ -56,20 +66,9 @@ public class OrderService {
         data.put("userId", order.getUserId());
         data.put("orderDate", order.getOrderDate());
         data.put("status", order.getStatus());
-
-        // Chuyển List<CartModel> sang List<Map<String, Object>>
-        List<Map<String, Object>> cartMaps = new ArrayList<>();
-        for (CartModel cart : order.getCartItems()) {
-            Map<String, Object> cartMap = new HashMap<>();
-            cartMap.put("foodId", cart.getFoodId());
-            cartMap.put("name", cart.getName());
-            cartMap.put("imageUrl", cart.getImageUrl());
-            cartMap.put("price", cart.getPrice());
-            cartMap.put("quantity", cart.getQuantity());
-            cartMaps.add(cartMap);
-        }
-
-        data.put("cartItems", cartMaps);
+        data.put("foodId", order.getFoodId());
+        data.put("quantity", order.getQuantity());
+        data.put("price", order.getPrice());
         return data;
     }
 }
