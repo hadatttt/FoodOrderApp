@@ -1,6 +1,8 @@
 package com.example.foodorderapp.ui;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -9,11 +11,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -25,149 +24,167 @@ import com.example.foodorderapp.service.FoodService;
 import com.example.foodorderapp.service.ShopService;
 import com.google.firebase.firestore.DocumentSnapshot;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class DetailShopActivity extends AppCompatActivity {
+
     private RecyclerView recyclerHotFood;
     private HotFoodAdapter hotFoodAdapter;
-    private List<FoodModel> foodList;
-    private List<FoodModel> fullFoodList;
+    private List<FoodModel> fullFoodList = new ArrayList<>();
+    private List<FoodModel> foodList = new ArrayList<>();
     private List<Button> categoryButtons = new ArrayList<>();
-    FoodService foodService = new FoodService();
-    ShopService shopService = new ShopService();
+    private Map<Button, String> buttonCategoryMap = new HashMap<>();
+
+    private final FoodService foodService = new FoodService();
+    private final ShopService shopService = new ShopService();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_detail_shop);
-        // Khởi tạo danh sách và RecyclerView
-        fullFoodList = new ArrayList<>();
-        foodList = new ArrayList<>();
+
+        setupUI();
+        setupCategoryButtons();
+
+        int storeId = getIntent().getIntExtra("storeId", -1);
+        if (storeId == -1) {
+            Toast.makeText(this, "Store ID không hợp lệ", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        loadShopInfo(storeId);
+        loadFoods(storeId);
+    }
+
+    private void setupUI() {
         recyclerHotFood = findViewById(R.id.listFood);
-        recyclerHotFood.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        recyclerHotFood.setLayoutManager(new LinearLayoutManager(this));
         hotFoodAdapter = new HotFoodAdapter(this, foodList);
         recyclerHotFood.setAdapter(hotFoodAdapter);
 
         ImageButton btnBack = findViewById(R.id.btnBack);
-        btnBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(DetailShopActivity.this, HomeActivity.class);
-                startActivity(intent);
-            }
-        });
-        // Khởi tạo danh sách nút danh mục
-        categoryButtons.add(findViewById(R.id.btnAll));
-        categoryButtons.add(findViewById(R.id.btnSpaghetti));
-        categoryButtons.add(findViewById(R.id.btnPotato));
-        categoryButtons.add(findViewById(R.id.btnPizza));
-        categoryButtons.add(findViewById(R.id.btnBurger));
-        categoryButtons.add(findViewById(R.id.btnChicken));
-        categoryButtons.add(findViewById(R.id.btnDrink));
-        // Thiết lập sự kiện click cho các nút
-        setupCategoryButtons();
-        // Lấy storeId từ Intent
-        int storeId = getIntent().getIntExtra("storeId", -1);
-        // Lấy thông tin cửa hàng
-        shopService.getShopById(storeId)
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    if (!queryDocumentSnapshots.isEmpty()) {
-                        DocumentSnapshot shopDoc = queryDocumentSnapshots.getDocuments().get(0);
-                        String shopName = shopDoc.getString("shopName");
-                        Double rating = shopDoc.getDouble("rating");
-                        String ad = shopDoc.getString("advertisement");
-                        String imageUrl = shopDoc.getString("imageUrl");
+        btnBack.setOnClickListener(v -> startActivity(new Intent(this, HomeActivity.class)));
 
-                        TextView tvShopName = findViewById(R.id.tvShopName);
-                        TextView tvShopRating = findViewById(R.id.tvRate);
-                        TextView tvShopAd = findViewById(R.id.tvDesc);
-                        ImageView imgShop = findViewById(R.id.imgShop);
+        // Gán từng button và category tương ứng
+        Button btnAll = findViewById(R.id.btnAll);
+        Button btnSpaghetti = findViewById(R.id.btnSpaghetti);
+        Button btnPotato = findViewById(R.id.btnPotato);
+        Button btnPizza = findViewById(R.id.btnPizza);
+        Button btnBurger = findViewById(R.id.btnBurger);
+        Button btnChicken = findViewById(R.id.btnChicken);
+        Button btnDrink = findViewById(R.id.btnDrink);
 
-                        tvShopName.setText(shopName);
-                        tvShopRating.setText(rating != null ? String.format("%.1f", rating) : "N/A");
-                        tvShopAd.setText(ad);
+        addCategoryButton(btnAll, "tất cả");
+        addCategoryButton(btnSpaghetti, "spaghetti");
+        addCategoryButton(btnPotato, "potato");
+        addCategoryButton(btnPizza, "pizza");
+        addCategoryButton(btnBurger, "burger");
+        addCategoryButton(btnChicken, "chicken");
+        addCategoryButton(btnDrink, "drink");
+    }
 
-                        if (imageUrl != null && !imageUrl.isEmpty()) {
-                            Glide.with(this).load(imageUrl).into(imgShop);
-                        }
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Lỗi khi tải thông tin cửa hàng", Toast.LENGTH_SHORT).show();
-                });
-
-        // Lấy danh sách món ăn và danh mục
-        foodService.getFoodsByStoreId(storeId)
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    fullFoodList.clear();
-                    Set<String> categories = new HashSet<>();
-
-                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
-                        FoodModel food = doc.toObject(FoodModel.class);
-                        if (food != null) {
-                            fullFoodList.add(food);
-                            if (food.getCategory() != null) {
-                                categories.add(food.getCategory().toLowerCase());
-                            }
-                        }
-                    }
-                    // Hiển thị/ẩn các nút danh mục
-                    for (Button button : categoryButtons) {
-                        String category = button.getText().toString().toLowerCase();
-                        if (categories.contains(category) || category.equals("all")) {
-                            button.setVisibility(View.VISIBLE);
-                        } else {
-                            button.setVisibility(View.GONE);
-                        }
-                    }
-                    // Cập nhật danh sách món ăn mặc định
-                    foodList.clear();
-                    foodList.addAll(fullFoodList);
-                    hotFoodAdapter.notifyDataSetChanged();
-                    selectCategory("all", findViewById(R.id.btnAll));
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Lỗi khi tải danh sách món ăn", Toast.LENGTH_SHORT).show();
-                });
+    private void addCategoryButton(Button button, String category) {
+        categoryButtons.add(button);
+        buttonCategoryMap.put(button, category);
     }
 
     private void setupCategoryButtons() {
         for (Button button : categoryButtons) {
             button.setOnClickListener(v -> {
-                String category = button.getText().toString().toLowerCase();
-                selectCategory(category, button);
+                String category = buttonCategoryMap.get(button);
+                if (category != null) {
+                    selectCategory(category);
+                }
             });
         }
     }
 
-    private void selectCategory(String category, Button selectedButton) {
-        filterFoods(category);
+    private void loadShopInfo(int storeId) {
+        shopService.getShopById(storeId)
+                .addOnSuccessListener(query -> {
+                    if (!query.isEmpty()) {
+                        DocumentSnapshot doc = query.getDocuments().get(0);
+                        setShopInfo(doc);
+                    }
+                })
+                .addOnFailureListener(e -> Toast.makeText(this, "Lỗi khi tải thông tin cửa hàng", Toast.LENGTH_SHORT).show());
+    }
+
+    private void setShopInfo(DocumentSnapshot doc) {
+        ((TextView) findViewById(R.id.tvShopName)).setText(doc.getString("shopName"));
+        ((TextView) findViewById(R.id.tvRate)).setText(
+                doc.getDouble("rating") != null ? String.format("%.1f", doc.getDouble("rating")) : "N/A");
+        ((TextView) findViewById(R.id.tvDesc)).setText(doc.getString("advertisement"));
+        String imageUrl = doc.getString("imageUrl");
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            Glide.with(this).load(imageUrl).into((ImageView) findViewById(R.id.imgShop));
+        }
+    }
+
+    private void loadFoods(int storeId) {
+        foodService.getFoodsByStoreId(storeId)
+                .addOnSuccessListener(query -> {
+                    fullFoodList.clear();
+                    Set<String> foundCategories = new HashSet<>();
+
+                    for (DocumentSnapshot doc : query) {
+                        FoodModel food = doc.toObject(FoodModel.class);
+                        if (food != null) {
+                            fullFoodList.add(food);
+                            if (food.getCategory() != null && !food.getCategory().trim().isEmpty()) {
+                                foundCategories.add(food.getCategory().trim().toLowerCase());
+                            }
+                        }
+                    }
+
+                    updateCategoryButtonsVisibility(foundCategories);
+                    selectCategory("tất cả");
+                })
+                .addOnFailureListener(e -> Toast.makeText(this, "Lỗi khi tải danh sách món ăn", Toast.LENGTH_SHORT).show());
+    }
+
+    private void updateCategoryButtonsVisibility(Set<String> validCategories) {
         for (Button button : categoryButtons) {
-            if (button == selectedButton) {
-                button.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFFD700)); // Vàng
+            String category = buttonCategoryMap.get(button);
+            if (category != null && (category.equals("tất cả") || validCategories.contains(category))) {
+                button.setVisibility(View.VISIBLE);
             } else {
-                button.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFEEEEEE)); // Xám nhạt
+                button.setVisibility(View.GONE);
             }
         }
     }
 
-    private void filterFoods(String category) {
+    private void selectCategory(String category) {
         List<FoodModel> filtered = new ArrayList<>();
-        if (category.equals("all")) {
+        if (category.equals("tất cả")) {
             filtered.addAll(fullFoodList);
         } else {
             for (FoodModel food : fullFoodList) {
-                if (food.getCategory() != null && food.getCategory().equalsIgnoreCase(category)) {
+                if (food.getCategory() != null &&
+                        food.getCategory().trim().toLowerCase().equals(category)) {
                     filtered.add(food);
                 }
             }
         }
+
         foodList.clear();
         foodList.addAll(filtered);
         hotFoodAdapter.notifyDataSetChanged();
+        updateButtonHighlight(category);
     }
+
+    private void updateButtonHighlight(String selectedCategory) {
+        for (Button button : categoryButtons) {
+            String category = buttonCategoryMap.get(button);
+            if (category != null && category.equals(selectedCategory)) {
+                button.setBackgroundTintList(ColorStateList.valueOf(
+                        Color.parseColor("#FFD700"))); // Vàng
+            } else {
+                button.setBackgroundTintList(ColorStateList.valueOf(
+                        Color.parseColor("#EEEEEE"))); // Xám
+            }
+        }
+    }
+
 }
