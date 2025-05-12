@@ -40,6 +40,7 @@ public class HomeActivity extends AppCompatActivity {
     private List<Button> categoryButtons;
     private TextView tvAllHot, tvAllSale;
     private UserService userService;
+
     private FoodService foodService;
     private ShopService shopService;
     private Context context = this;
@@ -90,7 +91,7 @@ public class HomeActivity extends AppCompatActivity {
         shopList = new ArrayList<>(fullShopList);
         recyclerSaleShop = findViewById(R.id.recyclerSaleShop);
         recyclerSaleShop.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        saleShopAdapter = new SaleShopAdapter(shopList);
+        saleShopAdapter = new SaleShopAdapter(this,shopList);
         recyclerSaleShop.setAdapter(saleShopAdapter);
         // Gán sự kiện cho các button lọc
         btnAll = findViewById(R.id.btnAll);
@@ -132,7 +133,7 @@ public class HomeActivity extends AppCompatActivity {
                         doc.getDouble("rating").floatValue(),
                         doc.getLong("sold").intValue(),
                         doc.getString("category"),
-                        doc.getString("imageUrl") // ✅ lấy ảnh từ Firestore
+                        doc.getString("imageUrl")
                 );
                 fullFoodList.add(food);
             }

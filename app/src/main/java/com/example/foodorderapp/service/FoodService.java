@@ -16,6 +16,10 @@ public class FoodService {
         db = FirebaseFirestore.getInstance();
         foodCollection = db.collection("foods");
     }
+    // Lấy danh sách món ăn theo storeId
+    public Task<QuerySnapshot> getFoodsByStoreId(int storeId) {
+        return foodCollection.whereEqualTo("storeId", storeId).get();
+    }
 
     // Lấy toàn bộ danh sách món ăn
     public Task<QuerySnapshot> getAllFoods() {

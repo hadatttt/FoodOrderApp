@@ -1,9 +1,6 @@
 package com.example.foodorderapp.service;
 
 import android.util.Log;
-
-import androidx.annotation.NonNull;
-
 import com.example.foodorderapp.model.CartModel;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
