@@ -62,8 +62,9 @@ public class SaleShopAdapter extends RecyclerView.Adapter<SaleShopAdapter.ShopVi
 
         public void bind(ShopModel shop) {
             // Chuyển từ tên tài nguyên drawable thành ID thực tế
+
             int resId = itemView.getContext().getResources().getIdentifier(
-                    shop.getImageResource(), "drawable", itemView.getContext().getPackageName());
+                    shop.getImageUrl(), "drawable", itemView.getContext().getPackageName());
             imageShop.setImageResource(resId);
             textShopName.setText(shop.getShopName());
             textAddress.setText(shop.getAddress());
