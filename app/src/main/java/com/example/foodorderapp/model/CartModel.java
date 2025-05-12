@@ -5,7 +5,7 @@ public class CartModel {
     //size
     //so luong
     //gia tien
-    private String foodId;
+    private int foodId;
     private String size;
     private int quantity;
     private double price;
@@ -13,7 +13,7 @@ public class CartModel {
 
     public CartModel() {}
 
-    public CartModel(String foodId, String size, int quantity, double price, String userId) {
+    public CartModel(int foodId, String size, int quantity, double price, String userId) {
         this.foodId = foodId;
         this.size = size;
         this.quantity = quantity;
@@ -22,8 +22,8 @@ public class CartModel {
     }
 
     // Getter & Setter
-    public String getFoodId() { return foodId; }
-    public void setFoodId(String foodId) { this.foodId = foodId; }
+    public int getFoodId() { return foodId; }
+    public void setFoodId(int foodId) { this.foodId = foodId; }
 
     public String getSize() { return size; }
     public void setSize(String size) { this.size = size; }

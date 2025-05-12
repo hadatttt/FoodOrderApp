@@ -72,7 +72,7 @@ public class HotFoodAdapter extends RecyclerView.Adapter<HotFoodAdapter.FoodView
         }
 
         public void bind(FoodModel food) {
-            // Dùng Glide để tải ảnh từ URL vào ImageView
+
             Glide.with(itemView.getContext())  // Sử dụng itemView.getContext() để lấy context
                     .load(food.getImageUrl())  // Lấy link ảnh từ FoodModel
         // Ảnh lỗi nếu tải ảnh không thành công

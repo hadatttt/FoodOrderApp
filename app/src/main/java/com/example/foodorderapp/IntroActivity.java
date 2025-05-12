@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -35,9 +36,6 @@ public class IntroActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        //test
-
-        //test
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_intro);
 //        ShopService shopService = new ShopService();
@@ -115,6 +113,7 @@ public class IntroActivity extends AppCompatActivity {
 //
 //            foodService.addFood(food);
 //        }
+
 //
 //        List<ShopModel> shopList = new ArrayList<>();
 //
@@ -136,6 +135,10 @@ public class IntroActivity extends AppCompatActivity {
 //        for (ShopModel shop : shopList) {
 //            shopService.addShop(shop);
 //        }
+
+        ProgressBar progressBar = findViewById(R.id.progressBar);
+        progressBar.setVisibility(View.GONE);
+
         imageResources = new int[]{
                 R.drawable.order,
                 R.drawable.chef,
@@ -155,26 +158,29 @@ public class IntroActivity extends AppCompatActivity {
         btnNext = findViewById(R.id.btn_next);
         btnNext.setOnClickListener(v -> {
             currentIndex = currentIndex + 1;
-            if (currentIndex == 0) {
-                tv.setText("Tất cả sở thích của bạn");
-            } else if (currentIndex == 1) {
-                tv.setText("Đặt món đến từ đầu bếp");
-            } else if (currentIndex == 2) {
-                tv.setText("Miễn phí vận chuyển");
-            }
-            if (currentIndex<3) {
+            if (currentIndex < imageResources.length) {
+                ivOrder.setImageResource(imageResources[currentIndex]);
+                if (currentIndex == 0) {
+                    tv.setText("Tất cả sở thích của bạn");
+                } else if (currentIndex == 1) {
+                    tv.setText("Đặt món đến từ đầu bếp");
+                } else if (currentIndex == 2) {
+                    tv.setText("Miễn phí vận chuyển");
+                }
                 updateDots();
             } else {
+                progressBar.setVisibility(View.VISIBLE);
                 Intent intent = new Intent(IntroActivity.this, LoginActivity.class);
                 startActivity(intent);
             }
-            ivOrder.setImageResource(imageResources[currentIndex]);
         });
 
         btnCancel = findViewById(R.id.btn_cancel);
         btnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                progressBar.setVisibility(View.VISIBLE);
+
                 Intent intent = new Intent(IntroActivity.this, LoginActivity.class);
                 startActivity(intent);
             }
@@ -186,5 +192,12 @@ public class IntroActivity extends AppCompatActivity {
         for (int i = 0; i < dots.length; i++) {
             dots[i].setSelected(i == currentIndex);
         }
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Ẩn progress bar nếu nó đang hiển thị
+        ProgressBar progressBar = findViewById(R.id.progressBar);
+        progressBar.setVisibility(View.GONE);  // Đảm bảo rằng progress bar không hiển thị khi quay lại
     }
 }

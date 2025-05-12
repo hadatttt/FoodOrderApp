@@ -37,6 +37,15 @@
             android:name=".ui.AllShopSaleActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.CartActivity"
+            android:exported="false"></activity>
+        <activity
+            android:name=".ui.DetailActivity"
+            android:exported="false"></activity>
+        <activity
+            android:name=".ui.OrderActivity"
+            android:exported="false"></activity>
+        <activity
             android:name=".IntroActivity"
             android:exported="true">
             <intent-filter>

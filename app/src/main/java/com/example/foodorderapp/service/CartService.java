@@ -1,76 +1,90 @@
 package com.example.foodorderapp.service;
 
-import android.util.Log;
 import com.example.foodorderapp.model.CartModel;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.FirebaseFirestore;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.firestore.*;
 
 public class CartService {
-    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private final CollectionReference cartRef = db.collection("Cart");
+    private FirebaseFirestore db;
+    private FoodService foodService;
 
-    public void addToCart(CartModel cartItem) {
-        // Document ID sẽ là combination giữa userId và foodId để tránh trùng
-        String documentId = cartItem.getUserId() + "_" + cartItem.getFoodId();
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("foodId", cartItem.getFoodId());
-        data.put("size", cartItem.getSize());
-        data.put("quantity", cartItem.getQuantity());
-        data.put("price", cartItem.getPrice());
-        data.put("userId", cartItem.getUserId());
-
-        cartRef.document(documentId)
-                .set(data)
-                .addOnSuccessListener(unused -> Log.d("CartService", "Item added to cart"))
-                .addOnFailureListener(e -> Log.e("CartService", "Failed to add to cart", e));
+    public CartService() {
+        db = FirebaseFirestore.getInstance();
+        foodService = new FoodService();
     }
 
-    public void deleteItemFromCart(String userId, String foodId) {
-        String documentId = userId + "_" + foodId;
-
-        cartRef.document(documentId)
-                .delete()
-                .addOnSuccessListener(unused -> Log.d("CartService", "Item deleted"))
-                .addOnFailureListener(e -> Log.e("CartService", "Delete failed", e));
+    public Task<DocumentReference> addToCart(CartModel cartModel) {
+        return db.collection("carts").add(cartModel);
     }
 
-    public void clearCart(String userId) {
-        cartRef.whereEqualTo("userId", userId)
+    public Task<QuerySnapshot> getCartByUserId(String userId) {
+        return db.collection("carts").whereEqualTo("userId", userId).get();
+    }
+
+    // Cập nhật số lượng giỏ hàng
+    public Task<Void> updateCartItem(String userId, int foodId, CartModel updatedModel) {
+        // Lấy giá của món ăn từ FoodService
+        return foodService.getFoodDetails(foodId)
+                .continueWithTask(task -> {
+                    if (task.isSuccessful() && task.getResult() != null && !task.getResult().isEmpty()) {
+                        // Lấy giá của món ăn từ Firestore
+                        DocumentSnapshot foodSnapshot = task.getResult().getDocuments().get(0);
+                        double price = foodSnapshot.getDouble("price");
+
+                        // Tính lại giá trị tổng cho món ăn và cập nhật giỏ hàng
+                        updatedModel.setPrice(price * updatedModel.getQuantity());
+
+                        // Lọc giỏ hàng theo userId và foodId
+                        return db.collection("carts")
+                                .whereEqualTo("userId", userId)  // Lọc theo userId
+                                .whereEqualTo("foodId", foodId)  // Lọc theo foodId
+                                .get()
+                                .continueWithTask(queryTask -> {
+                                    if (queryTask.isSuccessful() && !queryTask.getResult().isEmpty()) {
+                                        // Lấy documentId của mục giỏ hàng
+                                        DocumentSnapshot cartItemSnapshot = queryTask.getResult().getDocuments().get(0);
+                                        String cartItemId = cartItemSnapshot.getId();  // Đây là cartItemId
+
+                                        // Cập nhật giỏ hàng trong Firestore
+                                        return db.collection("carts").document(cartItemId).set(updatedModel);
+                                    } else {
+                                        return Tasks.forException(new Exception("Cart item not found"));
+                                    }
+                                });
+                    } else {
+                        return Tasks.forException(new Exception("Food not found"));
+                    }
+                });
+    }
+
+
+
+    public void deleteCartItemByFoodId(String userId, int foodId) {
+        db.collection("carts")
+                .whereEqualTo("userId", userId)
+                .whereEqualTo("foodId", foodId)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    for (var doc : queryDocumentSnapshots) {
-                        cartRef.document(doc.getId()).delete();
+                    for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
+                        doc.getReference().delete();  // Xóa từng mục phù hợp
                     }
-                    Log.d("CartService", "Cart cleared");
                 })
-                .addOnFailureListener(e -> Log.e("CartService", "Failed to clear cart", e));
+                .addOnFailureListener(e -> {
+                    System.out.println("Xóa giỏ hàng thất bại: " + e.getMessage());
+                });
     }
 
-    public void getCartByUserId(String userId, OnSuccessListener<Iterable<CartModel>> listener, OnFailureListener failureListener) {
-        cartRef.whereEqualTo("userId", userId)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    List<CartModel> cartList = new ArrayList<>();
-                    for (var doc : queryDocumentSnapshots) {
-                        CartModel item = new CartModel(
-                                doc.getString("foodId"),
-                                doc.getString("size"),
-                                doc.getLong("quantity").intValue(),
-                                doc.getDouble("price"),
-                                doc.getString("userId")
-                        );
-                        cartList.add(item);
+    public void clearCartByUserId(String userId) {
+        db.collection("carts").whereEqualTo("userId", userId).get()
+                .addOnSuccessListener(querySnapshots -> {
+                    for (DocumentSnapshot doc : querySnapshots.getDocuments()) {
+                        db.collection("carts").document(doc.getId()).delete();
                     }
-                    listener.onSuccess(cartList);
                 })
-                .addOnFailureListener(failureListener);
+                .addOnFailureListener(e -> {
+                    System.out.println("Error clearing cart: " + e.getMessage());
+                });
     }
 }

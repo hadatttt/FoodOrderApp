@@ -1,0 +1,134 @@
+package com.example.foodorderapp.ui;
+
+import android.content.Intent;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.foodorderapp.adapter.OrderAdapter;
+import com.example.foodorderapp.R;
+import com.example.foodorderapp.model.OrderModel;
+import com.example.foodorderapp.service.OrderService;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+
+import java.util.ArrayList;
+
+public class OrderActivity extends AppCompatActivity {
+    private RecyclerView rvDelivery, rvHistory;
+    public ArrayList<OrderModel> orderList, historyList;
+    private OrderAdapter myOrdersAdapter;
+    private LinearLayout btnDelivery, btnHistory;
+    private TextView tvDelivery, tvHistory;
+    private View vDelivery, vHistory;
+    private ViewGroup.LayoutParams params;
+    private int widthInPx;
+    private OrderService orderService;
+    private ImageButton btnBack;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_my_orders);
+        orderService = new OrderService();
+
+        rvDelivery = findViewById(R.id.rv_delivery);
+        rvHistory = findViewById(R.id.rv_history);
+        btnDelivery = findViewById(R.id.btn_delivery);
+        btnHistory = findViewById(R.id.btn_history);
+        tvDelivery = findViewById(R.id.tv_delivery);
+        tvHistory = findViewById(R.id.tv_history);
+        vDelivery = findViewById(R.id.v_delivery);
+        vHistory = findViewById(R.id.v_history);
+
+        btnBack = findViewById(R.id.btn_back);
+
+        rvDelivery.setVisibility(View.VISIBLE);
+        rvHistory.setVisibility(View.GONE);
+
+
+        orderList = new ArrayList<>();
+        historyList = new ArrayList<>();
+        rvDelivery.setLayoutManager(new LinearLayoutManager(this));
+        rvHistory.setLayoutManager(new LinearLayoutManager(this));
+
+        myOrdersAdapter = new OrderAdapter(orderList, this);
+        rvDelivery.setAdapter(myOrdersAdapter);
+        rvHistory.setAdapter(myOrdersAdapter);
+
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            String userId = currentUser.getUid();
+
+            // Gọi OrderService để lấy danh sách đơn hàng theo userId
+            orderService.getOrdersByUserId(userId)
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        orderList.clear();
+                        historyList.clear();
+
+                        for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
+                            OrderModel order = doc.toObject(OrderModel.class);
+                            if (order != null) {
+                                String status = order.getStatus();
+                                if (status != null && status.equalsIgnoreCase("Đang giao")) {
+                                    orderList.add(order);
+                                } else if (status != null &&
+                                        (status.equalsIgnoreCase("Hoàn thành") || status.equalsIgnoreCase("Đã hủy"))) {
+                                    historyList.add(order);
+                                }
+                            }
+                        }
+                        myOrdersAdapter.notifyDataSetChanged();
+                    })
+                    .addOnFailureListener(e -> Log.e("OrderActivity", "Lỗi lấy đơn hàng: " + e.getMessage()));
+        }
+        btnDelivery.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tvDelivery.setTextColor(ContextCompat.getColor(view.getContext(), R.color.orange));
+                vDelivery.setBackgroundColor(ContextCompat.getColor(view.getContext(), R.color.orange));
+                tvHistory.setTextColor(Color.parseColor("#8E8E8E"));
+                vHistory.setBackgroundColor(Color.parseColor("#8E8E8E"));
+                rvDelivery.setVisibility(View.VISIBLE);
+                rvHistory.setVisibility(View.GONE);
+                myOrdersAdapter = new OrderAdapter(orderList, OrderActivity.this);
+                rvDelivery.setAdapter(myOrdersAdapter);
+                myOrdersAdapter.notifyDataSetChanged();
+            }
+        });
+        btnHistory.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tvDelivery.setTextColor(Color.parseColor("#8E8E8E"));
+                vDelivery.setBackgroundColor(Color.parseColor("#8E8E8E"));
+                tvHistory.setTextColor(ContextCompat.getColor(view.getContext(), R.color.orange));
+                vHistory.setBackgroundColor(ContextCompat.getColor(view.getContext(), R.color.orange));
+                rvDelivery.setVisibility(View.GONE);
+                rvHistory.setVisibility(View.VISIBLE);
+                myOrdersAdapter = new OrderAdapter(historyList, OrderActivity.this);
+                rvHistory.setAdapter(myOrdersAdapter);
+                myOrdersAdapter.notifyDataSetChanged();
+            }
+        });
+
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(OrderActivity.this, HomeActivity.class);
+                startActivity(intent);
+            }
+        });
+
+    }
+}

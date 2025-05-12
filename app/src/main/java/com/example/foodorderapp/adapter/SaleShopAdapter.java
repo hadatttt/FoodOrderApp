@@ -76,6 +76,7 @@ public class SaleShopAdapter extends RecyclerView.Adapter<SaleShopAdapter.ShopVi
                     .into(imageShop);
 
             // Set tên và địa chỉ
+
             textShopName.setText(shop.getShopName());
             textAddress.setText(shop.getAddress());
 
