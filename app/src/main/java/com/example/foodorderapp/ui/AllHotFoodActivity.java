@@ -126,9 +126,9 @@ public class AllHotFoodActivity extends AppCompatActivity {
                         doc.getString("name"),
                         doc.getDouble("price"),
                         doc.getDouble("rating").floatValue(),
+                        doc.getString("imageUrl"),
                         doc.getLong("sold").intValue(),
-                        doc.getString("category"),
-                        doc.getString("imageUrl") // ✅ Lấy ảnh từ link
+                        doc.getString("category") // ✅ Lấy ảnh từ link
                 );
                 fullFoodList.add(food);
             }// Load all food data into the list and notify adapter

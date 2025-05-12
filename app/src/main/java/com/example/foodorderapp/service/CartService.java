@@ -5,59 +5,86 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.*;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class CartService {
-    private final FirebaseFirestore db;
-    private final CollectionReference cartCollection;
+    private FirebaseFirestore db;
+    private FoodService foodService;
 
-    public CartService(String userId) {
+
+    public CartService() {
         db = FirebaseFirestore.getInstance();
-        // Tách giỏ hàng theo người dùng
-        cartCollection = db.collection("carts").document(userId).collection("items");
+        foodService = new FoodService();
     }
 
-    // Lấy toàn bộ item trong giỏ hàng
-    public Task<QuerySnapshot> getAllCartItems() {
-        return cartCollection.get();
+    public Task<DocumentReference> addToCart(CartModel cartModel) {
+        return db.collection("carts").add(cartModel);
     }
 
-    // Thêm item vào giỏ hàng
-    public Task<DocumentReference> addCartItem(CartModel cartItem) {
-        return cartCollection.add(convertCartToMap(cartItem));
+    public Task<QuerySnapshot> getCartByUserId(String userId) {
+        return db.collection("carts").whereEqualTo("userId", userId).get();
     }
 
-    // Cập nhật item trong giỏ hàng (tìm theo foodId)
-    public Task<Void> updateCartItem(int foodId, CartModel updatedItem) {
-        return cartCollection.whereEqualTo("foodId", foodId).get()
+    // Cập nhật số lượng giỏ hàng
+    public Task<Void> updateCartItem(String userId, int foodId, CartModel updatedModel) {
+        // Lấy giá của món ăn từ FoodService
+        return foodService.getFoodDetails(foodId)
                 .continueWithTask(task -> {
-                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
-                        DocumentReference docRef = task.getResult().getDocuments().get(0).getReference();
-                        return docRef.update(convertCartToMap(updatedItem));
+                    if (task.isSuccessful() && task.getResult() != null && !task.getResult().isEmpty()) {
+                        // Lấy giá của món ăn từ Firestore
+                        DocumentSnapshot foodSnapshot = task.getResult().getDocuments().get(0);
+                        double price = foodSnapshot.getDouble("price");
+
+                        // Tính lại giá trị tổng cho món ăn và cập nhật giỏ hàng
+                        updatedModel.setPrice(price * updatedModel.getQuantity());
+
+                        // Lọc giỏ hàng theo userId và foodId
+                        return db.collection("carts")
+                                .whereEqualTo("userId", userId)  // Lọc theo userId
+                                .whereEqualTo("foodId", foodId)  // Lọc theo foodId
+                                .get()
+                                .continueWithTask(queryTask -> {
+                                    if (queryTask.isSuccessful() && !queryTask.getResult().isEmpty()) {
+                                        // Lấy documentId của mục giỏ hàng
+                                        DocumentSnapshot cartItemSnapshot = queryTask.getResult().getDocuments().get(0);
+                                        String cartItemId = cartItemSnapshot.getId();  // Đây là cartItemId
+
+                                        // Cập nhật giỏ hàng trong Firestore
+                                        return db.collection("carts").document(cartItemId).set(updatedModel);
+                                    } else {
+                                        return Tasks.forException(new Exception("Cart item not found"));
+                                    }
+                                });
+                    } else {
+                        return Tasks.forException(new Exception("Food not found"));
                     }
-                    return Tasks.forException(new Exception("Cart item not found"));
                 });
     }
 
-    // Xóa item khỏi giỏ hàng
-    public Task<Void> deleteCartItem(int foodId) {
-        return cartCollection.whereEqualTo("foodId", foodId).get()
-                .continueWithTask(task -> {
-                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
-                        DocumentReference docRef = task.getResult().getDocuments().get(0).getReference();
-                        return docRef.delete();
+
+
+    public void deleteCartItemByFoodId(String userId, int foodId) {
+        db.collection("carts")
+                .whereEqualTo("userId", userId)
+                .whereEqualTo("foodId", foodId)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
+                        doc.getReference().delete();  // Xóa từng mục phù hợp
                     }
-                    return Tasks.forException(new Exception("Cart item not found"));
+                })
+                .addOnFailureListener(e -> {
+                    System.out.println("Xóa giỏ hàng thất bại: " + e.getMessage());
                 });
     }
 
-    private Map<String, Object> convertCartToMap(CartModel cart) {
-        Map<String, Object> data = new HashMap<>();
-        data.put("foodId", cart.getFoodId());
-        data.put("size", cart.getSize());
-        data.put("quantity", cart.getQuantity());
-        data.put("price", cart.getPrice());
-        return data;
+    public void clearCartByUserId(String userId) {
+        db.collection("carts").whereEqualTo("userId", userId).get()
+                .addOnSuccessListener(querySnapshots -> {
+                    for (DocumentSnapshot doc : querySnapshots.getDocuments()) {
+                        db.collection("carts").document(doc.getId()).delete();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    System.out.println("Error clearing cart: " + e.getMessage());
+                });
     }
 }

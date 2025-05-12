@@ -4,55 +4,32 @@ public class CartModel {
     private int foodId;
     private String size;
     private int quantity;
+    private double price;
     private String userId;
-    private int price;
 
-    public CartModel(int foodId, String size, int quantity, String userId, int price) {
+    public CartModel() {}
+
+    public CartModel(int foodId, String size, int quantity, double price, String userId) {
         this.foodId = foodId;
         this.size = size;
         this.quantity = quantity;
-        this.userId = userId;
         this.price = price;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
         this.userId = userId;
     }
 
-    public int getFoodId() {
-        return foodId;
-    }
+    // Getter & Setter
+    public int getFoodId() { return foodId; }
+    public void setFoodId(int foodId) { this.foodId = foodId; }
 
-    public void setFoodId(int foodId) {
-        this.foodId = foodId;
-    }
+    public String getSize() { return size; }
+    public void setSize(String size) { this.size = size; }
 
-    public String getSize() {
-        return size;
-    }
+    public int getQuantity() { return quantity; }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
 
-    public void setSize(String size) {
-        this.size = size;
-    }
+    public double getPrice() { return price; }
+    public void setPrice(double price) { this.price = price; }
 
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    public int getPrice() {
-        return price;
-    }
-
-    public void setPrice(int price) {
-        this.price = price;
-    }
-
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
 }

@@ -1,15 +1,28 @@
 package com.example.foodorderapp.model;
 
+import java.util.List;
+
 public class OrderModel {
     private int orderId;
-    private int cartId;
-    private String datetime;
+    private String userId;
+
+    private int foodId;
+    private int quantity;
+    private double price;
+
+    private String orderDate;
     private String status;
 
-    public OrderModel(int orderId, int cartId, String datetime, String status) {
+    public OrderModel() {
+    }
+
+    public OrderModel(int orderId, String userId, int foodId, int quantity, double price, String orderDate, String status) {
         this.orderId = orderId;
-        this.cartId = cartId;
-        this.datetime = datetime;
+        this.userId = userId;
+        this.foodId = foodId;
+        this.quantity = quantity;
+        this.price = price;
+        this.orderDate = orderDate;
         this.status = status;
     }
 
@@ -21,20 +34,20 @@ public class OrderModel {
         this.orderId = orderId;
     }
 
-    public int getCartId() {
-        return cartId;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setCartId(int cartId) {
-        this.cartId = cartId;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
-    public String getDatetime() {
-        return datetime;
+    public String getOrderDate() {
+        return orderDate;
     }
 
-    public void setDatetime(String datetime) {
-        this.datetime = datetime;
+    public void setOrderDate(String orderDate) {
+        this.orderDate = orderDate;
     }
 
     public String getStatus() {
@@ -43,5 +56,29 @@ public class OrderModel {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public int getFoodId() {
+        return foodId;
+    }
+
+    public void setFoodId(int foodId) {
+        this.foodId = foodId;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
     }
 }

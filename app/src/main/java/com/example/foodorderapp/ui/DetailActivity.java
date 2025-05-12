@@ -3,6 +3,7 @@ package com.example.foodorderapp.ui;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.RadioButton;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -18,6 +19,7 @@ import com.example.foodorderapp.model.CartModel;
 import com.example.foodorderapp.model.FoodModel;
 import com.example.foodorderapp.service.CartService;
 import com.example.foodorderapp.service.FoodService;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.text.DecimalFormat;
@@ -28,12 +30,14 @@ public class DetailActivity extends AppCompatActivity {
     private ItemFoodBinding binding;
     public int quantity = 1;
     public double basePrice;
+    public FoodModel currentFood;
+    public int foodId;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ItemFoodBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        int foodId = getIntent().getIntExtra("FOOD_ID", -1);
+        foodId = getIntent().getIntExtra("FOOD_ID", -1);
         if (foodId != -1) {
             // Gọi Firebase hoặc một dịch vụ để lấy thông tin món ăn theo foodId
             getFoodDetails(foodId);
@@ -62,7 +66,12 @@ public class DetailActivity extends AppCompatActivity {
             finish(); // kết thúc activity hiện tại, quay lại activity trước
         });
 
-
+        binding.btnAddToCart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addFoodToCart();
+            }
+        });
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -85,15 +94,15 @@ public class DetailActivity extends AppCompatActivity {
             if (task.isSuccessful() && task.getResult() != null) {
                 // Lấy thông tin món ăn từ kết quả trả về
                 DocumentSnapshot document = task.getResult().getDocuments().get(0);
-                FoodModel food = document.toObject(FoodModel.class);
+                FoodModel currentFood = document.toObject(FoodModel.class);
 
-                if (food != null) {
-                    binding.tvFoodName.setText(food.getName());
+                if (currentFood != null) {
+                    binding.tvFoodName.setText(currentFood.getName());
                     Glide.with(binding.getRoot())
-                            .load(food.getImageUrl()) // Sử dụng Glide để tải ảnh
+                            .load(currentFood.getImageUrl()) // Sử dụng Glide để tải ảnh
                             .into(binding.imgFood);
-                    basePrice = food.getPrice();
-                    binding.tvRate.setText(String.valueOf(food.getRating()));
+                    basePrice = currentFood.getPrice();
+                    binding.tvRate.setText(String.valueOf(currentFood.getRating()));
                     updatePrice();
                 }
             } else {
@@ -102,16 +111,28 @@ public class DetailActivity extends AppCompatActivity {
         });
     }
     public void addFoodToCart(){
-        CartModel cart = new CartModel(1, "M", 2, " ", 200);
-        CartService cartService = new CartService("user123");
+        try{
+            int rdId = binding.rgSize.getCheckedRadioButtonId();
+            RadioButton rd = findViewById(rdId);
+            String size = rd.getText().toString();
+            String priceStr = binding.tvPrice.getText().toString();
+            priceStr = priceStr.replace(",", "").replace("đ", "").trim();
+            Double price = Double.parseDouble(priceStr);
+            FirebaseAuth mAuth = FirebaseAuth.getInstance();
+            String userId = mAuth.getCurrentUser().getUid();
+            CartModel cart = new CartModel(foodId, size, quantity, price, userId);
+            CartService cartService = new CartService();
+            cartService.addToCart(cart)
+                    .addOnSuccessListener(documentReference -> {
+                        Log.d("CartService", "Thêm thành công, ID: " + documentReference.getId());
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e("CartService", "Lỗi thêm item: ", e);
+                    });
+        }catch (Exception e){
+            Log.d("Loi", e.getMessage());
+        }
 
-        cartService.addCartItem(cart)
-                .addOnSuccessListener(documentReference -> {
-                    Log.d("CartService", "Thêm thành công, ID: " + documentReference.getId());
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("CartService", "Lỗi thêm item: ", e);
-                });
 
     }
 }
