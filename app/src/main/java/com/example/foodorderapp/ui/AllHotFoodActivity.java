@@ -140,7 +140,10 @@ public class AllHotFoodActivity extends AppCompatActivity {
                         doc.getDouble("rating").floatValue(),
                         doc.getLong("sold").intValue(),
                         doc.getString("category"),
-                        doc.getString("imageUrl")
+                        doc.getString("imageUrl"),
+                        doc.getString("caption"),
+                        doc.getBoolean("canUpsize") != null ? doc.getBoolean("canUpsize") : false,
+                        doc.getDouble("upsizePrice") != null ? doc.getDouble("upsizePrice") : 0.0
                 );
                 fullFoodList.add(food);
             }// Load all food data into the list and notify adapter

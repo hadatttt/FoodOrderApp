@@ -1,7 +1,5 @@
 package com.example.foodorderapp.model;
 
-import java.util.List;
-
 public class FoodModel {
     private int foodId;
     private int storeId;
@@ -11,14 +9,19 @@ public class FoodModel {
     private int sold;
     private String category;
     private String imageUrl;
-//    private List<ToppingModel> toppings; // ✅ Danh sách topping
+    private String caption;      // Mô tả ngắn
+    private boolean canUpsize;   // Có thể tăng size hay không
+    private double upsizePrice;  // Giá tiền để tăng size
 
+    // Constructor mặc định (Firestore yêu cầu)
     public FoodModel() {
         // Required empty constructor for Firestore
     }
 
+    // Constructor đầy đủ
     public FoodModel(int foodId, int storeId, String name, double price, float rating,
-                     int sold, String category, String imageUrl) {
+                     int sold, String category, String imageUrl, String caption,
+                     boolean canUpsize, double upsizePrice) {
         this.foodId = foodId;
         this.storeId = storeId;
         this.name = name;
@@ -27,7 +30,9 @@ public class FoodModel {
         this.sold = sold;
         this.category = category;
         this.imageUrl = imageUrl;
-//        this.toppings = toppings;
+        this.caption = caption;
+        this.canUpsize = canUpsize;
+        this.upsizePrice = upsizePrice;
     }
 
     // Getter và Setter
@@ -55,6 +60,12 @@ public class FoodModel {
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
-//    public List<ToppingModel> getToppings() { return toppings; }
-//    public void setToppings(List<ToppingModel> toppings) { this.toppings = toppings; }
+    public String getCaption() { return caption; }
+    public void setCaption(String caption) { this.caption = caption; }
+
+    public boolean isCanUpsize() { return canUpsize; }
+    public void setCanUpsize(boolean canUpsize) { this.canUpsize = canUpsize; }
+
+    public double getUpsizePrice() { return upsizePrice; }
+    public void setUpsizePrice(double upsizePrice) { this.upsizePrice = upsizePrice; }
 }

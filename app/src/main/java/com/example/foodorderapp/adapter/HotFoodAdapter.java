@@ -82,7 +82,7 @@ public class HotFoodAdapter extends RecyclerView.Adapter<HotFoodAdapter.FoodView
             itemView.setOnClickListener(v -> {
                 Context context = itemView.getContext();
                 Intent intent = new Intent(context, DetailFoodActivity.class);
-                intent.putExtra("food_id", food.getFoodId());  // Đặt tên key rõ ràng hơn
+                intent.putExtra("foodid", food.getFoodId());  // Đặt tên key rõ ràng hơn
                 context.startActivity(intent);
             });
 
