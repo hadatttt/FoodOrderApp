@@ -2,7 +2,6 @@ package com.example.foodorderapp.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RadioButton;
@@ -29,15 +28,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DetailFoodActivity extends AppCompatActivity {
+    // Khai báo các biến thành phần
     private int foodId;
-
     private int quantity = 1;
-    private final FoodService foodService = new FoodService();
-    private final ShopService shopService = new ShopService();
-    private final UserService userService = new UserService();
-    private final CartService cartService = new CartService();
+
+    private FoodService foodService;
+    private ShopService shopService;
+    private UserService userService;
+    private CartService cartService;
+
     private Map<String, Double> sizePrices = new HashMap<>();
 
+    // Khai báo các View
     private TextView tvQuantity, tvPrice, tvFoodName, tvRate, tvDesc, tvStore;
     private ImageView imgFood;
     private RadioButton rbS, rbM, rbL;
@@ -47,11 +49,13 @@ public class DetailFoodActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_food);
 
-        setupInsets();
+        // Khởi tạo các dịch vụ và các thành phần giao diện
+        initializeServices();
         setupViews();
         setupListeners();
 
         foodId = getIntent().getIntExtra("foodid", -1);
+
         if (foodId != -1) {
             loadFoodDetails(foodId);
         } else {
@@ -60,15 +64,15 @@ public class DetailFoodActivity extends AppCompatActivity {
         }
     }
 
-    private void setupInsets() {
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+    private void initializeServices() {
+        foodService = new FoodService();
+        shopService = new ShopService();
+        userService = new UserService();
+        cartService = new CartService();
     }
 
     private void setupViews() {
+        // Thiết lập giao diện
         ImageButton btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> startActivity(new Intent(this, HomeActivity.class)));
 
@@ -87,87 +91,63 @@ public class DetailFoodActivity extends AppCompatActivity {
     }
 
     private void setupListeners() {
-        findViewById(R.id.btnPlus).setOnClickListener(v -> {
-            quantity++;
-            tvQuantity.setText(String.valueOf(quantity));
-            updatePriceBasedOnSize(); // <-- thêm dòng này
-        });
+        // Thiết lập các sự kiện cho nút cộng, trừ số lượng
+        findViewById(R.id.btnPlus).setOnClickListener(v -> updateQuantity(1));
+        findViewById(R.id.btnMinus).setOnClickListener(v -> updateQuantity(-1));
 
-        findViewById(R.id.btnMinus).setOnClickListener(v -> {
-            if (quantity > 1) {
-                quantity--;
-                tvQuantity.setText(String.valueOf(quantity));
-                updatePriceBasedOnSize(); // <-- thêm dòng này
-            }
-        });
-
-
+        // Lắng nghe sự kiện thay đổi lựa chọn kích thước
         RadioGroup rgSize = findViewById(R.id.rgSize);
         rgSize.setOnCheckedChangeListener((group, checkedId) -> updatePriceBasedOnSize());
-        // Sự kiện cho nút "Add to Cart"
-        findViewById(R.id.btnAddToCart).setOnClickListener(v -> {
-            addToCart();
-        });
+
+        // Sự kiện "Thêm vào giỏ hàng"
+        findViewById(R.id.btnAddToCart).setOnClickListener(v -> addToCart());
     }
+
+    private void updateQuantity(int delta) {
+        quantity = Math.max(1, quantity + delta);
+        tvQuantity.setText(String.valueOf(quantity));
+        updatePriceBasedOnSize();
+    }
+
     private void addToCart() {
-        // Lấy thông tin món ăn
-        int foodId = getIntent().getIntExtra("foodid", -1);
-        String size;
-        if (rbS.isChecked()) size = "S";
-        else if (rbM.isChecked()) size = "M";
-        else if (rbL.isChecked()) size = "L";
-        else {
-            size = "";
-        }
-
-        double price = 0.0;
-        if (sizePrices.containsKey(size)) {
-            price = sizePrices.get(size);
-        }
-
+        String size = getSelectedSize();
+        double price = sizePrices.getOrDefault(size, 0.0);
         double totalPrice = price * quantity;
 
-        // Lấy userId từ Firebase
+        // Lấy thông tin người dùng và thêm vào giỏ hàng
         userService.getUser().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                DocumentSnapshot userDoc = task.getResult();
-                if (userDoc != null) {
-                    String userId = userDoc.getId(); // Lấy ID người dùng từ Firebase
-
-                    // Tạo đối tượng CartModel
-                    CartModel cartModel = new CartModel(foodId, size, quantity, totalPrice, userId);
-
-                    // Gọi CartService để thêm vào giỏ hàng
-                    cartService.addToCart(cartModel).addOnCompleteListener(cartTask -> {
-                        if (cartTask.isSuccessful()) {
-                            Toast.makeText(this, "Đã thêm vào giỏ hàng!", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(this, "Lỗi khi thêm vào giỏ hàng!", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                } else {
-                    Toast.makeText(this, "Không tìm thấy thông tin người dùng", Toast.LENGTH_SHORT).show();
-                }
+            if (task.isSuccessful() && task.getResult() != null) {
+                String userId = task.getResult().getId();
+                CartModel cartModel = new CartModel(foodId, size, quantity, totalPrice, userId);
+                addCartItem(cartModel);
             } else {
-                Toast.makeText(this, "Lỗi khi lấy thông tin người dùng", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Không tìm thấy thông tin người dùng", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void addCartItem(CartModel cartModel) {
+        cartService.addToCart(cartModel).addOnCompleteListener(cartTask -> {
+            if (cartTask.isSuccessful()) {
+                Toast.makeText(this, "Đã thêm vào giỏ hàng!", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Lỗi khi thêm vào giỏ hàng!", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void updatePriceBasedOnSize() {
-        double price = 0.0;
-        if (rbS.isChecked() && sizePrices.containsKey("S")) {
-            price = sizePrices.get("S");
-        } else if (rbM.isChecked() && sizePrices.containsKey("M")) {
-            price = sizePrices.get("M");
-        } else if (rbL.isChecked() && sizePrices.containsKey("L")) {
-            price = sizePrices.get("L");
-        }
-
+        double price = sizePrices.getOrDefault(getSelectedSize(), 0.0);
         double total = price * quantity;
         tvPrice.setText("Giá: " + String.format("%.3f", total) + "đ");
     }
 
+    private String getSelectedSize() {
+        if (rbS.isChecked()) return "S";
+        if (rbM.isChecked()) return "M";
+        if (rbL.isChecked()) return "L";
+        return "";
+    }
 
     private void loadFoodDetails(int foodId) {
         foodService.getFoodDetails(foodId).addOnCompleteListener(task -> {
@@ -194,26 +174,19 @@ public class DetailFoodActivity extends AppCompatActivity {
         // Load ảnh
         Glide.with(this).load(imageUrl).into(imgFood);
 
-        // Hiển thị thông tin
+        // Hiển thị thông tin món ăn
         tvFoodName.setText(name != null ? name : "Tên món");
         tvDesc.setText(caption != null ? caption : "Mô tả");
         tvRate.setText(String.valueOf(rating != null ? rating : 0.0f));
 
-        // Load giá size
+        // Cập nhật giá dựa trên kích thước
         Map<String, Long> rawSizePrices = (Map<String, Long>) doc.get("sizePrices");
         if (rawSizePrices != null) {
             for (Map.Entry<String, Long> entry : rawSizePrices.entrySet()) {
                 sizePrices.put(entry.getKey(), entry.getValue().doubleValue());
             }
-            // Mặc định chọn size S nếu có
-            if (sizePrices.containsKey("S")) rbS.setChecked(true);
-            else if (sizePrices.containsKey("M")) rbM.setChecked(true);
-            else if (sizePrices.containsKey("L")) rbL.setChecked(true);
-
             updatePriceBasedOnSize();
         }
-
-        Log.d("DetailFood", "Tên món: " + name + ", Đánh giá: " + rating);
     }
 
     private void loadShopInfo(Long storeIdLong) {
@@ -227,11 +200,9 @@ public class DetailFoodActivity extends AppCompatActivity {
                 String address = shopDoc.getString("address");
 
                 tvStore.setText(shopName != null ? shopName : "Tên cửa hàng");
-                Log.d("DetailShop", "Shop: " + shopName + ", Địa chỉ: " + address);
             } else {
                 Toast.makeText(this, "Không tìm thấy cửa hàng", Toast.LENGTH_SHORT).show();
             }
         });
     }
-
 }
