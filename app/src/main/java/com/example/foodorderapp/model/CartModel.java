@@ -9,7 +9,7 @@ public class CartModel {
     private String size;
     private int quantity;
     private double price;
-    private String userId;  // cập nhật từ int sang String
+    private String userId;
 
     public CartModel() {}
 

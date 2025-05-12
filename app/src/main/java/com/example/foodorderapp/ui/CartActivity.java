@@ -1,7 +1,11 @@
 package com.example.foodorderapp.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,6 +28,8 @@ public class CartActivity extends AppCompatActivity {
     private List<CartModel> cartList;
     private FirebaseFirestore db;
     private TextView tvPrice;
+    private ImageButton btnBack;
+    private Button btnPay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,15 +40,29 @@ public class CartActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.rv_cart);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+        btnBack = findViewById(R.id.btn_back);
+        btnPay = findViewById(R.id.btn_pay);
+
         db = FirebaseFirestore.getInstance();
         cartList = new ArrayList<>();
         cartAdapter = new CartAdapter(this, cartList);
         recyclerView.setAdapter(cartAdapter);
 
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        String userId = mAuth.getCurrentUser().getUid();
 
-        loadCartItems(userId);
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(CartActivity.this, HomeActivity.class);
+                startActivity(intent);
+            }
+        });
+        btnPay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(CartActivity.this, HomeActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     private void loadCartItems(String userId) {
@@ -68,6 +88,14 @@ public class CartActivity extends AppCompatActivity {
         for (CartModel cartItem : cartList) {
             totalPrice += cartItem.getPrice(); // Cộng dồn giá trị từ các item
         }
-        tvPrice.setText(String.format("%.2fđ", totalPrice));
+        tvPrice.setText(String.format("%.3fđ", totalPrice));
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        cartList.clear();
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        String userId = mAuth.getCurrentUser().getUid();
+        loadCartItems(userId);
     }
 }

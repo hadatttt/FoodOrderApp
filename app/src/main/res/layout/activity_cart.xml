@@ -20,11 +20,12 @@
         app:layout_constraintEnd_toEndOf="parent">
 
         <ImageButton
-            android:id="@+id/btnBack"
+            android:id="@+id/btn_back"
             android:layout_width="45dp"
             android:layout_height="45dp"
             android:background="@drawable/bg_circle"
             android:src="@drawable/ic_back"
+            android:backgroundTint="#00000000"
             android:contentDescription="Back"
             android:paddingLeft="7dp" />
 
@@ -118,7 +119,7 @@
 
         <!-- Nút Thêm vào giỏ -->
         <Button
-            android:id="@+id/btnAddToCart"
+            android:id="@+id/btn_pay"
             android:layout_width="match_parent"
             android:layout_height="75dp"
             android:layout_marginTop="16dp"
