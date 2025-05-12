@@ -39,22 +39,22 @@ public class IntroActivity extends AppCompatActivity {
         //test
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_intro);
-        FoodService foodService = new FoodService();
-
-        String[] foodNames = {
-                // Spaghetti
-                "Spaghetti Aglio e Olio", "Spaghetti Carbonara", "Spaghetti Bolognese", "Spaghetti Pesto", "Spaghetti Marinara",
-                // Potato
-                "Potato Fries", "Mashed Potatoes", "Baked Potato", "Potato Salad", "Potato Wedges",
-                // Pizza
-                "Pepperoni Pizza", "Margherita Pizza", "Hawaiian Pizza", "Vegetarian Pizza", "BBQ Chicken Pizza",
-                // Burger
-                "Cheeseburger", "Chicken Burger", "Veggie Burger", "Double Cheeseburger",
-                // Chicken
-                "Chicken Nuggets",
-                // Drink
-                "Coca-Cola", "Pepsi", "Orange Juice", "Lemon Tea", "Mineral Water"
-        };
+//        FoodService foodService = new FoodService();
+//
+//        String[] foodNames = {
+//                // Spaghetti
+//                "Spaghetti Aglio e Olio", "Spaghetti Carbonara", "Spaghetti Bolognese", "Spaghetti Pesto", "Spaghetti Marinara",
+//                // Potato
+//                "Potato Fries", "Mashed Potatoes", "Baked Potato", "Potato Salad", "Potato Wedges",
+//                // Pizza
+//                "Pepperoni Pizza", "Margherita Pizza", "Hawaiian Pizza", "Vegetarian Pizza", "BBQ Chicken Pizza",
+//                // Burger
+//                "Cheeseburger", "Chicken Burger", "Veggie Burger", "Double Cheeseburger",
+//                // Chicken
+//                "Chicken Nuggets",
+//                // Drink
+//                "Coca-Cola", "Pepsi", "Orange Juice", "Lemon Tea", "Mineral Water"
+//        };
 
         String[] categories = {
                 "Spaghetti", "Spaghetti", "Spaghetti", "Spaghetti", "Spaghetti",
@@ -99,20 +99,20 @@ public class IntroActivity extends AppCompatActivity {
                 "https://upload.wikimedia.org/wikipedia/commons/c/cd/Bottled_water.JPG"
         };
 
-        for (int i = 0; i < foodNames.length; i++) {
-            FoodModel food = new FoodModel();
-            food.setFoodId(i + 1);
-            int storeId = (i % 12) + 1;
-            food.setStoreId(storeId);
-            food.setName(foodNames[i]);
-            food.setPrice(100);
-            food.setRating(0f);
-            food.setSold(0);
-            food.setCategory(categories[i]);
-            food.setImageUrl(imageUrls[i]);
-
-            foodService.addFood(food);
-        }
+//        for (int i = 0; i < foodNames.length; i++) {
+//            FoodModel food = new FoodModel();
+//            food.setFoodId(i + 1);
+//            int storeId = (i % 12) + 1;
+//            food.setStoreId(storeId);
+//            food.setName(foodNames[i]);
+//            food.setPrice(100);
+//            food.setRating(0f);
+//            food.setSold(0);
+//            food.setCategory(categories[i]);
+//            food.setImageUrl(imageUrls[i]);
+//
+//            foodService.addFood(food);
+//        }
 
 
         imageResources = new int[]{
