@@ -17,7 +17,9 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.bumptech.glide.Glide;
 import com.example.foodorderapp.R;
+import com.example.foodorderapp.model.CartModel;
 import com.example.foodorderapp.model.FoodModel;
+import com.example.foodorderapp.service.CartService;
 import com.example.foodorderapp.service.FoodService;
 import com.example.foodorderapp.service.ShopService;
 import com.example.foodorderapp.service.UserService;
@@ -27,11 +29,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DetailFoodActivity extends AppCompatActivity {
+    private int foodId;
 
     private int quantity = 1;
     private final FoodService foodService = new FoodService();
     private final ShopService shopService = new ShopService();
     private final UserService userService = new UserService();
+    private final CartService cartService = new CartService();
     private Map<String, Double> sizePrices = new HashMap<>();
 
     private TextView tvQuantity, tvPrice, tvFoodName, tvRate, tvDesc, tvStore;
@@ -47,7 +51,7 @@ public class DetailFoodActivity extends AppCompatActivity {
         setupViews();
         setupListeners();
 
-        int foodId = getIntent().getIntExtra("foodid", -1);
+        foodId = getIntent().getIntExtra("foodid", -1);
         if (foodId != -1) {
             loadFoodDetails(foodId);
         } else {
@@ -86,28 +90,84 @@ public class DetailFoodActivity extends AppCompatActivity {
         findViewById(R.id.btnPlus).setOnClickListener(v -> {
             quantity++;
             tvQuantity.setText(String.valueOf(quantity));
+            updatePriceBasedOnSize(); // <-- thêm dòng này
         });
 
         findViewById(R.id.btnMinus).setOnClickListener(v -> {
             if (quantity > 1) {
                 quantity--;
                 tvQuantity.setText(String.valueOf(quantity));
+                updatePriceBasedOnSize(); // <-- thêm dòng này
             }
         });
 
+
         RadioGroup rgSize = findViewById(R.id.rgSize);
         rgSize.setOnCheckedChangeListener((group, checkedId) -> updatePriceBasedOnSize());
+        // Sự kiện cho nút "Add to Cart"
+        findViewById(R.id.btnAddToCart).setOnClickListener(v -> {
+            addToCart();
+        });
+    }
+    private void addToCart() {
+        // Lấy thông tin món ăn
+        int foodId = getIntent().getIntExtra("foodid", -1);
+        String size;
+        if (rbS.isChecked()) size = "S";
+        else if (rbM.isChecked()) size = "M";
+        else if (rbL.isChecked()) size = "L";
+        else {
+            size = "";
+        }
+
+        double price = 0.0;
+        if (sizePrices.containsKey(size)) {
+            price = sizePrices.get(size);
+        }
+
+        double totalPrice = price * quantity;
+
+        // Lấy userId từ Firebase
+        userService.getUser().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot userDoc = task.getResult();
+                if (userDoc != null) {
+                    String userId = userDoc.getId(); // Lấy ID người dùng từ Firebase
+
+                    // Tạo đối tượng CartModel
+                    CartModel cartModel = new CartModel(foodId, size, quantity, totalPrice, userId);
+
+                    // Gọi CartService để thêm vào giỏ hàng
+                    cartService.addToCart(cartModel).addOnCompleteListener(cartTask -> {
+                        if (cartTask.isSuccessful()) {
+                            Toast.makeText(this, "Đã thêm vào giỏ hàng!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(this, "Lỗi khi thêm vào giỏ hàng!", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else {
+                    Toast.makeText(this, "Không tìm thấy thông tin người dùng", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(this, "Lỗi khi lấy thông tin người dùng", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void updatePriceBasedOnSize() {
+        double price = 0.0;
         if (rbS.isChecked() && sizePrices.containsKey("S")) {
-            tvPrice.setText("Giá: " + sizePrices.get("S").intValue() + "đ");
+            price = sizePrices.get("S");
         } else if (rbM.isChecked() && sizePrices.containsKey("M")) {
-            tvPrice.setText("Giá: " + sizePrices.get("M").intValue() + "đ");
+            price = sizePrices.get("M");
         } else if (rbL.isChecked() && sizePrices.containsKey("L")) {
-            tvPrice.setText("Giá: " + sizePrices.get("L").intValue() + "đ");
+            price = sizePrices.get("L");
         }
+
+        double total = price * quantity;
+        tvPrice.setText("Giá: " + String.format("%.3f", total) + "đ");
     }
+
 
     private void loadFoodDetails(int foodId) {
         foodService.getFoodDetails(foodId).addOnCompleteListener(task -> {
@@ -173,4 +233,5 @@ public class DetailFoodActivity extends AppCompatActivity {
             }
         });
     }
+
 }
