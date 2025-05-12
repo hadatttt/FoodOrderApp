@@ -1,11 +1,13 @@
 package com.example.foodorderapp.ui;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,11 +17,18 @@ import com.example.foodorderapp.R;
 import com.example.foodorderapp.adapter.CartAdapter;
 import com.example.foodorderapp.model.CartModel;
 import com.example.foodorderapp.model.OrderModel;
+import com.example.foodorderapp.service.CartService;
+import com.example.foodorderapp.service.OrderService;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.DocumentSnapshot;
+
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class CartActivity extends AppCompatActivity {
@@ -31,11 +40,15 @@ public class CartActivity extends AppCompatActivity {
     private TextView tvPrice;
     private ImageButton btnBack;
     private Button btnPay;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cart);
+
+        progressBar = findViewById(R.id.progressBar);
+        progressBar.setVisibility(View.GONE);
 
         tvPrice = findViewById(R.id.tvPrice);
         recyclerView = findViewById(R.id.rv_cart);
@@ -60,6 +73,7 @@ public class CartActivity extends AppCompatActivity {
         btnPay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                progressBar.setVisibility(View.VISIBLE);
                 processOrder();
             }
         });
@@ -86,7 +100,7 @@ public class CartActivity extends AppCompatActivity {
     public void updateTotalPrice() {
         double totalPrice = 0;
         for (CartModel cartItem : cartList) {
-            totalPrice += cartItem.getPrice(); // Cộng dồn giá trị từ các item
+            totalPrice += cartItem.getPrice();
         }
         tvPrice.setText(String.format("%.3fđ", totalPrice));
     }
@@ -97,66 +111,52 @@ public class CartActivity extends AppCompatActivity {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         String userId = mAuth.getCurrentUser().getUid();
         loadCartItems(userId);
+    } private void processOrder() {
+        final int[] d = {0};
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        if (mAuth.getCurrentUser() != null) {
+            String userId = mAuth.getCurrentUser().getUid();
+
+            OrderService orderService = new OrderService();
+            OrderModel order = new OrderModel();
+            for (CartModel cartItem : cartList) {
+
+                Date date = new Date();
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+                order = new OrderModel(
+                        userId,
+                        cartItem.getFoodId(),
+                        cartItem.getQuantity(),
+                        cartItem.getPrice(),
+                        sdf.format(date),
+                        "Đang giao"
+                );
+                orderService.addOrder(order).addOnSuccessListener(aVoid -> {
+                    d[0]++;
+                    if (d[0] == cartList.size()) {
+
+                        progressBar.setVisibility(View.GONE);
+                        Log.d("CartActivity", "Tất cả đơn hàng đã được thêm");
+
+                         clearCart(userId);
+
+                        Intent intent = new Intent(CartActivity.this, OrderActivity.class);
+                        startActivity(intent);
+                    }
+                }).addOnFailureListener(e -> {
+                    Log.e("CartActivity", "Lỗi thêm đơn hàng: " + e.getMessage());
+                    progressBar.setVisibility(View.GONE);
+                });
+            }
+
+        }
     }
 
-    private void processOrder() {
-//        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-//        String userId = mAuth.getCurrentUser().getUid();
-//
-//        // Chuyển giỏ hàng thành các đơn hàng
-//        List<OrderItem> orderItems = new ArrayList<>();
-//        double totalPrice = 0;
-//
-//        for (CartModel cartItem : cartList) {
-//            OrderItem orderItem = new OrderItem(
-//                    cartItem.getFoodId(),
-//                    cartItem.getName(),
-//                    cartItem.getSize(),
-//                    cartItem.getQuantity(),
-//                    cartItem.getPrice()
-//            );
-//            orderItems.add(orderItem);
-//            totalPrice += cartItem.getPrice();
-//        }
-//
-//        // Tạo OrderModel
-//        String orderId = db.collection("orders").document().getId();
-//        OrderModel order = new OrderModel(
-//                orderId,
-//                userId,
-//                orderItems,
-//                String.valueOf(System.currentTimeMillis()), // thời gian đơn hàng
-//                "Processing" // trạng thái đơn hàng
-//        );
-//
-//        // Thêm đơn hàng vào Firestore
-//        db.collection("orders")
-//                .document(orderId)
-//                .set(order)
-//                .addOnSuccessListener(aVoid -> {
-//                    Log.d("CartActivity", "Đơn hàng đã được thêm thành công");
-//
-//                    // Xóa tất cả các sản phẩm trong giỏ hàng
-//                    clearCart(userId);
-//
-//                    // Chuyển tới màn hình chính
-//                    Intent intent = new Intent(CartActivity.this, HomeActivity.class);
-//                    startActivity(intent);
-//                })
-//                .addOnFailureListener(e -> Log.e("CartActivity", "Lỗi thêm đơn hàng: " + e.getMessage()));
-    }
+
 
     private void clearCart(String userId) {
-        // Xóa tất cả các sản phẩm trong giỏ hàng của người dùng
-        db.collection("carts")
-                .whereEqualTo("userId", userId)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots.getDocuments()) {
-                        documentSnapshot.getReference().delete();
-                    }
-                    Log.d("CartActivity", "Giỏ hàng đã được xóa.");
-                })
-                .addOnFailureListener(e -> Log.e("CartActivity", "Lỗi xóa giỏ hàng: " + e.getMessage()));
+        CartService cartService = new CartService();
+        cartService.clearCartByUserId(userId);
     }
 }

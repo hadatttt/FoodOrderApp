@@ -1,8 +1,12 @@
 package com.example.foodorderapp.ui;
 
+import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -14,22 +18,31 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.foodorderapp.adapter.OrderAdapter;
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.model.OrderModel;
+import com.example.foodorderapp.service.OrderService;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
 
 public class OrderActivity extends AppCompatActivity {
     private RecyclerView rvDelivery, rvHistory;
-    private ArrayList<OrderModel> orderList, historyList;
+    public ArrayList<OrderModel> orderList, historyList;
     private OrderAdapter myOrdersAdapter;
     private LinearLayout btnDelivery, btnHistory;
     private TextView tvDelivery, tvHistory;
     private View vDelivery, vHistory;
     private ViewGroup.LayoutParams params;
     private int widthInPx;
+    private OrderService orderService;
+    private ImageButton btnBack;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_orders);
+        orderService = new OrderService();
+
         rvDelivery = findViewById(R.id.rv_delivery);
         rvHistory = findViewById(R.id.rv_history);
         btnDelivery = findViewById(R.id.btn_delivery);
@@ -38,6 +51,8 @@ public class OrderActivity extends AppCompatActivity {
         tvHistory = findViewById(R.id.tv_history);
         vDelivery = findViewById(R.id.v_delivery);
         vHistory = findViewById(R.id.v_history);
+
+        btnBack = findViewById(R.id.btn_back);
 
         rvDelivery.setVisibility(View.VISIBLE);
         rvHistory.setVisibility(View.GONE);
@@ -52,23 +67,39 @@ public class OrderActivity extends AppCompatActivity {
         rvDelivery.setAdapter(myOrdersAdapter);
         rvHistory.setAdapter(myOrdersAdapter);
 
-//        orderList.add(new MyOrders(1, "Đồ ăn", "burger", "Pizza Hut", "100.000", 1, "Đang giao", ""));
-//        orderList.add(new MyOrders(2, "Đồ ăn", "burger", "Pizza Hut", "75.000", 2,"Đang giao", ""));
-//        orderList.add(new MyOrders(3, "Đồ ăn", "burger", "Pizza Hut", "89.000", 3,"Đang giao", ""));
-//        historyList.add(new MyOrders(4, "Đồ ăn", "burger", "Pizza Hut", "89.000", 3,"Hoàn thành", "21/04, 11:30"));
-//        historyList.add(new MyOrders(5, "Đồ ăn", "burger", "Pizza Hut", "89.000", 3,"Hoàn thành", "21/04, 11:30"));
-//        historyList.add(new MyOrders(6, "Đồ ăn", "burger", "Pizza Hut", "89.000", 3,"Hoàn thành", "21/04, 11:30"));
-//        historyList.add(new MyOrders(7, "Đồ ăn", "burger", "Pizza Hut", "89.000", 3,"Đã hủy", "21/04, 11:30"));
-//        historyList.add(new MyOrders(8, "Đồ ăn", "burger", "Pizza Hut", "89.000", 3,"Đã hủy", "21/04, 11:30"));
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            String userId = currentUser.getUid();
 
-        myOrdersAdapter.notifyDataSetChanged();
+            // Gọi OrderService để lấy danh sách đơn hàng theo userId
+            orderService.getOrdersByUserId(userId)
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        orderList.clear();
+                        historyList.clear();
+
+                        for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
+                            OrderModel order = doc.toObject(OrderModel.class);
+                            if (order != null) {
+                                String status = order.getStatus();
+                                if (status != null && status.equalsIgnoreCase("Đang giao")) {
+                                    orderList.add(order);
+                                } else if (status != null &&
+                                        (status.equalsIgnoreCase("Hoàn thành") || status.equalsIgnoreCase("Đã hủy"))) {
+                                    historyList.add(order);
+                                }
+                            }
+                        }
+                        myOrdersAdapter.notifyDataSetChanged();
+                    })
+                    .addOnFailureListener(e -> Log.e("OrderActivity", "Lỗi lấy đơn hàng: " + e.getMessage()));
+        }
         btnDelivery.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 tvDelivery.setTextColor(ContextCompat.getColor(view.getContext(), R.color.orange));
                 vDelivery.setBackgroundColor(ContextCompat.getColor(view.getContext(), R.color.orange));
-                tvHistory.setTextColor(ContextCompat.getColor(view.getContext(), R.color.gray));
-                vHistory.setBackgroundColor(ContextCompat.getColor(view.getContext(), R.color.gray));
+                tvHistory.setTextColor(Color.parseColor("#8E8E8E"));
+                vHistory.setBackgroundColor(Color.parseColor("#8E8E8E"));
                 rvDelivery.setVisibility(View.VISIBLE);
                 rvHistory.setVisibility(View.GONE);
                 myOrdersAdapter = new OrderAdapter(orderList, OrderActivity.this);
@@ -79,8 +110,8 @@ public class OrderActivity extends AppCompatActivity {
         btnHistory.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                tvDelivery.setTextColor(ContextCompat.getColor(view.getContext(), R.color.gray));
-                vDelivery.setBackgroundColor(ContextCompat.getColor(view.getContext(), R.color.gray));
+                tvDelivery.setTextColor(Color.parseColor("#8E8E8E"));
+                vDelivery.setBackgroundColor(Color.parseColor("#8E8E8E"));
                 tvHistory.setTextColor(ContextCompat.getColor(view.getContext(), R.color.orange));
                 vHistory.setBackgroundColor(ContextCompat.getColor(view.getContext(), R.color.orange));
                 rvDelivery.setVisibility(View.GONE);
@@ -91,6 +122,13 @@ public class OrderActivity extends AppCompatActivity {
             }
         });
 
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(OrderActivity.this, HomeActivity.class);
+                startActivity(intent);
+            }
+        });
 
     }
 }

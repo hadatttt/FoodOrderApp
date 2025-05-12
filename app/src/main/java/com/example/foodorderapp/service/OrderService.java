@@ -1,9 +1,7 @@
 package com.example.foodorderapp.service;
 
-import com.example.foodorderapp.model.CartModel;
 import com.example.foodorderapp.model.OrderModel;
 import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.*;
 
 import java.util.*;
@@ -28,35 +26,59 @@ public class OrderService {
     }
 
     // Lấy đơn hàng theo orderId
-    public Task<DocumentSnapshot> getOrderById(String orderId) {
-        return orderCollection.document(orderId).get();
+    public Task<QuerySnapshot> getOrderById(String orderId) {
+        return orderCollection.whereEqualTo("orderId", orderId).get();
     }
 
     // Thêm đơn hàng mới
     public Task<Void> addOrder(OrderModel order) {
         return orderCollection.orderBy("orderId", Query.Direction.DESCENDING).limit(1).get()
                 .continueWithTask(task -> {
-                    int newOrderId = 1;
+                    int newOrderId = 1;  // Mặc định nếu không có đơn hàng trước đó
+                    String documentId = orderCollection.document().getId();  // Tạo documentId tự động
+
                     if (task.isSuccessful() && task.getResult() != null && !task.getResult().isEmpty()) {
+                        // Nếu có đơn hàng trước đó
                         DocumentSnapshot lastOrder = task.getResult().getDocuments().get(0);
-                        Long lastId = lastOrder.getLong("orderId"); // Firestore lưu số dưới dạng Long
+                        Long lastId = lastOrder.getLong("orderId");  // Lấy orderId của đơn hàng cuối cùng
                         if (lastId != null) {
-                            newOrderId = lastId.intValue() + 1;
+                            newOrderId = lastId.intValue() + 1;  // Tăng orderId lên 1
                         }
                     }
-                    order.setOrderId(newOrderId);
-                    return orderCollection.document(String.valueOf(newOrderId)).set(convertOrderToMap(order));
+
+                    // Gán orderId cho đơn hàng mới
+                    order.setOrderId(documentId);
+
+                    // Thêm đơn hàng vào Firestore
+                    return orderCollection.document(documentId).set(convertOrderToMap(order));
                 });
     }
 
     // Cập nhật đơn hàng theo orderId
     public Task<Void> updateOrder(String orderId, OrderModel order) {
-        return orderCollection.document(orderId).update(convertOrderToMap(order));
+        // Tìm đơn hàng với orderId và cập nhật
+        return orderCollection.whereEqualTo("orderId", orderId).get()
+                .continueWithTask(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        DocumentSnapshot documentSnapshot = task.getResult().getDocuments().get(0);
+                        return orderCollection.document(documentSnapshot.getId()).update(convertOrderToMap(order));
+                    } else {
+                        throw new Exception("Order not found");
+                    }
+                });
     }
 
     // Xoá đơn hàng
     public Task<Void> deleteOrder(String orderId) {
-        return orderCollection.document(orderId).delete();
+        return orderCollection.whereEqualTo("orderId", orderId).get()
+                .continueWithTask(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        DocumentSnapshot documentSnapshot = task.getResult().getDocuments().get(0);
+                        return orderCollection.document(documentSnapshot.getId()).delete();
+                    } else {
+                        throw new Exception("Order not found");
+                    }
+                });
     }
 
     // Chuyển đổi OrderModel sang Map để lưu vào Firestore

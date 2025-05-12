@@ -1,6 +1,7 @@
 package com.example.foodorderapp.adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +17,11 @@ import com.bumptech.glide.Glide;
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.model.OrderModel;
 import com.example.foodorderapp.service.FoodService;
+import com.example.foodorderapp.service.OrderService;
+import com.example.foodorderapp.ui.OrderActivity;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 
@@ -32,7 +37,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     @Override
     public OrderAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_food, parent, false);
+                .inflate(R.layout.item_order_food, parent, false);
 
         return new OrderAdapter.ViewHolder(view);
     }
@@ -67,6 +72,23 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         holder.btnFollow.setVisibility(View.VISIBLE);
         holder.btnCancel.setVisibility(View.VISIBLE);
         holder.tvStatus.setVisibility(View.GONE);
+
+        holder.btnCancel.setOnClickListener(v -> {
+            OrderService orderService = new OrderService();
+            order.setStatus("Đã hủy");
+            orderService.updateOrder(order.getOrderId(), order)
+                    .addOnSuccessListener(aVoid -> {
+                        orderList.remove(position);
+                        ((OrderActivity) context).historyList.add(order);
+
+                        notifyItemRemoved(position);
+                        notifyDataSetChanged();
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e("OrderAdapter", "Lỗi cập nhật trạng thái: " + e.getMessage());
+                    });
+        });
+
         if (orderList.get(position).getStatus().equals("Hoàn thành")) {
             holder.tvStatus.setVisibility(View.VISIBLE);
             holder.tvStatus.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.green));

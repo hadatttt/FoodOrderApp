@@ -48,10 +48,11 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="78dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="20dp"
         android:orientation="horizontal"
+        android:gravity="center"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
@@ -64,21 +65,30 @@
         <LinearLayout
             android:layout_width="220dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
-            android:paddingTop="7dp"
-            android:orientation="vertical">
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingTop="7dp">
+
+            <TextView
+                android:id="@+id/tv_id"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:text="#1234567"
+                android:textColor="@color/black"
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/tv_name_food"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
                 android:layout_marginBottom="5dp"
-                android:textStyle="bold"
+                android:text="Pizza Hut"
                 android:textColor="@color/black"
-                android:text="Pizza Hut" />
+                android:textSize="14sp"
+                android:textStyle="bold" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -89,12 +99,13 @@
                     android:id="@+id/tv_price"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
                     android:layout_marginRight="10dp"
+                    android:gravity="center_vertical"
+                    android:text="100.000đ"
                     android:textColor="@color/black"
-                    android:text="100.000đ" />
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
                 <View
                     android:layout_width="1dp"
                     android:layout_height="match_parent"
@@ -106,30 +117,20 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="5dp"
-                    android:visibility="gone"
-                    android:text="21/04, 11:30  -" />
+                    android:text="21/04, 11:30  -"
+                    android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/tv_quantity"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
-                    android:textSize="14sp"
+                    android:text="1 món"
                     android:textColor="@color/black"
-                    android:text="1 món" />
+                    android:textSize="14sp" />
             </LinearLayout>
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/tv_id"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center_vertical"
-            android:paddingTop="5dp"
-            android:text="#1234567"
-            android:textColor="@color/black"
-            android:textSize="14sp" />
     </LinearLayout>
 
     <LinearLayout
