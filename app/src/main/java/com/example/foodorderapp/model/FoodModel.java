@@ -6,7 +6,7 @@ public class FoodModel {
     private int foodId;
     private int storeId;
     private String name;
-    private double price;  // giá mặc định (có thể dùng cho size S hoặc M mặc định)
+    private double price;  // giá bắt đầu, khởi điểm
     private float rating;
     private int sold;
     private String category;

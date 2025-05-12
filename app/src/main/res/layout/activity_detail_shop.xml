@@ -26,14 +26,15 @@
 
             <ImageButton
                 android:id="@+id/btnBack"
-                android:layout_width="66dp"
-                android:layout_height="58dp"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
                 android:background="@drawable/bg_circle"
                 android:contentDescription="Back"
                 android:paddingLeft="7dp"
                 android:src="@drawable/ic_back"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
+
             <TextView
                 android:id="@+id/tvTitle"
                 android:layout_width="wrap_content"
