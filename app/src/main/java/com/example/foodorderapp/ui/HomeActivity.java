@@ -6,7 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -19,9 +21,11 @@ import com.example.foodorderapp.adapter.HotFoodAdapter;
 import com.example.foodorderapp.adapter.SaleShopAdapter;
 import com.example.foodorderapp.model.FoodModel;
 import com.example.foodorderapp.model.ShopModel;
+import com.example.foodorderapp.service.CartService;
 import com.example.foodorderapp.service.FoodService;
 import com.example.foodorderapp.service.ShopService;
 import com.example.foodorderapp.service.UserService;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,6 +48,8 @@ public class HomeActivity extends AppCompatActivity {
     private FoodService foodService;
     private ShopService shopService;
     private Context context = this;
+    private ImageView imgCart;
+    private TextView tvCartCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,6 +127,16 @@ public class HomeActivity extends AppCompatActivity {
             Intent intent = new Intent(HomeActivity.this, AllShopSaleActivity.class);
             startActivity(intent);
         });
+        imgCart = findViewById(R.id.imgCartIcon);
+        imgCart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(HomeActivity.this, CartActivity.class);
+                startActivity(intent);
+            }
+        });
+        tvCartCount = findViewById(R.id.textCartCount);
+        loadCartItems();
     }private void loadAllFoods() {
         foodService.getAllFoods().addOnSuccessListener(querySnapshots -> {
             fullFoodList.clear();
@@ -144,6 +160,7 @@ public class HomeActivity extends AppCompatActivity {
         }).addOnFailureListener(e -> {
             Log.e(TAG, "Lỗi khi tải dữ liệu món ăn", e);
         });
+
     }
 
     private void selectCategory(String category, Button selectedButton) {
@@ -215,5 +232,25 @@ public class HomeActivity extends AppCompatActivity {
             }
             filterShops("Tất cả");
         }).addOnFailureListener(e -> Log.e(TAG, "Error loading shop data", e));
+
+    }
+    private void loadCartItems() {
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        String userId = mAuth.getCurrentUser().getUid();
+        CartService cartService = new CartService();
+        cartService.getCartByUserId(userId)
+                .addOnSuccessListener(querySnapshot -> {
+                    int cartItemCount = querySnapshot.size(); // Mỗi tài liệu là một món
+
+                    if (cartItemCount > 0) {
+                        tvCartCount.setText(String.valueOf(cartItemCount));
+                        tvCartCount.setVisibility(View.VISIBLE);
+                    } else {
+                        tvCartCount.setVisibility(View.GONE);
+                    }
+                })
+                .addOnFailureListener(e -> {
+//                    Toast.makeText(HomeActivity.this, "Không thể tải giỏ hàng", Toast.LENGTH_SHORT).show();
+                });
     }
 }

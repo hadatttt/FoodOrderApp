@@ -15,6 +15,7 @@ public class ShopService {
         db = FirebaseFirestore.getInstance();
     }
 
+
     // Thêm cửa hàng vào Firestore
     public Task<DocumentReference> addShop(ShopModel shopModel) {
         CollectionReference shopCollection = db.collection("shops");

@@ -12,9 +12,9 @@
     <!-- Ảnh cửa hàng -->
     <ImageView
         android:id="@+id/imageShop"
-        android:layout_width="140dp"
+        android:layout_width="match_parent"
         android:layout_height="140dp"
-        android:scaleType="centerInside"
+        android:scaleType="fitCenter"
         android:src="@drawable/pizza" />
 
     <!-- Tên cửa hàng -->

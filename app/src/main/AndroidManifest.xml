@@ -40,7 +40,7 @@
             android:name=".ui.CartActivity"
             android:exported="false"></activity>
         <activity
-            android:name=".ui.DetailActivity"
+            android:name=".ui.DetailFoodActivity"
             android:exported="false"></activity>
         <activity
             android:name=".ui.OrderActivity"

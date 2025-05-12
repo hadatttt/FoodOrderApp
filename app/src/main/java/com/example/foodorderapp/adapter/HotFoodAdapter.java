@@ -1,6 +1,7 @@
 package com.example.foodorderapp.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,13 +14,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.model.FoodModel;
+import com.example.foodorderapp.ui.DetailFoodActivity;
 
 import java.util.List;
 
 public class HotFoodAdapter extends RecyclerView.Adapter<HotFoodAdapter.FoodViewHolder> {
 
     private List<FoodModel> foodList;
-    private Context context;
+    private final Context context;
 
     // Constructor
     public HotFoodAdapter(Context context, List<FoodModel> foodList) {
@@ -70,16 +72,23 @@ public class HotFoodAdapter extends RecyclerView.Adapter<HotFoodAdapter.FoodView
             textRating = itemView.findViewById(R.id.textRating);
             textSoldAmount = itemView.findViewById(R.id.textSoldAmount);
         }
-
         public void bind(FoodModel food) {
-
-            Glide.with(itemView.getContext())  // Sử dụng itemView.getContext() để lấy context
-                    .load(food.getImageUrl())  // Lấy link ảnh từ FoodModel
-        // Ảnh lỗi nếu tải ảnh không thành công
+            // Tải ảnh từ URL vào ImageView
+            Glide.with(itemView.getContext())
+                    .load(food.getImageUrl())
                     .into(imageFood);
 
+            // Bắt sự kiện click để mở DetailFoodActivity và truyền foodId
+            itemView.setOnClickListener(v -> {
+                Context context = itemView.getContext();
+                Intent intent = new Intent(context, DetailFoodActivity.class);
+                intent.putExtra("food_id", food.getFoodId());  // Đặt tên key rõ ràng hơn
+                context.startActivity(intent);
+            });
+
+            // Gán dữ liệu vào các view
             textFoodName.setText(food.getName());
-            textFoodPrice.setText(String.format("%.2f", food.getPrice()) + "đ");
+            textFoodPrice.setText(String.format("%,.3fđ", food.getPrice()));  // Định dạng giá đẹp hơn
             textRating.setText(String.valueOf(food.getRating()));
             textSoldAmount.setText("Đã bán: " + food.getSold());
         }

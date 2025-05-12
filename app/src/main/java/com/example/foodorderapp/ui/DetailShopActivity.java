@@ -1,8 +1,10 @@
 package com.example.foodorderapp.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,20 +44,22 @@ public class DetailShopActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_detail_shop);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.shopdetail), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
-
         // Khởi tạo danh sách và RecyclerView
         fullFoodList = new ArrayList<>();
         foodList = new ArrayList<>();
-        recyclerHotFood = findViewById(R.id.recyclerHotFood);
-        recyclerHotFood.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        recyclerHotFood = findViewById(R.id.listFood);
+        recyclerHotFood.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         hotFoodAdapter = new HotFoodAdapter(this, foodList);
         recyclerHotFood.setAdapter(hotFoodAdapter);
 
+        ImageButton btnBack = findViewById(R.id.btnBack);
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(DetailShopActivity.this, HomeActivity.class);
+                startActivity(intent);
+            }
+        });
         // Khởi tạo danh sách nút danh mục
         categoryButtons.add(findViewById(R.id.btnAll));
         categoryButtons.add(findViewById(R.id.btnSpaghetti));
@@ -64,13 +68,10 @@ public class DetailShopActivity extends AppCompatActivity {
         categoryButtons.add(findViewById(R.id.btnBurger));
         categoryButtons.add(findViewById(R.id.btnChicken));
         categoryButtons.add(findViewById(R.id.btnDrink));
-
         // Thiết lập sự kiện click cho các nút
         setupCategoryButtons();
-
         // Lấy storeId từ Intent
         int storeId = getIntent().getIntExtra("storeId", -1);
-
         // Lấy thông tin cửa hàng
         shopService.getShopById(storeId)
                 .addOnSuccessListener(queryDocumentSnapshots -> {
@@ -81,14 +82,14 @@ public class DetailShopActivity extends AppCompatActivity {
                         String ad = shopDoc.getString("advertisement");
                         String imageUrl = shopDoc.getString("imageUrl");
 
-                        TextView tvShopName = findViewById(R.id.tvFoodName);
+                        TextView tvShopName = findViewById(R.id.tvShopName);
                         TextView tvShopRating = findViewById(R.id.tvRate);
                         TextView tvShopAd = findViewById(R.id.tvDesc);
-                        ImageView imgShop = findViewById(R.id.imageShop);
+                        ImageView imgShop = findViewById(R.id.imgShop);
 
-                        tvShopName.setText(shopName != null ? shopName : "N/A");
+                        tvShopName.setText(shopName);
                         tvShopRating.setText(rating != null ? String.format("%.1f", rating) : "N/A");
-                        tvShopAd.setText(ad != null ? ad : "");
+                        tvShopAd.setText(ad);
 
                         if (imageUrl != null && !imageUrl.isEmpty()) {
                             Glide.with(this).load(imageUrl).into(imgShop);
@@ -114,7 +115,6 @@ public class DetailShopActivity extends AppCompatActivity {
                             }
                         }
                     }
-
                     // Hiển thị/ẩn các nút danh mục
                     for (Button button : categoryButtons) {
                         String category = button.getText().toString().toLowerCase();
@@ -124,7 +124,6 @@ public class DetailShopActivity extends AppCompatActivity {
                             button.setVisibility(View.GONE);
                         }
                     }
-
                     // Cập nhật danh sách món ăn mặc định
                     foodList.clear();
                     foodList.addAll(fullFoodList);

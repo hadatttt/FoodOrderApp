@@ -111,7 +111,8 @@ public class CartActivity extends AppCompatActivity {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         String userId = mAuth.getCurrentUser().getUid();
         loadCartItems(userId);
-    } private void processOrder() {
+    }
+    private void processOrder() {
         final int[] d = {0};
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         if (mAuth.getCurrentUser() != null) {
