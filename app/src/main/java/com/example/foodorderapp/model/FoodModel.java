@@ -1,27 +1,26 @@
 package com.example.foodorderapp.model;
 
+import java.util.Map;
+
 public class FoodModel {
     private int foodId;
     private int storeId;
     private String name;
-    private double price;
+    private double price;  // giá mặc định (có thể dùng cho size S hoặc M mặc định)
     private float rating;
     private int sold;
     private String category;
     private String imageUrl;
-    private String caption;      // Mô tả ngắn
-    private boolean canUpsize;   // Có thể tăng size hay không
-    private double upsizePrice;  // Giá tiền để tăng size
+    private String caption;
+    private Map<String, Double> sizePrices; // ✅ Giá theo size: S, M, L
 
-    // Constructor mặc định (Firestore yêu cầu)
-    public FoodModel() {
-        // Required empty constructor for Firestore
-    }
+    // Constructor mặc định (dùng cho Firestore)
+    public FoodModel() {}
 
     // Constructor đầy đủ
     public FoodModel(int foodId, int storeId, String name, double price, float rating,
                      int sold, String category, String imageUrl, String caption,
-                     boolean canUpsize, double upsizePrice) {
+                     Map<String, Double> sizePrices) {
         this.foodId = foodId;
         this.storeId = storeId;
         this.name = name;
@@ -31,11 +30,10 @@ public class FoodModel {
         this.category = category;
         this.imageUrl = imageUrl;
         this.caption = caption;
-        this.canUpsize = canUpsize;
-        this.upsizePrice = upsizePrice;
+        this.sizePrices = sizePrices;
     }
 
-    // Getter và Setter
+    // Getters và Setters
     public int getFoodId() { return foodId; }
     public void setFoodId(int foodId) { this.foodId = foodId; }
 
@@ -63,9 +61,6 @@ public class FoodModel {
     public String getCaption() { return caption; }
     public void setCaption(String caption) { this.caption = caption; }
 
-    public boolean isCanUpsize() { return canUpsize; }
-    public void setCanUpsize(boolean canUpsize) { this.canUpsize = canUpsize; }
-
-    public double getUpsizePrice() { return upsizePrice; }
-    public void setUpsizePrice(double upsizePrice) { this.upsizePrice = upsizePrice; }
+    public Map<String, Double> getSizePrices() { return sizePrices; }
+    public void setSizePrices(Map<String, Double> sizePrices) { this.sizePrices = sizePrices; }
 }

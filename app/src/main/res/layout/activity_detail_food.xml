@@ -176,7 +176,7 @@
                         android:layout_height="wrap_content"
                         android:button="@null"
                         android:background="@drawable/bg_circle"
-                        android:text="Nhỏ"
+                        android:text="S"
                         android:gravity="center"
                         android:layout_marginRight="10dp"
                         android:textColor="@drawable/txt_color_radio"/>
@@ -186,7 +186,7 @@
                         android:layout_height="wrap_content"
                         android:button="@null"
                         android:background="@drawable/bg_circle"
-                        android:text="Vừa"
+                        android:text="M"
                         android:gravity="center"
                         android:layout_marginRight="10dp"
                         android:textColor="@drawable/txt_color_radio"/>
@@ -196,7 +196,7 @@
                         android:layout_height="wrap_content"
                         android:button="@null"
                         android:background="@drawable/bg_circle"
-                        android:text="Lớn"
+                        android:text="L"
                         android:gravity="center"
                         android:textColor="@drawable/txt_color_radio"/>
                 </RadioGroup>

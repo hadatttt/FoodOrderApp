@@ -2,6 +2,7 @@ package com.example.foodorderapp.ui;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,11 +18,14 @@ import com.example.foodorderapp.service.ShopService;
 import com.example.foodorderapp.service.UserService;
 import com.google.firebase.firestore.DocumentSnapshot;
 
+import java.util.Map;
+
 public class DetailFoodActivity extends AppCompatActivity {
+    private int quantity = 1;
     private FoodService foodService = new FoodService();
     private ShopService shopService = new ShopService();
     private UserService userService = new UserService();
-
+    private Map<String, Double> sizePrices;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,8 +37,24 @@ public class DetailFoodActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        //nhan id food
         int foodId = getIntent().getIntExtra("foodid", -1);
-        // TODO: Viết logic xử lý ở đây nếu cần
+        //setup button
+        ImageButton btnPlus = findViewById(R.id.btnPlus);
+        ImageButton btnMinus = findViewById(R.id.btnMinus);
+        TextView tvQuantity = findViewById(R.id.tvQuantity);
+        tvQuantity.setText(String.valueOf(quantity));
+        btnPlus.setOnClickListener(v -> {
+            quantity++;
+            tvQuantity.setText(String.valueOf(quantity));
+        });
+        btnMinus.setOnClickListener(v -> {
+            if (quantity > 1) {
+                quantity--;
+                tvQuantity.setText(String.valueOf(quantity));
+            }
+        });
+
         foodService.getFoodDetails(foodId).addOnCompleteListener(task -> {
             if (task.isSuccessful() && task.getResult() != null && !task.getResult().isEmpty()) {
                 DocumentSnapshot document = task.getResult().getDocuments().get(0);
@@ -51,14 +71,17 @@ public class DetailFoodActivity extends AppCompatActivity {
 
                     // Lấy name
                     String name = document.getString("name");
+                    String decs = document.getString("caption");
 
                     // Lấy price
                     Double priceDouble = document.getDouble("price");
                     double price = priceDouble != null ? priceDouble : 0.3;
                     TextView foodName = findViewById(R.id.tvFoodName);
                     TextView ratting = findViewById(R.id.tvRate);
+                    TextView cap = findViewById(R.id.tvDesc);
                     foodName.setText(name);
-                    ratting.setText((float) rating);
+                    ratting.setText(String.valueOf(rating));  // Đổi từ float sang String
+                    cap.setText(decs);
 
                     Log.d("DetailFood", "storeId: " + storeId);
                     Log.d("DetailFood", "name: " + name);
@@ -71,19 +94,13 @@ public class DetailFoodActivity extends AppCompatActivity {
                             DocumentSnapshot shopDoc = shopTask.getResult().getDocuments().get(0);
 
                             String shopName = shopDoc.getString("name");
-                            String caption = shopDoc.getString("caption");
                             String address = shopDoc.getString("address");
 
                             Log.d("DetailShop", "Shop Name: " + shopName);
-                            Log.d("DetailShop", "Caption: " + caption);
                             Log.d("DetailShop", "Address: " + address);
 
                             TextView shopn = findViewById(R.id.tvShopName);
-                            TextView ad = findViewById(R.id.tvDesc);
                             shopn.setText(shopName);
-                            ad.setText(caption);
-
-
                         } else {
                             Toast.makeText(this, "Không tìm thấy cửa hàng", Toast.LENGTH_SHORT).show();
                         }

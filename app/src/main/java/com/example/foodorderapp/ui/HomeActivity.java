@@ -30,6 +30,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class HomeActivity extends AppCompatActivity {
     private static final String TAG = "HomeActivity";
@@ -151,8 +152,7 @@ public class HomeActivity extends AppCompatActivity {
                         doc.getString("category"),
                         doc.getString("imageUrl"),
                         doc.getString("caption"),
-                        doc.getBoolean("canUpsize") != null ? doc.getBoolean("canUpsize") : false,
-                        doc.getDouble("upsizePrice") != null ? doc.getDouble("upsizePrice") : 0.0
+                        (Map<String, Double>) doc.get("sizePrices")
                 );
                 fullFoodList.add(food);
             }
