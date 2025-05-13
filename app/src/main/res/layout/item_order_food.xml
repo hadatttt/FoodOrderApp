@@ -135,11 +135,12 @@
 
         <Button
             android:id="@+id/btn_follow"
+            style="@style/buttonFollow"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            style="@style/buttonFollow"
             android:text="Theo dõi đơn" />
+
         <Button
             android:id="@+id/btn_feedback"
             android:layout_width="0dp"
@@ -151,6 +152,7 @@
             android:text="Đánh giá" />
         <View
             android:layout_width="60dp"
+            android:id="@+id/v_between"
             android:layout_height="match_parent" />
         <Button
             android:id="@+id/btn_cancel"

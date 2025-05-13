@@ -1,13 +1,18 @@
 package com.example.foodorderapp.adapter;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -15,13 +20,19 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.foodorderapp.R;
+import com.example.foodorderapp.model.CartModel;
 import com.example.foodorderapp.model.OrderModel;
+import com.example.foodorderapp.service.CartService;
 import com.example.foodorderapp.service.FoodService;
 import com.example.foodorderapp.service.OrderService;
+import com.example.foodorderapp.service.UserService;
+import com.example.foodorderapp.ui.CartActivity;
+import com.example.foodorderapp.ui.HomeActivity;
 import com.example.foodorderapp.ui.OrderActivity;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.auth.User;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -76,6 +87,14 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         holder.btnCancel.setVisibility(View.VISIBLE);
         holder.tvStatus.setVisibility(View.GONE);
 
+        holder.vBetween.setVisibility(View.VISIBLE);
+        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) holder.vBetween.getLayoutParams();
+        params.width = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, 60, context.getResources().getDisplayMetrics());
+        holder.vBetween.setLayoutParams(params);
+
+
+
         holder.btnCancel.setOnClickListener(v -> {
             OrderService orderService = new OrderService();
             order.setStatus("Đã hủy");
@@ -106,6 +125,12 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             holder.btnRepurchase.setVisibility(View.VISIBLE);
             holder.tvDate.setText(orderList.get(position).getOrderDate());
             holder.tvDate.setVisibility(View.VISIBLE);
+//            params = (LinearLayout.LayoutParams) holder.vBetween.getLayoutParams();
+//            params.width = (int) TypedValue.applyDimension(
+//                    TypedValue.COMPLEX_UNIT_DIP, 0, context.getResources().getDisplayMetrics());
+//            params.weight = 1;
+//            holder.vBetween.setLayoutParams(params);
+
         } else  if (orderList.get(position).getStatus().equals("Đã hủy")) {
             holder.tvStatus.setVisibility(View.VISIBLE);
             holder.btnFollow.setVisibility(View.GONE);
@@ -115,7 +140,36 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             holder.tvStatus.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.red));
             holder.tvDate.setText(orderList.get(position).getOrderDate());
             holder.tvDate.setVisibility(View.VISIBLE);
+            params = (LinearLayout.LayoutParams) holder.vBetween.getLayoutParams();
+            params.width = (int) TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP, 0, context.getResources().getDisplayMetrics());
+            params.weight = 1;
+            holder.vBetween.setLayoutParams(params);
         }
+
+        holder.btnRepurchase.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                UserService userService = new UserService();
+                CartService cartService = new CartService();
+
+                userService.getUser().addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        String userId = task.getResult().getId();
+                        CartModel newCartItem = new CartModel(order.getFoodId(), order.getSize(), order.getQuantity(), order.getPrice(), userId);
+                        cartService.checkAndAddOrUpdateCartItem(newCartItem)
+                                .addOnSuccessListener(aVoid -> {
+                                    Intent intent = new Intent((Activity) context, CartActivity.class);
+                                    context.startActivity(intent);
+                                })
+                                .addOnFailureListener(e -> {
+                                    Toast.makeText(context, "Lỗi thêm vào giỏ hàng", Toast.LENGTH_SHORT).show();
+                                });
+                    } else {
+                    }
+                });
+            }
+        });
     }
 
     @Override
@@ -125,6 +179,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView tvName, tvTitle, tvPrice, tvQuantity, tvId, tvStatus, tvDate, tvSize;
         public ImageView image;
+        public View vBetween;
         public Button btnFollow, btnCancel, btnFeedback, btnRepurchase;
 
         public ViewHolder(View view) {
@@ -143,6 +198,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             btnCancel = view.findViewById(R.id.btn_cancel);
             btnFeedback = view.findViewById(R.id.btn_feedback);
             btnRepurchase = view.findViewById(R.id.btn_repurchase);
+            vBetween = view.findViewById(R.id.v_between);
         }
     }
 }
