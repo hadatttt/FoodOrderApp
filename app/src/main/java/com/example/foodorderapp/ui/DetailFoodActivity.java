@@ -2,8 +2,10 @@ package com.example.foodorderapp.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -74,8 +76,13 @@ public class DetailFoodActivity extends AppCompatActivity {
     private void setupViews() {
         // Thiết lập giao diện
         ImageButton btnBack = findViewById(R.id.btnBack);
-        btnBack.setOnClickListener(v -> startActivity(new Intent(this, HomeActivity.class)));
-
+//        btnBack.setOnClickListener(v -> startActivity(new Intent(this, HomeActivity.class)));
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
         imgFood = findViewById(R.id.imgFood);
         tvFoodName = findViewById(R.id.tvFoodName);
         tvRate = findViewById(R.id.tvRate);
@@ -100,7 +107,12 @@ public class DetailFoodActivity extends AppCompatActivity {
         rgSize.setOnCheckedChangeListener((group, checkedId) -> updatePriceBasedOnSize());
 
         // Sự kiện "Thêm vào giỏ hàng"
-        findViewById(R.id.btnAddToCart).setOnClickListener(v -> addToCart());
+        findViewById(R.id.btnAddToCart).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addToCart();
+            }
+        });
     }
 
     private void updateQuantity(int delta) {
@@ -112,19 +124,19 @@ public class DetailFoodActivity extends AppCompatActivity {
     private void addToCart() {
         String size = getSelectedSize();
         double price = sizePrices.getOrDefault(size, 0.0);
-        double totalPrice = price * quantity;
 
-        // Lấy thông tin người dùng và thêm vào giỏ hàng
         userService.getUser().addOnCompleteListener(task -> {
             if (task.isSuccessful() && task.getResult() != null) {
                 String userId = task.getResult().getId();
-                CartModel cartModel = new CartModel(foodId, size, quantity, totalPrice, userId);
-                addCartItem(cartModel);
+                CartModel newCartItem = new CartModel(foodId, size, quantity, price, userId);
+                cartService.checkAndAddOrUpdateCartItem(newCartItem);
+
             } else {
                 Toast.makeText(this, "Không tìm thấy thông tin người dùng", Toast.LENGTH_SHORT).show();
             }
         });
     }
+
 
     private void addCartItem(CartModel cartModel) {
         cartService.addToCart(cartModel).addOnCompleteListener(cartTask -> {

@@ -23,7 +23,9 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> {
     private ArrayList<OrderModel> orderList;
@@ -65,8 +67,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                     }
                 });
         holder.tvId.setText("#"+order.getOrderId());
-        holder.tvPrice.setText(order.getPrice() + "đ");
+        holder.tvPrice.setText(order.getPrice() + "00 đ");
         holder.tvQuantity.setText(order.getQuantity()+ " món");
+        holder.tvSize.setText(order.getSize());
         holder.tvStatus.setText(order.getStatus());
         holder.tvDate.setVisibility(View.GONE);
         holder.btnFollow.setVisibility(View.VISIBLE);
@@ -79,6 +82,11 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             orderService.updateOrder(order.getOrderId(), order)
                     .addOnSuccessListener(aVoid -> {
                         orderList.remove(position);
+
+                        Date date = new Date();
+                        SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm");
+                        order.setOrderDate(sdf.format(date));
+
                         ((OrderActivity) context).historyList.add(order);
 
                         notifyItemRemoved(position);
@@ -115,7 +123,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         return orderList.size();
     }
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public TextView tvName, tvTitle, tvPrice, tvQuantity, tvId, tvStatus, tvDate;
+        public TextView tvName, tvTitle, tvPrice, tvQuantity, tvId, tvStatus, tvDate, tvSize;
         public ImageView image;
         public Button btnFollow, btnCancel, btnFeedback, btnRepurchase;
 
@@ -127,6 +135,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             tvPrice = view.findViewById(R.id.tv_price);
             tvQuantity = view.findViewById(R.id.tv_quantity);
             tvId = view.findViewById(R.id.tv_id);
+            tvSize = view.findViewById(R.id.tv_size);
             tvDate = view.findViewById(R.id.tv_date);
             image = view.findViewById(R.id.img_food);
             tvStatus = view.findViewById(R.id.tv_status);

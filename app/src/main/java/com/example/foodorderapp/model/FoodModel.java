@@ -12,7 +12,7 @@ public class FoodModel {
     private String category;
     private String imageUrl;
     private String caption;
-    private Map<String, Double> sizePrices; // ✅ Giá theo size: S, M, L
+    private Map<String, Double> sizePrices;
 
     // Constructor mặc định (dùng cho Firestore)
     public FoodModel() {}
@@ -61,6 +61,6 @@ public class FoodModel {
     public String getCaption() { return caption; }
     public void setCaption(String caption) { this.caption = caption; }
 
-    public Map<String, Double> getSizePrices() { return sizePrices; }
+    public double getSizePrices(String size) { return sizePrices.get(size); }
     public void setSizePrices(Map<String, Double> sizePrices) { this.sizePrices = sizePrices; }
 }

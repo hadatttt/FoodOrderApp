@@ -16,16 +16,18 @@ public class OrderModel {
 
     private String orderDate;
     private String status;
+    private String size;
 
     public OrderModel() {
     }
 
-    public OrderModel(String userId, int foodId, int quantity, double price, String orderDate, String status) {
+    public OrderModel(String userId, int foodId, int quantity, double price, String size, String orderDate, String status) {
         this.userId = userId;
         this.foodId = foodId;
         this.quantity = quantity;
         this.price = price;
         this.orderDate = orderDate;
+        this.size = size;
         this.status = status;
     }
 
@@ -83,5 +85,13 @@ public class OrderModel {
 
     public void setPrice(double price) {
         this.price = price;
+    }
+
+    public String getSize() {
+        return size;
+    }
+
+    public void setSize(String size) {
+        this.size = size;
     }
 }

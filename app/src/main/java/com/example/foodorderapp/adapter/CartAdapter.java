@@ -22,11 +22,11 @@ import com.example.foodorderapp.ui.CartActivity;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.List;
+import java.util.Map;
 
 public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder> {
     private Context context;
     private List<CartModel> cartList;
-    private Double price = 0.0;
     public CartAdapter(Context context, List<CartModel> cartList) {
         this.context = context;
         this.cartList = cartList;
@@ -45,7 +45,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
         // Set data for each view
      // Assuming foodId is the food name
-        holder.tvPrice.setText(cartItem.getPrice() + " đ");
+        holder.tvPrice.setText(cartItem.getPrice() * cartItem.getQuantity() + "00 đ");
         holder.tvSize.setText(cartItem.getSize());
         holder.tvQuantity.setText(String.valueOf(cartItem.getQuantity()));
 
@@ -59,10 +59,17 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
                         DocumentSnapshot foodSnapshot = queryDocumentSnapshots.getDocuments().get(0);
                         String imageUrl = foodSnapshot.getString("imageUrl");
                         holder.tvFoodName.setText(foodSnapshot.getString("name"));
-                        Double fetchedPrice = foodSnapshot.getDouble("price");
+                        Map<String, Object> sizePricesMap = (Map<String, Object>) foodSnapshot.get("sizePrices");
+                        if (sizePricesMap != null && sizePricesMap.containsKey(cartItem.getSize())) {
+                            Object priceObj = sizePricesMap.get(cartItem.getSize());
 
-                        if (fetchedPrice != null) {
-                            price = fetchedPrice;
+                            if (priceObj instanceof Number) {
+                                Double fetchedPrice = ((Number) priceObj).doubleValue();
+                                if (fetchedPrice != null) {
+                                    cartItem.setPrice(fetchedPrice);
+                                    holder.tvPrice.setText(fetchedPrice * cartItem.getQuantity() + "00 đ");
+                                }
+                            }
                         }
                         Glide.with(context)
                                 .load(imageUrl)
@@ -79,16 +86,15 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             int quantity = cartItem.getQuantity();
             if (quantity > 1) {
                 cartItem.setQuantity(quantity - 1);
-                cartItem.setPrice(price * cartItem.getQuantity());
                 holder.tvQuantity.setText(String.valueOf(cartItem.getQuantity()));
                 ((CartActivity) context).updateTotalPrice();
-                holder.tvPrice.setText(price * cartItem.getQuantity()+" đ");
+                holder.tvPrice.setText(cartItem.getPrice() * cartItem.getQuantity() + "00 đ");
                 cartService.updateCartItem(cartItem.getUserId(), cartItem.getFoodId(), cartItem);
                 notifyItemChanged(position);
-
             } else {
                 cartList.remove(position);
-                cartService.deleteCartItemByFoodId(cartItem.getUserId(), cartItem.getFoodId());
+                cartService.deleteCartItemByFoodId(cartItem.getUserId(), cartItem.getFoodId(), cartItem.getSize());
+                ((CartActivity) context).updateTotalPrice();
                 notifyItemRemoved(position);
             }
         });
@@ -96,19 +102,19 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         holder.btnAdd.setOnClickListener(v -> {
             int quantity = cartItem.getQuantity();
             cartItem.setQuantity(quantity + 1);
-            cartItem.setPrice(price * cartItem.getQuantity());
-            holder.tvPrice.setText(price * cartItem.getQuantity() + " đ");
+            holder.tvPrice.setText(cartItem.getPrice() * cartItem.getQuantity() + "00 đ");
             ((CartActivity) context).updateTotalPrice();
             holder.tvQuantity.setText(String.valueOf(cartItem.getQuantity()));
             cartService.updateCartItem(cartItem.getUserId(), cartItem.getFoodId(), cartItem);
-            notifyItemChanged(position);
+            notifyDataSetChanged();
         });
 
         // Set remove button action
         holder.btnRemove.setOnClickListener(v -> {
             cartList.remove(position);
-            cartService.deleteCartItemByFoodId(cartItem.getUserId(), cartItem.getFoodId());
-            notifyItemRemoved(position);
+            cartService.deleteCartItemByFoodId(cartItem.getUserId(), cartItem.getFoodId(), cartItem.getSize());
+            ((CartActivity) context).updateTotalPrice();
+            notifyDataSetChanged();
         });
     }
 

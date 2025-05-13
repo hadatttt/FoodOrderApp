@@ -72,11 +72,10 @@
                     android:layout_height="20dp"
                     android:layout_gravity="top|end"
                     android:background="@drawable/bg_circle_badge"
-                    android:text="2"
                     android:textColor="#FFFFFF"
                     android:textSize="12sp"
                     android:gravity="center"
-                    android:visibility="visible" />
+                    android:visibility="gone" />
 
             </FrameLayout>
         </LinearLayout>

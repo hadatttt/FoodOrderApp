@@ -137,8 +137,14 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
         tvCartCount = findViewById(R.id.textCartCount);
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
         loadCartItems();
-    }private void loadAllFoods() {
+    }
+
+    private void loadAllFoods() {
         foodService.getAllFoods().addOnSuccessListener(querySnapshots -> {
             fullFoodList.clear();
             for (DocumentSnapshot doc : querySnapshots) {

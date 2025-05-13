@@ -89,9 +89,9 @@ public class CartActivity extends AppCompatActivity {
                             CartModel cartItem = documentSnapshot.toObject(CartModel.class);
                             cartList.add(cartItem);
                         }
-                        cartAdapter.notifyDataSetChanged();
-                        updateTotalPrice();
                     }
+                    cartAdapter.notifyDataSetChanged();
+                    updateTotalPrice();
                 })
                 .addOnFailureListener(e -> {
                     Log.e("CartActivity", "Lỗi lấy dữ liệu giỏ hàng: " + e.getMessage());
@@ -100,9 +100,16 @@ public class CartActivity extends AppCompatActivity {
     public void updateTotalPrice() {
         double totalPrice = 0;
         for (CartModel cartItem : cartList) {
-            totalPrice += cartItem.getPrice();
+            totalPrice += cartItem.getPrice()*cartItem.getQuantity();
         }
         tvPrice.setText(String.format("%.3fđ", totalPrice));
+        if (cartList.isEmpty()) {
+            btnPay.setEnabled(false);
+            btnPay.setBackgroundColor(getResources().getColor(R.color.gray_black)); // màu xám
+        } else {
+            btnPay.setEnabled(true);
+            btnPay.setBackgroundColor(getResources().getColor(R.color.orange)); // màu cam
+        }
     }
     @Override
     protected void onResume() {
@@ -112,6 +119,7 @@ public class CartActivity extends AppCompatActivity {
         String userId = mAuth.getCurrentUser().getUid();
         loadCartItems(userId);
     }
+
     private void processOrder() {
         final int[] d = {0};
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
@@ -123,13 +131,14 @@ public class CartActivity extends AppCompatActivity {
             for (CartModel cartItem : cartList) {
 
                 Date date = new Date();
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm");
 
                 order = new OrderModel(
                         userId,
                         cartItem.getFoodId(),
                         cartItem.getQuantity(),
-                        cartItem.getPrice(),
+                        cartItem.getPrice() * cartItem.getQuantity(),
+                        cartItem.getSize(),
                         sdf.format(date),
                         "Đang giao"
                 );
@@ -146,7 +155,7 @@ public class CartActivity extends AppCompatActivity {
                         startActivity(intent);
                     }
                 }).addOnFailureListener(e -> {
-                    Log.e("CartActivity", "Lỗi thêm đơn hàng: " );
+                    Log.e("CartActivity", "Lỗi thêm đơn hàng: "+ e.getMessage() );
                     progressBar.setVisibility(View.GONE);
                 });
             }

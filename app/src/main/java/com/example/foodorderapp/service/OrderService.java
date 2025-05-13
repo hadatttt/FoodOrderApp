@@ -32,26 +32,10 @@ public class OrderService {
 
     // Thêm đơn hàng mới
     public Task<Void> addOrder(OrderModel order) {
-        return orderCollection.orderBy("orderId", Query.Direction.DESCENDING).limit(1).get()
-                .continueWithTask(task -> {
-                    int newOrderId = 1;  // Mặc định nếu không có đơn hàng trước đó
-                    String documentId = orderCollection.document().getId();  // Tạo documentId tự động
+        String documentId = orderCollection.document().getId();
 
-                    if (task.isSuccessful() && task.getResult() != null && !task.getResult().isEmpty()) {
-                        // Nếu có đơn hàng trước đó
-                        DocumentSnapshot lastOrder = task.getResult().getDocuments().get(0);
-                        Long lastId = lastOrder.getLong("orderId");  // Lấy orderId của đơn hàng cuối cùng
-                        if (lastId != null) {
-                            newOrderId = lastId.intValue() + 1;  // Tăng orderId lên 1
-                        }
-                    }
-
-                    // Gán orderId cho đơn hàng mới
-                    order.setOrderId(documentId);
-
-                    // Thêm đơn hàng vào Firestore
-                    return orderCollection.document(documentId).set(convertOrderToMap(order));
-                });
+        order.setOrderId(documentId);
+        return orderCollection.document(documentId).set(convertOrderToMap(order));
     }
 
     // Cập nhật đơn hàng theo orderId
@@ -90,6 +74,7 @@ public class OrderService {
         data.put("status", order.getStatus());
         data.put("foodId", order.getFoodId());
         data.put("quantity", order.getQuantity());
+        data.put("size", order.getSize());
         data.put("price", order.getPrice());
         return data;
     }
