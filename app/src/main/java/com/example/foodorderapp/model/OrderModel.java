@@ -17,11 +17,12 @@ public class OrderModel {
     private String orderDate;
     private String status;
     private String size;
+    private String address;
 
     public OrderModel() {
     }
 
-    public OrderModel(String userId, int foodId, int quantity, double price, String size, String orderDate, String status) {
+    public OrderModel(String userId, int foodId, int quantity, double price, String size, String orderDate, String status, String address) {
         this.userId = userId;
         this.foodId = foodId;
         this.quantity = quantity;
@@ -29,6 +30,7 @@ public class OrderModel {
         this.orderDate = orderDate;
         this.size = size;
         this.status = status;
+        this.address = address;
     }
 
     public String getOrderId() {
@@ -93,5 +95,13 @@ public class OrderModel {
 
     public void setSize(String size) {
         this.size = size;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 }

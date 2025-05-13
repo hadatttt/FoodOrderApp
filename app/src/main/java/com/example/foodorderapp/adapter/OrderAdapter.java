@@ -110,7 +110,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             holder.tvStatus.setVisibility(View.VISIBLE);
             holder.btnFollow.setVisibility(View.GONE);
             holder.btnCancel.setVisibility(View.GONE);
-            holder.btnFeedback.setVisibility(View.VISIBLE);
+            holder.btnFeedback.setVisibility(View.GONE);
             holder.btnRepurchase.setVisibility(View.VISIBLE);
             holder.tvStatus.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.red));
             holder.tvDate.setText(orderList.get(position).getOrderDate());
