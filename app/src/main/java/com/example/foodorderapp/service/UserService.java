@@ -1,4 +1,5 @@
 package com.example.foodorderapp.service;
+
 import android.util.Log;
 
 import com.example.foodorderapp.model.UserModel;
@@ -11,6 +12,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+
 public class UserService {
     private FirebaseFirestore db;
 
@@ -44,6 +46,15 @@ public class UserService {
         }
     }
 
+    public String getUserId() {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            return currentUser.getUid();
+        } else {
+            return null;
+        }
+    }
+
     // Cập nhật thông tin người dùng trong Firestore
     public Task<Void> updateUser(UserModel user) {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -69,6 +80,7 @@ public class UserService {
             return Tasks.forException(new Exception("User not logged in"));
         }
     }
+
     public Task<FirebaseUser> loginUser(String email, String password) {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
@@ -129,7 +141,6 @@ public class UserService {
                     }
                 });
     }
-
 
 
     public Task<Void> loginWithGoogle(String idToken) {

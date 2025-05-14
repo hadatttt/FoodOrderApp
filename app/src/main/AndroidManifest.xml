@@ -46,7 +46,7 @@
             android:name=".ui.OrderActivity"
             android:exported="false"></activity>
         <activity
-            android:name=".IntroActivity"
+            android:name=".ui.SearchActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

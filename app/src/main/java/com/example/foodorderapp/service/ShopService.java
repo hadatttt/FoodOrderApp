@@ -2,11 +2,17 @@ package com.example.foodorderapp.service;
 
 import com.example.foodorderapp.model.ShopModel;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.DocumentReference;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class ShopService {
     private FirebaseFirestore db;
@@ -34,6 +40,35 @@ public class ShopService {
         return shopCollection.whereEqualTo("storeid", storeId).get();  // Truy vấn cửa hàng theo storeId
     }
 
+    // Tìm kiếm cửa hàng theo tên
+    public List<ShopModel> searchShopsByName(String query) {
+        try {
+            CollectionReference shopCollection = db.collection("shops");
+            // Lấy tất cả dữ liệu cửa hàng từ Firestore
+            QuerySnapshot snapshot = Tasks.await(shopCollection.get());
+            List<ShopModel> allShops = snapshot.toObjects(ShopModel.class);
+
+            if (query == null || query.trim().isEmpty()) {
+                return allShops;  // Nếu không có truy vấn, trả về tất cả cửa hàng
+            }
+
+            List<ShopModel> filteredShops = new ArrayList<>();
+            String lowercaseQuery = query.trim().toLowerCase();
+
+            // Lọc các cửa hàng theo tên
+            for (ShopModel shop : allShops) {
+                if (shop.getShopName().toLowerCase().contains(lowercaseQuery)) {
+                    filteredShops.add(shop);
+                }
+            }
+
+            return filteredShops;  // Trả về danh sách cửa hàng đã lọc
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+            return Collections.emptyList();  // Trả về danh sách rỗng nếu có lỗi
+        }
+    }
+
     // Cập nhật cửa hàng
     public Task<QuerySnapshot> updateShop(int storeId, ShopModel shopModel) {
         CollectionReference shopCollection = db.collection("shops");
@@ -58,6 +93,11 @@ public class ShopService {
                         shopCollection.document(documentSnapshot.getId()).delete();  // Xóa cửa hàng
                     }
                 });
+    }
+
+    public Task<QuerySnapshot> getHotShops() {
+        CollectionReference shopCollection = db.collection("shops");
+        return shopCollection.orderBy("rating", com.google.firebase.firestore.Query.Direction.DESCENDING).limit(30).get();
     }
     public void updateStoreRating(int storeId) {
         CollectionReference foodCollection = db.collection("foods");

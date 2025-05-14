@@ -5,8 +5,12 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.*;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 public class FoodService {
     private final FirebaseFirestore db;
@@ -26,6 +30,32 @@ public class FoodService {
         return foodCollection.get();
     }
 
+    // Lấy danh sách món ăn theo tên
+    public List<FoodModel> getFoodsByName(String name) {
+        try {
+            QuerySnapshot snapshot = Tasks.await(foodCollection.get());
+            List<FoodModel> foodList = snapshot.toObjects(FoodModel.class);
+
+            if (name == null || name.trim().isEmpty()) {
+                return foodList;
+            }
+
+            List<FoodModel> results = new ArrayList<>();
+            String lowercaseName = name.trim().toLowerCase();
+            for (FoodModel food : foodList) {
+                String foodName = food.getName().toLowerCase();
+                if (foodName.contains(lowercaseName)) {
+                    results.add(food);
+                }
+            }
+
+            return results;
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
+    }
+
     // Lấy thông tin món ăn theo foodId
     public Task<QuerySnapshot> getFoodDetails(int foodId) {
         return foodCollection.whereEqualTo("foodId", foodId).get();
@@ -34,6 +64,10 @@ public class FoodService {
     // Thêm món ăn mới
     public Task<DocumentReference> addFood(FoodModel food) {
         return foodCollection.add(convertFoodToMap(food));
+    }
+
+    public Task<QuerySnapshot> getRandomFoods(int limit) {
+        return foodCollection.limit(limit).get();
     }
 
     // Cập nhật thông tin món ăn theo foodId
