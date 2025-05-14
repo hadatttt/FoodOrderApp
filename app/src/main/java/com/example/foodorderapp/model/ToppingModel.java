@@ -3,6 +3,8 @@ package com.example.foodorderapp.model;
 public class ToppingModel {
     private String name;
     private double price;
+    private String imageUrl;
+
 
     public ToppingModel() {
         // Required for Firestore
