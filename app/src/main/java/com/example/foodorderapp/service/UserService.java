@@ -12,6 +12,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 public class UserService {
     private FirebaseFirestore db;
@@ -28,7 +29,6 @@ public class UserService {
             DocumentReference userRef = db.collection("users").document(uid);
             return userRef.set(user);
         } else {
-            // Xử lý khi người dùng chưa đăng nhập
             return Tasks.forException(new Exception("User not logged in"));
         }
     }
@@ -39,9 +39,9 @@ public class UserService {
         if (currentUser != null) {
             String uid = currentUser.getUid();
             DocumentReference userRef = db.collection("users").document(uid);
+            Log.d("UserService", "Fetching user with UID: " + uid);
             return userRef.get();
         } else {
-            // Xử lý khi người dùng chưa đăng nhập
             return Tasks.forException(new Exception("User not logged in"));
         }
     }
@@ -68,7 +68,6 @@ public class UserService {
         }
     }
 
-    // Xóa người dùng khỏi Firestore
     public Task<Void> deleteUser() {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null) {
@@ -76,9 +75,20 @@ public class UserService {
             DocumentReference userRef = db.collection("users").document(uid);
             return userRef.delete();
         } else {
-            // Xử lý khi người dùng chưa đăng nhập
             return Tasks.forException(new Exception("User not logged in"));
         }
+    }
+
+    public Task<QuerySnapshot> getUserByEmail(String email) {
+        return FirebaseFirestore.getInstance()
+                .collection("users")
+                .whereEqualTo("email", email)
+                .get();
+    }
+
+
+    public void logout() {
+        FirebaseAuth.getInstance().signOut();
     }
 
     public Task<FirebaseUser> loginUser(String email, String password) {
@@ -173,5 +183,17 @@ public class UserService {
                 });
     }
 
-
+    public Task<Boolean> isNewUser(String email) {
+        return db.collection("users").whereEqualTo("email", email)
+                .limit(1)
+                .get()
+                .continueWith(task -> {
+                    if (task.isSuccessful() && task.getResult() != null && !task.getResult().isEmpty()) {
+                        UserModel userModel = task.getResult().getDocuments().get(0).toObject(UserModel.class);
+                        return userModel.getFullName() == null || userModel.getFullName().isEmpty();
+                    } else {
+                        return true; // Người dùng không tồn tại
+                    }
+                });
+    }
 }

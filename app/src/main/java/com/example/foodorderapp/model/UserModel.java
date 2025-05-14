@@ -1,17 +1,20 @@
 package com.example.foodorderapp.model;
+
 public class UserModel {
     private String fullName;
     private String phone;
     private String address;
+    private String email;
 
     public UserModel() {
-        // Required for Firestore
     }
+
     public UserModel(String fullName, String phone, String address) {
         this.fullName = fullName;
         this.phone = phone;
         this.address = address;
     }
+
     // Getters and setters
     public String getFullName() {
         return fullName;
@@ -35,5 +38,13 @@ public class UserModel {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

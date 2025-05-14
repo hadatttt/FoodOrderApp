@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">FoodOrderApp</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="signup_text"><![CDATA[<string name=\"signup_text\">Nếu bạn chưa có tài khoản, vui lòng <font color=\"#FF0000\">Đăng kí</font>.</string>\n]]></string>
 
 </resources>
