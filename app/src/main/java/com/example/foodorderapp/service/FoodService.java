@@ -73,4 +73,8 @@ public class FoodService {
         data.put("category", food.getCategory());
         return data;
     }
+
+    public Task<QuerySnapshot> getLimitFoods(int limit) {
+        return foodCollection.limit(limit).get();
+    }
 }
