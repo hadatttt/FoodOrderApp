@@ -1,4 +1,5 @@
 package com.example.foodorderapp.service;
+
 import android.util.Log;
 
 import com.example.foodorderapp.model.UserModel;
@@ -11,6 +12,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
 public class UserService {
     private FirebaseFirestore db;
 
@@ -69,6 +72,7 @@ public class UserService {
             return Tasks.forException(new Exception("User not logged in"));
         }
     }
+
     public Task<FirebaseUser> loginUser(String email, String password) {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
@@ -131,7 +135,6 @@ public class UserService {
     }
 
 
-
     public Task<Void> loginWithGoogle(String idToken) {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
@@ -162,5 +165,16 @@ public class UserService {
                 });
     }
 
+    public Task<QuerySnapshot> getUserByEmail(String email) {
+        return FirebaseFirestore.getInstance()
+                .collection("users")
+                .whereEqualTo("email", email)
+                .get();
+    }
+
+
+    public void logout() {
+        FirebaseAuth.getInstance().signOut();
+    }
 
 }
