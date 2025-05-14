@@ -3,6 +3,7 @@ package com.example.foodorderapp.ui;
 import static android.content.ContentValues.TAG;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -18,18 +19,22 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.adapter.HotFoodAdapter;
+import com.example.foodorderapp.adapter.SaleShopAdapter;
 import com.example.foodorderapp.model.FoodModel;
+import com.example.foodorderapp.model.ShopModel;
 import com.example.foodorderapp.service.FoodService;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class AllHotFoodActivity extends AppCompatActivity {
 
     private RecyclerView recyclerHotFood;
     private HotFoodAdapter hotFoodAdapter;
+    private SaleShopAdapter saleShopAdapter;
     private List<FoodModel> fullFoodList;
     private List<FoodModel> foodList;
     private FoodService foodService;
@@ -51,8 +56,7 @@ public class AllHotFoodActivity extends AppCompatActivity {
         });
 
         // Initialize back button to finish the activity
-        ImageView btnBack = findViewById(R.id.btnBack);
-        btnBack.setOnClickListener(v -> finish());
+        setupBackButton();
 
         // Initialize RecyclerView for Hot Foods
         recyclerHotFood = findViewById(R.id.recyclerHotFood);
@@ -90,15 +94,24 @@ public class AllHotFoodActivity extends AppCompatActivity {
         foodService = new FoodService();
         loadAllFoods();
     }
+    private void setupBackButton() {
+        ImageView btnBack = findViewById(R.id.btnBack);
+        btnBack.setOnClickListener(v -> {
+            Intent intent = new Intent(AllHotFoodActivity.this, HomeActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            finish();
+        });
+    }
 
     private void selectCategory(String category, Button selectedButton) {
         filterFoods(category);
-
         for (Button button : categoryButtons) {
             int color = (button == selectedButton) ? 0xFFFFD700 : 0xFFEEEEEE; // gold for selected, light gray for others
             button.setBackgroundTintList(android.content.res.ColorStateList.valueOf(color));
         }
     }
+
 
     private void filterFoods(String category) {
         List<FoodModel> filteredFoodList = new ArrayList<>();
@@ -126,9 +139,11 @@ public class AllHotFoodActivity extends AppCompatActivity {
                         doc.getString("name"),
                         doc.getDouble("price"),
                         doc.getDouble("rating").floatValue(),
-                        doc.getString("imageUrl"),
                         doc.getLong("sold").intValue(),
-                        doc.getString("category") // ✅ Lấy ảnh từ link
+                        doc.getString("category"),
+                        doc.getString("imageUrl"),
+                        doc.getString("caption"),
+                        (Map<String, Double>) doc.get("sizePrices")
                 );
                 fullFoodList.add(food);
             }// Load all food data into the list and notify adapter
@@ -137,4 +152,5 @@ public class AllHotFoodActivity extends AppCompatActivity {
             hotFoodAdapter.notifyDataSetChanged();
         }).addOnFailureListener(e -> Log.e(TAG, "Error loading food data", e));
     }
+
 }

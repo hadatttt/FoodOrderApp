@@ -19,9 +19,10 @@
 
             <!-- Icon Menu -->
             <ImageView
+                android:id="@+id/btnProfile"
                 android:layout_width="wrap_content"
                 android:layout_height="24dp"
-                android:src="@drawable/ic_location" />
+                android:src="@drawable/ic_menu" />
 
             <!-- Địa chỉ -->
             <LinearLayout
@@ -72,7 +73,6 @@
                     android:layout_height="20dp"
                     android:layout_gravity="top|end"
                     android:background="@drawable/bg_circle_badge"
-                    android:text="2"
                     android:textColor="#FFFFFF"
                     android:textSize="12sp"
                     android:gravity="center"

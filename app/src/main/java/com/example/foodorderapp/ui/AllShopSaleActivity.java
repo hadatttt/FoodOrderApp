@@ -1,6 +1,11 @@
 package com.example.foodorderapp.ui;
 
+import static android.content.ContentValues.TAG;
+
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageView;
 
@@ -14,7 +19,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.adapter.SaleShopAdapter;
+import com.example.foodorderapp.model.FoodModel;
 import com.example.foodorderapp.model.ShopModel;
+import com.example.foodorderapp.service.FoodService;
+import com.example.foodorderapp.service.ShopService;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,11 +33,15 @@ public class AllShopSaleActivity extends AppCompatActivity {
 
     private RecyclerView recyclerShopSale;
     private SaleShopAdapter shopSaleAdapter;
-    private List<ShopModel> fullShopList;
-    private List<ShopModel> shopList;
+    private List<ShopModel> fullShopList = new ArrayList<>();
+    private List<FoodModel> fullFoodList = new ArrayList<>();
+    private List<ShopModel> shopList = new ArrayList<>();
+    private ShopService shopService;
+    private FoodService foodService;
 
-    private Button btnAll, btnSpaghetti, btnPotato, btnPizza, btnBurger, btnChicken;
+    private Button btnAll, btnSpaghetti, btnPotato, btnPizza, btnBurger, btnChicken, btnDrink;
     private List<Button> categoryButtons;
+    private String selectedCategory = "Tất cả";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,69 +55,128 @@ public class AllShopSaleActivity extends AppCompatActivity {
             return insets;
         });
 
-        // Nút quay về
-        ImageView btnBack = findViewById(R.id.btnBack);
-        btnBack.setOnClickListener(v -> {
-            finish(); // Quay về mà không khởi động lại HomeActivity
-        });
+        // Khởi tạo Service
+        shopService = new ShopService();
+        foodService = new FoodService();
 
-        // Khởi tạo RecyclerView ShopSale
+        // Setup UI
+        setupRecyclerView();
+        setupCategoryButtons();
+        setupBackButton();
+
+        // Tải dữ liệu ban đầu
+        loadAllFoods();
+    }
+
+    private void setupRecyclerView() {
         recyclerShopSale = findViewById(R.id.recyclerShopSale);
         recyclerShopSale.setLayoutManager(new GridLayoutManager(this, 2));
-        // Danh sách cửa hàng giảm giá
-        fullShopList = new ArrayList<>();
-        shopList = new ArrayList<>(fullShopList);
 
-        shopSaleAdapter = new SaleShopAdapter(shopList);
+        // Truyền context và danh sách vào adapter
+        shopSaleAdapter = new SaleShopAdapter(this, shopList);
+
         recyclerShopSale.setAdapter(shopSaleAdapter);
+    }
 
-        // Category buttons
+
+    private void setupCategoryButtons() {
         btnAll = findViewById(R.id.btnAll);
         btnSpaghetti = findViewById(R.id.btnSpaghetti);
         btnPotato = findViewById(R.id.btnPotato);
         btnPizza = findViewById(R.id.btnPizza);
         btnBurger = findViewById(R.id.btnBurger);
         btnChicken = findViewById(R.id.btnChicken);
+        btnDrink = findViewById(R.id.btnDrink);
 
-        categoryButtons = Arrays.asList(btnAll, btnSpaghetti, btnPotato, btnPizza, btnBurger, btnChicken);
+        categoryButtons = Arrays.asList(btnAll, btnSpaghetti, btnPotato, btnPizza, btnBurger, btnChicken, btnDrink);
 
-        // Set click listeners
         btnAll.setOnClickListener(v -> selectCategory("Tất cả", btnAll));
         btnSpaghetti.setOnClickListener(v -> selectCategory("Spaghetti", btnSpaghetti));
         btnPotato.setOnClickListener(v -> selectCategory("Potato", btnPotato));
         btnPizza.setOnClickListener(v -> selectCategory("Pizza", btnPizza));
         btnBurger.setOnClickListener(v -> selectCategory("Burger", btnBurger));
         btnChicken.setOnClickListener(v -> selectCategory("Chicken", btnChicken));
-
-        // Mặc định chọn All
-        selectCategory("Tất cả", btnAll);
+        btnDrink.setOnClickListener(v -> selectCategory("Drink", btnDrink));
     }
 
-    private void selectCategory(String category, Button selectedButton) {
-//        filterShops(category);
+    private void setupBackButton() {
+        ImageView btnBack = findViewById(R.id.btnBack);
+        btnBack.setOnClickListener(v -> {
+            Intent intent = new Intent(AllShopSaleActivity.this, HomeActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            finish();
+        });
+    }
 
+
+    private void selectCategory(String category, Button selectedButton) {
+        this.selectedCategory = category;
+        updateCategoryUI(selectedButton);
+        filterShops(category);
+    }
+
+    private void updateCategoryUI(Button selectedButton) {
         for (Button button : categoryButtons) {
-            if (button == selectedButton) {
-                button.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFFD700)); // vàng
-            } else {
-                button.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFEEEEEE)); // xám nhạt
-            }
+            int color = (button == selectedButton) ? 0xFFFFD700 : 0xFFEEEEEE; // Vàng / Xám
+            button.setBackgroundTintList(android.content.res.ColorStateList.valueOf(color));
         }
     }
 
-//    private void filterShops(String category) {
-//        List<ShopModel> filteredShopList = new ArrayList<>();
-//
-//        if (category.equals("Tất cả")) {
-//            filteredShopList.addAll(fullShopList);
-//        } else {
-//            for (ShopModel shop : fullShopList) {
-//                if (shop.getCategory().equalsIgnoreCase(category)) {
-//                    filteredShopList.add(shop);
-//                }
-//            }
-//        }
-//
-//        shopSaleAdapter.updateData(filteredShopList);
-//    }
+    private void loadAllFoods() {
+        foodService.getAllFoods().addOnSuccessListener(querySnapshot -> {
+            fullFoodList.clear();
+            for (DocumentSnapshot document : querySnapshot.getDocuments()) {
+                FoodModel food = document.toObject(FoodModel.class);
+                fullFoodList.add(food);
+            }
+            loadAllShops();
+        }).addOnFailureListener(e -> Log.e(TAG, "Error loading food data", e));
+    }
+
+    private void loadAllShops() {
+        shopService.getAllShops().addOnSuccessListener(querySnapshot -> {
+            fullShopList.clear();
+            for (DocumentSnapshot doc : querySnapshot) {
+                ShopModel shop = new ShopModel(
+                        doc.getLong("storeid").intValue(),
+                        doc.getString("shopName"),
+                        doc.getString("address"),
+                        doc.getDouble("discount").floatValue(),
+                        doc.getString("imageUrl"),
+                        doc.getString("advertisement"),
+                        doc.getDouble("rating").floatValue()
+                );
+                fullShopList.add(shop);
+            }
+            filterShops(selectedCategory);
+        }).addOnFailureListener(e -> Log.e(TAG, "Error loading shop data", e));
+    }
+
+    private void filterShops(String category) {
+        shopList.clear();
+
+        if (category.equals("Tất cả")) {
+            shopList.addAll(fullShopList);
+        } else {
+            for (ShopModel shop : fullShopList) {
+                int shopId = shop.getStoreid();
+                boolean hasFood = false;
+
+                for (FoodModel food : fullFoodList) {
+                    if (food.getStoreId() == shopId &&
+                            food.getCategory().equalsIgnoreCase(category)) {
+                        hasFood = true;
+                        break;
+                    }
+                }
+
+                if (hasFood) {
+                    shopList.add(shop);
+                }
+            }
+        }
+
+        shopSaleAdapter.updateData(shopList);
+    }
 }

@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -13,32 +16,41 @@
         android:theme="@style/Theme.FoodOrderApp"
         tools:targetApi="31">
         <activity
+            android:name=".ui.InfoActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.MenuProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.DetailShopActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.LoginActivity"
-            android:exported="false"></activity>
+            android:exported="false" />
         <activity
             android:name=".ui.ForgetActivity"
-            android:exported="false"></activity>
+            android:exported="false" />
         <activity
             android:name=".ui.HomeActivity"
-            android:exported="false"></activity>
+            android:exported="false" />
         <activity
             android:name=".ui.RegisterActivity"
-            android:exported="false"></activity>
+            android:exported="false" />
         <activity
             android:name=".ui.AllHotFoodActivity"
-            android:exported="false"></activity>
+            android:exported="false" />
         <activity
             android:name=".ui.AllShopSaleActivity"
-            android:exported="false"></activity>
+            android:exported="false" />
         <activity
             android:name=".ui.CartActivity"
-            android:exported="false"></activity>
+            android:exported="false" />
         <activity
-            android:name=".ui.DetailActivity"
-            android:exported="false"></activity>
+            android:name=".ui.DetailFoodActivity"
+            android:exported="false" />
         <activity
             android:name=".ui.OrderActivity"
-            android:exported="false"></activity>
+            android:exported="false" />
         <activity
             android:name=".IntroActivity"
             android:exported="true">
