@@ -1,33 +1,39 @@
 package com.example.foodorderapp.model;
 
+import java.util.Map;
+
 public class FoodModel {
     private int foodId;
     private int storeId;
     private String name;
-    private double price;
+    private double price;  // giá bắt đầu, khởi điểm
     private float rating;
-    private String imageUrl;
     private int sold;
     private String category;
+    private String imageUrl;
+    private String caption;
+    private Map<String, Double> sizePrices;
 
-    public FoodModel() {
-        // Required empty constructor for Firestore
-    }
+    // Constructor mặc định (dùng cho Firestore)
+    public FoodModel() {}
 
-
-    public FoodModel(int foodId, int storeId, String name, double price, float rating, String imagUrl, int sold, String category) {
-
+    // Constructor đầy đủ
+    public FoodModel(int foodId, int storeId, String name, double price, float rating,
+                     int sold, String category, String imageUrl, String caption,
+                     Map<String, Double> sizePrices) {
         this.foodId = foodId;
         this.storeId = storeId;
         this.name = name;
         this.price = price;
         this.rating = rating;
-        this.imageUrl = imageUrl;
         this.sold = sold;
         this.category = category;
         this.imageUrl = imageUrl;
+        this.caption = caption;
+        this.sizePrices = sizePrices;
     }
 
+    // Getters và Setters
     public int getFoodId() { return foodId; }
     public void setFoodId(int foodId) { this.foodId = foodId; }
 
@@ -43,13 +49,18 @@ public class FoodModel {
     public float getRating() { return rating; }
     public void setRating(float rating) { this.rating = rating; }
 
-    public String getImageUrl() { return imageUrl; }
-    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
-
     public int getSold() { return sold; }
     public void setSold(int sold) { this.sold = sold; }
 
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
 
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+    public String getCaption() { return caption; }
+    public void setCaption(String caption) { this.caption = caption; }
+
+    public double getSizePrices(String size) { return sizePrices.get(size); }
+    public void setSizePrices(Map<String, Double> sizePrices) { this.sizePrices = sizePrices; }
 }

@@ -12,10 +12,9 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.Glide;
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.model.FoodModel;
-import com.example.foodorderapp.ui.DetailActivity;
+import com.example.foodorderapp.ui.DetailFoodActivity;
 
 import java.util.List;
 
@@ -73,30 +72,26 @@ public class HotFoodAdapter extends RecyclerView.Adapter<HotFoodAdapter.FoodView
             textRating = itemView.findViewById(R.id.textRating);
             textSoldAmount = itemView.findViewById(R.id.textSoldAmount);
         }
-
         public void bind(FoodModel food) {
-            // Dùng Glide để tải ảnh từ URL vào ImageView
-            Glide.with(itemView.getContext())  // Sử dụng itemView.getContext() để lấy context
-                    .load(food.getImageUrl())  // Lấy link ảnh từ FoodModel
-        // Ảnh lỗi nếu tải ảnh không thành công
+            // Tải ảnh từ URL vào ImageView
+            Glide.with(itemView.getContext())
+                    .load(food.getImageUrl())
                     .into(imageFood);
 
-            Glide.with(itemView.getContext())  // Sử dụng itemView.getContext() để lấy context
-                    .load(food.getImageUrl())  // Lấy link ảnh từ FoodModel
-                    // Ảnh lỗi nếu tải ảnh không thành công
-                    .into(imageFood);
+            // Bắt sự kiện click để mở DetailFoodActivity và truyền foodId
             itemView.setOnClickListener(v -> {
-                // Truyền foodId sang FoodDetailActivity
-                Intent intent = new Intent(itemView.getContext(), DetailActivity.class);
-                intent.putExtra("FOOD_ID", food.getFoodId());  // Truyền foodId
-                itemView.getContext().startActivity(intent);
+                Context context = itemView.getContext();
+                Intent intent = new Intent(context, DetailFoodActivity.class);
+                intent.putExtra("foodid", food.getFoodId());  // Đặt tên key rõ ràng hơn
+                context.startActivity(intent);
             });
 
-
+            // Gán dữ liệu vào các view
             textFoodName.setText(food.getName());
-            textFoodPrice.setText(String.format("$%.2f", food.getPrice())+"đ");
+            textFoodPrice.setText(String.format("%,.3fđ", food.getPrice()));  // Định dạng giá đẹp hơn
             textRating.setText(String.valueOf(food.getRating()));
             textSoldAmount.setText("Đã bán: " + food.getSold());
         }
+
     }
 }

@@ -18,6 +18,7 @@ import com.example.foodorderapp.service.FoodService;
 import com.example.foodorderapp.service.ShopService;
 import com.example.foodorderapp.ui.LoginActivity;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -37,6 +38,7 @@ public class IntroActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_intro);
+//        ShopService shopService = new ShopService();
 //        FoodService foodService = new FoodService();
 //
 //        String[] foodNames = {
@@ -110,6 +112,28 @@ public class IntroActivity extends AppCompatActivity {
 //            food.setImageUrl(imageUrls[i]);
 //
 //            foodService.addFood(food);
+//        }
+
+//
+//        List<ShopModel> shopList = new ArrayList<>();
+//
+//        // Các cửa hàng ăn nhanh kiểu Jolibi với link ảnh thực tế
+//        shopList.add(new ShopModel(1, "Jolibi - Gà Rán", "68 Nguyễn Thiện Thuật, Quận 3, TP.HCM", 10, "https://example.com/jolibi1.jpg", "Gà rán, khoai tây chiên, và nước ngọt", 0));
+//        shopList.add(new ShopModel(2, "Gà Rán Cô Ba", "91 Đường Trần Hưng Đạo, Quận 1, TP.HCM", 15, "https://example.com/garancoba1.jpg", "Gà rán giòn, mềm, ngon", 0));
+//        shopList.add(new ShopModel(3, "KFC Việt Nam", "104 Nguyễn Văn Cừ, Quận 5, TP.HCM", 5, "https://example.com/kfc1.jpg", "Gà rán ngon, hấp dẫn", 0));
+//        shopList.add(new ShopModel(4, "McDonald's", "Số 33 Nguyễn Trãi, Quận 1, TP.HCM", 10, "https://example.com/mcdonalds1.jpg", "Burger và khoai tây chiên", 0));
+//        shopList.add(new ShopModel(5, "Lotteria", "9 Lê Thánh Tôn, Quận 1, TP.HCM", 20, "https://example.com/lotteria1.jpg", "Gà rán và các món ăn nhanh", 0));
+//        shopList.add(new ShopModel(6, "Jollibee", "160 Trần Hưng Đạo, Quận 5, TP.HCM", 15, "https://example.com/jollibee1.jpg", "Gà rán, bánh mỳ, khoai tây chiên", 0));
+//        shopList.add(new ShopModel(7, "Popeyes", "Số 68 Trần Quang Khải, Quận 1, TP.HCM", 10, "https://example.com/popeyes1.jpg", "Gà rán kiểu Mỹ", 0));
+//        shopList.add(new ShopModel(8, "Cơm Gà Hưng Béo", "102 Lê Thánh Tôn, Quận 1, TP.HCM", 20, "https://example.com/comga1.jpg", "Cơm gà ngon, thơm", 0));
+//        shopList.add(new ShopModel(9, "Gà Rán Sài Gòn", "56 Lý Tự Trọng, Quận 1, TP.HCM", 5, "https://example.com/garan1.jpg", "Gà rán giòn, thơm", 0));
+//        shopList.add(new ShopModel(10, "Gà Rán Xôi", "23 Nguyễn Thái Bình, Quận 1, TP.HCM", 25, "https://example.com/garanxoi1.jpg", "Gà rán và xôi đầy đặn", 0));
+//        shopList.add(new ShopModel(11, "KFC Lẩu Gà", "35 Nguyễn Văn Cừ, Quận 5, TP.HCM", 20, "https://example.com/kfclau1.jpg", "Lẩu gà và gà rán", 0));
+//        shopList.add(new ShopModel(12, "Gà Rán Hoàng Gia", "98 Nguyễn Hữu Cảnh, Bình Thạnh, TP.HCM", 10, "https://example.com/garanhoanggia1.jpg", "Gà rán giòn, khoai tây chiên", 0));
+//
+//        // Dùng vòng lặp for để gọi hàm addShop
+//        for (ShopModel shop : shopList) {
+//            shopService.addShop(shop);
 //        }
 
         ProgressBar progressBar = findViewById(R.id.progressBar);
