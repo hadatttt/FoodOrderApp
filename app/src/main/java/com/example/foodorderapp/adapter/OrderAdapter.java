@@ -1,6 +1,7 @@
 package com.example.foodorderapp.adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,9 +17,15 @@ import com.bumptech.glide.Glide;
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.model.OrderModel;
 import com.example.foodorderapp.service.FoodService;
+import com.example.foodorderapp.service.OrderService;
+import com.example.foodorderapp.ui.OrderActivity;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> {
     private ArrayList<OrderModel> orderList;
@@ -32,7 +39,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     @Override
     public OrderAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.activity_detail, parent, false);
+                .inflate(R.layout.item_order_food, parent, false);
 
         return new OrderAdapter.ViewHolder(view);
     }
@@ -60,13 +67,36 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                     }
                 });
         holder.tvId.setText("#"+order.getOrderId());
-        holder.tvPrice.setText(order.getPrice() + "đ");
+        holder.tvPrice.setText(order.getPrice() + "00 đ");
         holder.tvQuantity.setText(order.getQuantity()+ " món");
+        holder.tvSize.setText(order.getSize());
         holder.tvStatus.setText(order.getStatus());
         holder.tvDate.setVisibility(View.GONE);
         holder.btnFollow.setVisibility(View.VISIBLE);
         holder.btnCancel.setVisibility(View.VISIBLE);
         holder.tvStatus.setVisibility(View.GONE);
+
+        holder.btnCancel.setOnClickListener(v -> {
+            OrderService orderService = new OrderService();
+            order.setStatus("Đã hủy");
+            orderService.updateOrder(order.getOrderId(), order)
+                    .addOnSuccessListener(aVoid -> {
+                        orderList.remove(position);
+
+                        Date date = new Date();
+                        SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm");
+                        order.setOrderDate(sdf.format(date));
+
+                        ((OrderActivity) context).historyList.add(order);
+
+                        notifyItemRemoved(position);
+                        notifyDataSetChanged();
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e("OrderAdapter", "Lỗi cập nhật trạng thái: " + e.getMessage());
+                    });
+        });
+
         if (orderList.get(position).getStatus().equals("Hoàn thành")) {
             holder.tvStatus.setVisibility(View.VISIBLE);
             holder.tvStatus.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.green));
@@ -80,7 +110,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             holder.tvStatus.setVisibility(View.VISIBLE);
             holder.btnFollow.setVisibility(View.GONE);
             holder.btnCancel.setVisibility(View.GONE);
-            holder.btnFeedback.setVisibility(View.VISIBLE);
+            holder.btnFeedback.setVisibility(View.GONE);
             holder.btnRepurchase.setVisibility(View.VISIBLE);
             holder.tvStatus.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.red));
             holder.tvDate.setText(orderList.get(position).getOrderDate());
@@ -93,25 +123,26 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         return orderList.size();
     }
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public TextView tvName, tvTitle, tvPrice, tvQuantity, tvId, tvStatus, tvDate;
+        public TextView tvName, tvTitle, tvPrice, tvQuantity, tvId, tvStatus, tvDate, tvSize;
         public ImageView image;
         public Button btnFollow, btnCancel, btnFeedback, btnRepurchase;
 
         public ViewHolder(View view) {
             super(view);
 
-//            tvName = view.findViewById(R.id.tvFoodName);
-//            tvTitle = view.findViewById(R.id.tv_title);
-//            tvPrice = view.findViewById(R.id.tv_price);
-//            tvQuantity = view.findViewById(R.id.tv_quantity);
-//            tvId = view.findViewById(R.id.tv_id);
-//            tvDate = view.findViewById(R.id.tv_date);
-//            image = view.findViewById(R.id.img_food);
-//            tvStatus = view.findViewById(R.id.tv_status);
-//            btnFollow = view.findViewById(R.id.btn_follow);
-//            btnCancel = view.findViewById(R.id.btn_cancel);
-//            btnFeedback = view.findViewById(R.id.btn_feedback);
-//            btnRepurchase = view.findViewById(R.id.btn_repurchase);
+            tvName = view.findViewById(R.id.tv_name_food);
+            tvTitle = view.findViewById(R.id.tv_title);
+            tvPrice = view.findViewById(R.id.tv_price);
+            tvQuantity = view.findViewById(R.id.tv_quantity);
+            tvId = view.findViewById(R.id.tv_id);
+            tvSize = view.findViewById(R.id.tv_size);
+            tvDate = view.findViewById(R.id.tv_date);
+            image = view.findViewById(R.id.img_food);
+            tvStatus = view.findViewById(R.id.tv_status);
+            btnFollow = view.findViewById(R.id.btn_follow);
+            btnCancel = view.findViewById(R.id.btn_cancel);
+            btnFeedback = view.findViewById(R.id.btn_feedback);
+            btnRepurchase = view.findViewById(R.id.btn_repurchase);
         }
     }
 }

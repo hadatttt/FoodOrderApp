@@ -3,7 +3,11 @@ package com.example.foodorderapp.model;
 import java.util.List;
 
 public class OrderModel {
-    private int orderId;
+    //id
+    //card id
+    //datetime
+    //trang thai
+    private String orderId;
     private String userId;
 
     private int foodId;
@@ -12,25 +16,28 @@ public class OrderModel {
 
     private String orderDate;
     private String status;
+    private String size;
+    private String address;
 
     public OrderModel() {
     }
 
-    public OrderModel(int orderId, String userId, int foodId, int quantity, double price, String orderDate, String status) {
-        this.orderId = orderId;
+    public OrderModel(String userId, int foodId, int quantity, double price, String size, String orderDate, String status, String address) {
         this.userId = userId;
         this.foodId = foodId;
         this.quantity = quantity;
         this.price = price;
         this.orderDate = orderDate;
+        this.size = size;
         this.status = status;
+        this.address = address;
     }
 
-    public int getOrderId() {
+    public String getOrderId() {
         return orderId;
     }
 
-    public void setOrderId(int orderId) {
+    public void setOrderId(String orderId) {
         this.orderId = orderId;
     }
 
@@ -80,5 +87,21 @@ public class OrderModel {
 
     public void setPrice(double price) {
         this.price = price;
+    }
+
+    public String getSize() {
+        return size;
+    }
+
+    public void setSize(String size) {
+        this.size = size;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 }

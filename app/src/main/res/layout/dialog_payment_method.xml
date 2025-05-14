@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="24dp"
+    android:radius="8dp">
+
+    <TextView
+        android:id="@+id/dialog_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Chọn phương thức thanh toán"
+        android:textSize="20sp"
+        android:gravity="center"
+        android:paddingBottom="20dp"
+        android:textStyle="bold"/>
+
+    <RadioGroup
+        android:id="@+id/radioGroupPayment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="24dp">
+
+        <RadioButton
+            android:id="@+id/radioCashOnDelivery"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Thanh toán khi nhận hàng"
+            android:textSize="16sp"
+            android:padding="8dp"
+            android:textColor="@android:color/black"/>
+
+        <RadioButton
+            android:id="@+id/radioTransferBefore"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Thanh toán bằng MoMo"
+            android:textSize="16sp"
+            android:padding="8dp"
+            android:textColor="@android:color/black"/>
+    </RadioGroup>
+
+    <Button
+        android:id="@+id/btnConfirmPayment"
+        style="@style/buttonSuccess"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Xác nhận"
+        android:textColor="@android:color/white"
+        android:layout_marginTop="16dp"
+        android:textSize="16sp"
+        android:padding="12dp"/>
+</LinearLayout>
