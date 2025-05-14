@@ -2,11 +2,17 @@ package com.example.foodorderapp.service;
 
 import com.example.foodorderapp.model.ShopModel;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.DocumentReference;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class ShopService {
     private FirebaseFirestore db;
@@ -45,6 +51,34 @@ public class ShopService {
                         shopCollection.document(documentSnapshot.getId()).set(shopModel);  // Cập nhật cửa hàng
                     }
                 });
+    }
+
+    public List<ShopModel> searchShopsByName(String query) {
+        try {
+            CollectionReference shopCollection = db.collection("shops");
+            // Lấy tất cả dữ liệu cửa hàng từ Firestore
+            QuerySnapshot snapshot = Tasks.await(shopCollection.get());
+            List<ShopModel> allShops = snapshot.toObjects(ShopModel.class);
+
+            if (query == null || query.trim().isEmpty()) {
+                return allShops;
+            }
+
+            List<ShopModel> filteredShops = new ArrayList<>();
+            String lowercaseQuery = query.trim().toLowerCase();
+
+            // Lọc các cửa hàng theo tên
+            for (ShopModel shop : allShops) {
+                if (shop.getShopName().toLowerCase().contains(lowercaseQuery)) {
+                    filteredShops.add(shop);
+                }
+            }
+
+            return filteredShops;  // Trả về danh sách cửa hàng đã lọc
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+            return Collections.emptyList();  // Trả về danh sách rỗng nếu có lỗi
+        }
     }
 
     // Xóa cửa hàng

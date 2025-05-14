@@ -34,6 +34,15 @@ public class UserService {
         }
     }
 
+    public String getUserId() {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            return currentUser.getUid();
+        } else {
+            return null;
+        }
+    }
+
     // Lấy thông tin người dùng từ Firestore bằng UID
     public Task<DocumentSnapshot> getUser() {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
