@@ -133,13 +133,28 @@ public class CartActivity extends AppCompatActivity {
         btnPay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (tvAddress.getText().toString().isEmpty()) {
-                    showAddressDialog();
-                } else {
-//                    progressBar.setVisibility(View.VISIBLE);
-//                    processOrder();
-                    showPaymentMethodDialog();
-                }
+                UserService userService = new UserService();
+                userService.getUser().addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String address = documentSnapshot.getString("address");
+                        String phone = documentSnapshot.getString("phone");
+
+                        if (phone == null || phone.isEmpty()) {
+                            showPhoneRequiredDialog();
+                            return;
+                        }
+
+                        if (address == null || address.isEmpty()) {
+                            showAddressDialog();
+                        } else {
+                            showPaymentMethodDialog();
+                        }
+                    } else {
+                        showPhoneRequiredDialog();
+                    }
+                }).addOnFailureListener(e -> {
+//                    Toast.makeText(CartActivity.this, "Lỗi khi lấy thông tin người dùng", Toast.LENGTH_SHORT).show();
+                });
             }
         });
         btnAddress.setOnClickListener(new View.OnClickListener() {
@@ -241,6 +256,15 @@ public class CartActivity extends AppCompatActivity {
         CartService cartService = new CartService();
         cartService.clearCartByUserId(userId);
     }
+
+    private void showPhoneRequiredDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("Thiếu số điện thoại")
+                .setMessage("Vui lòng cập nhật số điện thoại trước khi thanh toán.")
+                .setPositiveButton("OK", null)
+                .show();
+    }
+
     private void showAddressDialog() {
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_address, null);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
