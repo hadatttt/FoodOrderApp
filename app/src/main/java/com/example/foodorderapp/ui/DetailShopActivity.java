@@ -47,9 +47,15 @@ public class DetailShopActivity extends AppCompatActivity {
         setupCategoryButtons();
 
         int storeId = getIntent().getIntExtra("storeId", -1);
+        int foodId = getIntent().getIntExtra("foodId", -1);
+        if(foodId != -1) {
+            Intent intent = new Intent(this, DetailFoodActivity.class);
+            intent.putExtra("foodId", foodId);
+            startActivity(intent);
+        }
         if (storeId == -1) {
             Toast.makeText(this, "Store ID không hợp lệ", Toast.LENGTH_SHORT).show();
-            finish();
+            onBackPressed();
             return;
         }
 
@@ -64,7 +70,7 @@ public class DetailShopActivity extends AppCompatActivity {
         recyclerHotFood.setAdapter(hotFoodAdapter);
 
         ImageButton btnBack = findViewById(R.id.btnBack);
-        btnBack.setOnClickListener(v -> startActivity(new Intent(this, HomeActivity.class)));
+        btnBack.setOnClickListener(v -> onBackPressed());
 
         // Gán từng button và category tương ứng
         Button btnAll = findViewById(R.id.btnAll);

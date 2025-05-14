@@ -60,7 +60,7 @@ public class DetailFoodActivity extends AppCompatActivity {
             loadFoodDetails(foodId);
         } else {
             Toast.makeText(this, "Không tìm thấy món ăn!", Toast.LENGTH_SHORT).show();
-            finish();
+            onBackPressed();
         }
     }
 
@@ -74,7 +74,7 @@ public class DetailFoodActivity extends AppCompatActivity {
     private void setupViews() {
         // Thiết lập giao diện
         ImageButton btnBack = findViewById(R.id.btnBack);
-        btnBack.setOnClickListener(v -> startActivity(new Intent(this, HomeActivity.class)));
+        btnBack.setOnClickListener(v -> onBackPressed());
 
         imgFood = findViewById(R.id.imgFood);
         tvFoodName = findViewById(R.id.tvFoodName);
