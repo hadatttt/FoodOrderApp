@@ -59,6 +59,7 @@ public class ShopService {
                     }
                 });
     }
+
     public void updateStoreRating(int storeId) {
         CollectionReference foodCollection = db.collection("foods");
         // Lấy tất cả các món ăn của cửa hàng từ collection "foods"
@@ -100,5 +101,10 @@ public class ShopService {
                 .addOnFailureListener(e -> {
                     System.out.println("Error getting food items: " + e.getMessage());
                 });
+    }
+
+    public Task<QuerySnapshot> getHotShops() {
+        CollectionReference shopCollection = db.collection("shops");
+        return shopCollection.orderBy("rating", com.google.firebase.firestore.Query.Direction.DESCENDING).limit(10).get();
     }
 }
