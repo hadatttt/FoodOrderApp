@@ -13,8 +13,14 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.FoodOrderApp"
+        android:theme="@style/Base.Theme.FoodOrderApp"
         tools:targetApi="31">
+        <activity
+            android:name=".ui.InfoActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.MenuProfileActivity"
+            android:exported="false" />
         <activity
             android:name=".ui.DetailShopActivity"
             android:exported="false" />
@@ -38,13 +44,13 @@
             android:exported="false" />
         <activity
             android:name=".ui.CartActivity"
-            android:exported="false"></activity>
+            android:exported="false" />
         <activity
             android:name=".ui.DetailFoodActivity"
-            android:exported="false"></activity>
+            android:exported="false" />
         <activity
             android:name=".ui.OrderActivity"
-            android:exported="false"></activity>
+            android:exported="false" />
         <activity
             android:name=".IntroActivity"
             android:exported="true">

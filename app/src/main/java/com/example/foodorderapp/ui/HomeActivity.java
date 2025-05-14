@@ -10,6 +10,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -51,6 +53,7 @@ public class HomeActivity extends AppCompatActivity {
     private Context context = this;
     private ImageView imgCart;
     private TextView tvCartCount;
+    private ImageView btnProfile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,9 +63,7 @@ public class HomeActivity extends AppCompatActivity {
         userService = new UserService();
         foodService = new FoodService();
         shopService = new ShopService(); // Thêm dòng này
-
-
-        // Setup thanh padding tránh che mất layout bởi status/navigation bar
+        EdgeToEdge.enable(this);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.home), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -102,6 +103,7 @@ public class HomeActivity extends AppCompatActivity {
         recyclerSaleShop.setAdapter(saleShopAdapter);
         // Gán sự kiện cho các button lọc
         btnAll = findViewById(R.id.btnAll);
+        btnProfile = findViewById(R.id.btnProfile);
         btnSpaghetti = findViewById(R.id.btnSpaghetti);
         btnPotato = findViewById(R.id.btnPotato);
         btnPizza = findViewById(R.id.btnPizza);
@@ -133,6 +135,13 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(HomeActivity.this, CartActivity.class);
+                startActivity(intent);
+            }
+        });
+        btnProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(HomeActivity.this, MenuProfileActivity.class);
                 startActivity(intent);
             }
         });

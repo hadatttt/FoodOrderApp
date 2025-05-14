@@ -1,10 +1,6 @@
 package com.example.foodorderapp.model;
 
 public class CartModel {
-    //food id
-    //size
-    //so luong
-    //gia tien
     private int foodId;
     private String size;
     private int quantity;

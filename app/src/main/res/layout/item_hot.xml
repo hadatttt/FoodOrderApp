@@ -56,7 +56,7 @@
             <ImageView
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                android:src="@drawable/ic_star"
+                android:src="@drawable/ic_star_lite"
                 android:layout_marginStart="16dp" />
 
             <TextView

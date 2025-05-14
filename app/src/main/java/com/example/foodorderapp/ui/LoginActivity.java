@@ -12,13 +12,18 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.model.UserModel;
@@ -45,11 +50,17 @@ public class LoginActivity extends AppCompatActivity {
     private GoogleSignInClient mGoogleSignInClient;
     public UserService userService = new UserService();
     private ProgressBar progressBar;
+    private FrameLayout loadingOverlay;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
+        EdgeToEdge.enable(this);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
         tvSignup = findViewById(R.id.tv_signup);
         tvLoginError = findViewById(R.id.tv_login_error);
         btnForget = findViewById(R.id.btn_forget);
@@ -57,6 +68,8 @@ public class LoginActivity extends AppCompatActivity {
         edtUsername = findViewById(R.id.edt_email);
         edtPassword = findViewById(R.id.edt_password);
 
+        loadingOverlay = findViewById(R.id.loadingOverlay);
+        loadingOverlay.setVisibility(View.GONE);
         progressBar = findViewById(R.id.progressBar);
         progressBar.setVisibility(View.GONE);
 
@@ -71,10 +84,12 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View widget) {
 
+                loadingOverlay.setVisibility(View.VISIBLE);
                 progressBar.setVisibility(View.VISIBLE);
                 Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
                 startActivity(intent);
-                finish();
+                loadingOverlay.setVisibility(View.GONE);
+                progressBar.setVisibility(View.GONE);
             }
 
             @Override
@@ -91,14 +106,17 @@ public class LoginActivity extends AppCompatActivity {
 
         // Quên mật khẩu
         btnForget.setOnClickListener(view -> {
+            loadingOverlay.setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.VISIBLE);
             Intent intent = new Intent(LoginActivity.this, ForgetActivity.class);
             startActivity(intent);
-            finish();
+            loadingOverlay.setVisibility(View.GONE);
+            progressBar.setVisibility(View.GONE);
         });
 
         // Đăng nhập bằng email & mật khẩu
         btnLogin.setOnClickListener(view -> {
+            loadingOverlay.setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.VISIBLE);
             String inputEmail = edtUsername.getText().toString().trim();
             String inputPassword = edtPassword.getText().toString().trim();
@@ -117,6 +135,7 @@ public class LoginActivity extends AppCompatActivity {
                             finish();
                         } else {
                             tvLoginError.setVisibility(View.VISIBLE);
+                            loadingOverlay.setVisibility(View.GONE);
                             progressBar.setVisibility(View.GONE);
                             tvLoginError.setText("Sai tài khoản hoặc mật khẩu");
                         }
@@ -135,6 +154,7 @@ public class LoginActivity extends AppCompatActivity {
         googleLogin.setOnClickListener(v -> {
             Intent signInIntent = mGoogleSignInClient.getSignInIntent();
             progressBar.setVisibility(View.VISIBLE);
+            loadingOverlay.setVisibility(View.VISIBLE);
             startActivityForResult(signInIntent, RC_SIGN_IN);
         });
     }
@@ -157,11 +177,13 @@ public class LoginActivity extends AppCompatActivity {
                                 startActivity(intent);
                                 finish();
                             } else {
+                                loadingOverlay.setVisibility(View.GONE);
                                 progressBar.setVisibility(View.GONE);
                                 Toast.makeText(LoginActivity.this, "Đăng nhập Google thất bại", Toast.LENGTH_SHORT).show();
                             }
                         });
             } catch (ApiException e) {
+                loadingOverlay.setVisibility(View.GONE);
                 progressBar.setVisibility(View.GONE);
                 Log.w("GoogleSignIn", "Google sign in failed", e);
                 Toast.makeText(this, "Đăng nhập Google thất bại", Toast.LENGTH_SHORT).show();

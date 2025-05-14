@@ -12,6 +12,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -52,7 +53,12 @@ public class DetailFoodActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_food);
-
+        EdgeToEdge.enable(this);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
         // Khởi tạo các dịch vụ và các thành phần giao diện
         initializeServices();
         setupViews();
@@ -155,19 +161,14 @@ public class DetailFoodActivity extends AppCompatActivity {
         String selectedSize = getSelectedSize();
         double price;
 
-        // Kiểm tra xem nếu size được chọn là "DEFAULT" (món không có size)
         if (selectedSize.isEmpty()) {
-            // Nếu không có size, lấy giá mặc định
             price = sizePrices.getOrDefault("DEFAULT", 0.0);
         } else {
-            // Nếu có size, lấy giá theo size
             price = sizePrices.getOrDefault(selectedSize, 0.0);
         }
 
-        // Tính tổng giá
         double total = price * quantity;
 
-        // Cập nhật giá trên giao diện
         tvPrice.setText("Giá: " + String.format("%.3f", total) + "đ");
     }
 

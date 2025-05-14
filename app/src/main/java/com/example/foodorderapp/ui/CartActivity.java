@@ -11,6 +11,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -19,8 +20,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.foodorderapp.R;
@@ -66,12 +71,22 @@ public class CartActivity extends AppCompatActivity {
     private ImageButton btnBack;
     private Button btnPay, btnAddress;
     private ProgressBar progressBar;
+    private FrameLayout loadingOverlay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cart);
+        EdgeToEdge.enable(this);
 
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+
+        loadingOverlay = findViewById(R.id.loadingOverlay);
+        loadingOverlay.setVisibility(View.GONE);
         progressBar = findViewById(R.id.progressBar);
         progressBar.setVisibility(View.GONE);
 
@@ -203,6 +218,7 @@ public class CartActivity extends AppCompatActivity {
                     d[0]++;
                     if (d[0] == cartList.size()) {
 
+                        loadingOverlay.setVisibility(View.GONE);
                         progressBar.setVisibility(View.GONE);
                         Log.d("CartActivity", "Tất cả đơn hàng đã được thêm");
 
@@ -214,6 +230,7 @@ public class CartActivity extends AppCompatActivity {
                 }).addOnFailureListener(e -> {
                     Log.e("CartActivity", "Lỗi thêm đơn hàng: "+ e.getMessage() );
                     progressBar.setVisibility(View.GONE);
+                    loadingOverlay.setVisibility(View.GONE);
                 });
             }
 
