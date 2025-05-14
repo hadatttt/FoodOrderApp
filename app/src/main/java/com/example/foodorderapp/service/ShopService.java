@@ -37,7 +37,7 @@ public class ShopService {
     // Lấy cửa hàng theo storeId
     public Task<QuerySnapshot> getShopById(int storeId) {
         CollectionReference shopCollection = db.collection("shops");
-        return shopCollection.whereEqualTo("storeid", storeId).get();  // Truy vấn cửa hàng theo storeId
+        return shopCollection.whereEqualTo("storeid", storeId).get();
     }
 
     // Tìm kiếm cửa hàng theo tên
@@ -49,7 +49,7 @@ public class ShopService {
             List<ShopModel> allShops = snapshot.toObjects(ShopModel.class);
 
             if (query == null || query.trim().isEmpty()) {
-                return allShops;  // Nếu không có truy vấn, trả về tất cả cửa hàng
+                return allShops;
             }
 
             List<ShopModel> filteredShops = new ArrayList<>();
@@ -97,7 +97,7 @@ public class ShopService {
 
     public Task<QuerySnapshot> getHotShops() {
         CollectionReference shopCollection = db.collection("shops");
-        return shopCollection.orderBy("rating", com.google.firebase.firestore.Query.Direction.DESCENDING).limit(30).get();
+        return shopCollection.orderBy("rating", com.google.firebase.firestore.Query.Direction.DESCENDING).limit(10).get();
     }
     public void updateStoreRating(int storeId) {
         CollectionReference foodCollection = db.collection("foods");

@@ -1,5 +1,6 @@
 package com.example.foodorderapp.adapter;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -23,6 +24,7 @@ public class SearchHotShopAdapter extends RecyclerView.Adapter<SearchHotShopAdap
     public SearchHotShopAdapter(List<ShopModel> shops, OnItemClickListener listener) {
         this.shops = shops;
         this.listener = listener;
+        Log.d("SearchHotShopAdapter", "OnItemClickListener initialized: " + listener.getClass().getSimpleName());
     }
 
     @NonNull

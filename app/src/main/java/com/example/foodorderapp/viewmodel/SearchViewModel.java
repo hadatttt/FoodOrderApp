@@ -3,7 +3,6 @@ package com.example.foodorderapp.viewmodel;
 import android.util.Log;
 
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.SavedStateHandle;
 import androidx.lifecycle.ViewModel;
 
 import com.example.foodorderapp.model.FoodModel;
@@ -14,13 +13,12 @@ import com.example.foodorderapp.service.FoodService;
 import com.example.foodorderapp.service.SearchQueryService;
 import com.example.foodorderapp.service.ShopService;
 import com.example.foodorderapp.service.UserService;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class SearchViewModel extends ViewModel {
 
@@ -39,7 +37,6 @@ public class SearchViewModel extends ViewModel {
             this.rating = rating;
         }
 
-        // Getter + Setter omitted for brevity...
         public String getName() {
             return name;
         }
@@ -74,6 +71,15 @@ public class SearchViewModel extends ViewModel {
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
     private final MutableLiveData<Boolean> hasResults = new MutableLiveData<>(true);
 
+    private final ExecutorService executorService = Executors.newFixedThreadPool(2);
+
+    public SearchViewModel() {
+        this.userId = userService.getUserId();
+        loadSuggestions();
+        loadHotShops();
+        loadHistory();
+    }
+
     public MutableLiveData<List<FoodModel>> getSuggestions() {
         return suggestions;
     }
@@ -102,103 +108,137 @@ public class SearchViewModel extends ViewModel {
         return hasResults;
     }
 
-    private final ExecutorService executorService = Executors.newFixedThreadPool(2);
-
-    public SearchViewModel() {
-        this.userId = userService.getUserId();
-        loadSuggestions();
-        loadHotShops();
-        loadHistory();
+    public void addToSearchHistory(SearchQueryModel newQuery) {
+        searchQueryService.addSearchQuery(newQuery);
     }
 
     private void loadHistory() {
         isLoading.setValue(true);
-        userService.getUser().addOnSuccessListener(documentSnapshot -> {
-            UserModel user = documentSnapshot.toObject(UserModel.class);
-            if (user == null) {
-                errorMessage.setValue("User not found");
-            }
-            isLoading.setValue(false);
-        }).addOnFailureListener(e -> {
-            errorMessage.setValue("Failed to load user: " + e.getMessage());
-            isLoading.setValue(false);
-        });
+        userService.getUser()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (!documentSnapshot.exists()) {
+                        errorMessage.setValue("User document does not exist");
+                        searchQueries.setValue(new ArrayList<>());
+                        isLoading.setValue(false);
+                        return;
+                    }
+
+                    UserModel user = documentSnapshot.toObject(UserModel.class);
+                    if (user == null) {
+                        errorMessage.setValue("Invalid user data");
+                        searchQueries.setValue(new ArrayList<>());
+                        isLoading.setValue(false);
+                        return;
+                    }
+
+                    searchQueryService.getSearchQueryByUserId(userId)
+                            .addOnSuccessListener(querySnapshot -> {
+                                List<SearchQueryModel> queries = querySnapshot != null
+                                        ? querySnapshot.toObjects(SearchQueryModel.class)
+                                        : new ArrayList<>();
+                                searchQueries.setValue(queries);
+                                isLoading.setValue(false);
+                            })
+                            .addOnFailureListener(e -> {
+                                errorMessage.setValue("Failed to load search history: " + e.getMessage());
+                                searchQueries.setValue(new ArrayList<>());
+                                isLoading.setValue(false);
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    errorMessage.setValue("Failed to load user data: " + e.getMessage());
+                    searchQueries.setValue(new ArrayList<>());
+                    isLoading.setValue(false);
+                });
     }
 
     private void loadSuggestions() {
         isLoading.setValue(true);
-        foodService.getRandomFoods(4).addOnSuccessListener(snapshot -> {
-            List<FoodModel> foods = snapshot.toObjects(FoodModel.class);
-            suggestions.setValue(foods);
-            hasResults.setValue(!foods.isEmpty());
-            isLoading.setValue(false);
-        }).addOnFailureListener(e -> {
-            errorMessage.setValue("Failed to load suggestions: " + e.getMessage());
-            isLoading.setValue(false);
-        });
+        foodService.getRandomFoods(4)
+                .addOnSuccessListener(snapshot -> {
+                    List<FoodModel> foods = snapshot.toObjects(FoodModel.class);
+                    suggestions.setValue(foods);
+                    hasResults.setValue(!foods.isEmpty());
+                    isLoading.setValue(false);
+                })
+                .addOnFailureListener(e -> {
+                    errorMessage.setValue("Failed to load suggestions: " + e.getMessage());
+                    suggestions.setValue(new ArrayList<>());
+                    isLoading.setValue(false);
+                });
     }
 
     private void loadHotShops() {
         isLoading.setValue(true);
-        shopService.getHotShops().addOnSuccessListener(snapshot -> {
-            List<ShopModel> shops = snapshot.toObjects(ShopModel.class);
-            hotShops.setValue(shops);
-            hasResults.setValue(!shops.isEmpty());
-            isLoading.setValue(false);
-        }).addOnFailureListener(e -> {
-            errorMessage.setValue("Failed to load hot shops: " + e.getMessage());
-            isLoading.setValue(false);
-        });
+        shopService.getHotShops()
+                .addOnSuccessListener(snapshot -> {
+                    List<ShopModel> shops = snapshot.toObjects(ShopModel.class);
+                    hotShops.setValue(shops);
+                    hasResults.setValue(!shops.isEmpty());
+                    isLoading.setValue(false);
+                })
+                .addOnFailureListener(e -> {
+                    errorMessage.setValue("Failed to load hot shops: " + e.getMessage());
+                    hotShops.setValue(new ArrayList<>());
+                    isLoading.setValue(false);
+                });
     }
 
     public void performSearch(String query) {
         if (query.trim().isEmpty()) {
             searchResults.setValue(new ArrayList<>());
             hasResults.setValue(true);
+            isLoading.setValue(false);
             return;
         }
 
         isLoading.setValue(true);
-        hasResults.setValue(true);
         searchResults.setValue(new ArrayList<>());
+        AtomicInteger taskCounter = new AtomicInteger(2); // Track food and shop searches
 
         executorService.execute(() -> {
-            // Tìm kiếm thực phẩm
             List<FoodModel> foods = foodService.getFoodsByName(query);
-            processFoodResults(foods);  // Cập nhật UI bằng LiveData
+            processFoodResults(foods, taskCounter);
+        });
 
-            // Tìm kiếm cửa hàng
+        executorService.execute(() -> {
             List<ShopModel> shops = shopService.searchShopsByName(query);
-            processShopResults(shops);  // Cập nhật UI bằng LiveData
+            processShopResults(shops, taskCounter);
         });
     }
 
-    private void processFoodResults(List<FoodModel> foodList) {
+    private void processFoodResults(List<FoodModel> foodList, AtomicInteger taskCounter) {
         List<SearchResultItem> currentResults = new ArrayList<>(searchResults.getValue());
         if (foodList != null && !foodList.isEmpty()) {
             for (FoodModel item : foodList) {
                 currentResults.add(new SearchResultItem(-1, item.getFoodId(), item.getName(), item.getImageUrl(), item.getRating()));
             }
-            searchResults.postValue(currentResults);  // Sử dụng postValue để cập nhật giá trị từ background thread
+            searchResults.postValue(currentResults);
             checkForResults();
         } else {
-            errorMessage.postValue("Failed to search menu items");
+            errorMessage.postValue("No menu items found");
         }
-        isLoading.postValue(false);
+
+        if (taskCounter.decrementAndGet() == 0) {
+            isLoading.postValue(false);
+        }
     }
 
-    private void processShopResults(List<ShopModel> foodList) {
+    private void processShopResults(List<ShopModel> shopList, AtomicInteger taskCounter) {
         List<SearchResultItem> currentResults = new ArrayList<>(searchResults.getValue());
-        if (foodList != null && !foodList.isEmpty()) {
-            for (ShopModel item : foodList) {
+        if (shopList != null && !shopList.isEmpty()) {
+            for (ShopModel item : shopList) {
                 currentResults.add(new SearchResultItem(item.getStoreid(), -1, item.getShopName(), item.getImageUrl(), item.getRating()));
             }
-            searchResults.postValue(currentResults);  // Sử dụng postValue để cập nhật giá trị từ background thread
+            searchResults.postValue(currentResults);
             checkForResults();
         } else {
-            errorMessage.postValue("Failed to search shops");
+            errorMessage.postValue("No shops found");
         }
-        isLoading.postValue(false);
+
+        if (taskCounter.decrementAndGet() == 0) {
+            isLoading.postValue(false);
+        }
     }
 
     private void checkForResults() {
@@ -219,5 +259,11 @@ public class SearchViewModel extends ViewModel {
             searchQueryService.deleteSearchQueryByKeywordAndUserId(query.getUserId(), query.getKeyword())
                     .addOnFailureListener(e -> Log.e("SearchViewModel", "Failed to delete history: " + e.getMessage()));
         }
+    }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        executorService.shutdown();
     }
 }
