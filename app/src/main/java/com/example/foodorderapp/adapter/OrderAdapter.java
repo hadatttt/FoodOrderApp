@@ -37,7 +37,9 @@ import com.example.foodorderapp.ui.CartActivity;
 import com.example.foodorderapp.ui.HomeActivity;
 import com.example.foodorderapp.ui.OrderActivity;
 import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -45,7 +47,8 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.auth.User;
-import com.google.type.LatLng;
+
+import org.json.JSONArray;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -212,75 +215,68 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         });
     }
     private void showRouteDialog(String userAddress, String shopAddress) {
-        if (!(context instanceof androidx.fragment.app.FragmentActivity)) return;
-        FragmentActivity activity = (androidx.fragment.app.FragmentActivity) context;
-        FragmentManager fm = activity.getSupportFragmentManager();
-
         View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_map_route, null);
-
-        SupportMapFragment mapFragment = (SupportMapFragment) fm.findFragmentById(R.id.dialog_map_fragment);
-        if (mapFragment == null) {
-            mapFragment = SupportMapFragment.newInstance();
-            fm.beginTransaction().replace(R.id.dialog_map_fragment, mapFragment).commit();
-        }
+        MapView mapView = dialogView.findViewById(R.id.dialog_map_view);
+        mapView.onCreate(null); // No savedInstanceState
+        mapView.onResume();     // Ensure the map is visible immediately
 
         AlertDialog dialog = new AlertDialog.Builder(context)
-                .setTitle("Đường đi đến cửa hàng")
                 .setView(dialogView)
                 .setNegativeButton("Đóng", (d, which) -> d.dismiss())
                 .create();
-
         dialog.show();
 
         MapService mapService = new MapService();
 
-        // Lấy tọa độ user
-        SupportMapFragment finalMapFragment = mapFragment;
         mapService.getCoordinatesFromAddress(userAddress, (userLat, userLng) -> {
-            if (userLat == 0 && userLng == 0) {
-                return;
-            }
+            if (userLat == 0 && userLng == 0) return;
 
-            // Lấy tọa độ shop
             mapService.getCoordinatesFromAddress(shopAddress, (shopLat, shopLng) -> {
-                if (shopLat == 0 && shopLng == 0) {
-                    return;
-                }
+                if (shopLat == 0 && shopLng == 0) return;
 
-                // Hiển thị map và đường đi trên UI thread
                 ((Activity) context).runOnUiThread(() -> {
-                    finalMapFragment.getMapAsync(googleMap -> {
+                    mapView.getMapAsync(googleMap -> {
                         googleMap.clear();
 
-                        com.google.android.gms.maps.model.LatLng userLatLng = new com.google.android.gms.maps.model.LatLng(userLat, userLng);
-                        com.google.android.gms.maps.model.LatLng shopLatLng = new com.google.android.gms.maps.model.LatLng(shopLat, shopLng);
+                        LatLng userLatLng = new LatLng(userLat, userLng);
+                        LatLng shopLatLng = new LatLng(shopLat, shopLng);
 
-                        // Thêm marker user và shop
                         googleMap.addMarker(new MarkerOptions().position(userLatLng).title("Bạn"));
                         googleMap.addMarker(new MarkerOptions().position(shopLatLng).title("Cửa hàng"));
 
-                        // Zoom bản đồ để hiện cả 2 điểm
-                        LatLngBounds.Builder builder = new LatLngBounds.Builder();
-                        builder.include(userLatLng);
-                        builder.include(shopLatLng);
-                        LatLngBounds bounds = builder.build();
-                        int padding = 100; // padding cho bản đồ
-                        googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
+                        LatLngBounds bounds = new LatLngBounds.Builder()
+                                .include(userLatLng)
+                                .include(shopLatLng)
+                                .build();
+                        googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100));
 
-                        // Vẽ đường đi giữa 2 điểm (đơn giản dạng đường thẳng)
-                        PolylineOptions polylineOptions = new PolylineOptions()
-                                .add(userLatLng)
-                                .add(shopLatLng)
-                                .color(Color.BLUE)
-                                .width(8);
-                        googleMap.addPolyline(polylineOptions);
-
-                        // Nếu muốn bạn có thể dùng MapService.getTravelTimeOSRM để lấy thời gian và hiển thị
+                        mapService.getRouteCoordinatesOSRM(userLat, userLng, shopLat, shopLng, coordinates -> {
+                            if (coordinates != null) {
+                                Log.d("RouteDebug", "Coordinates received: " + coordinates.toString());
+                                PolylineOptions routeLine = new PolylineOptions().color(Color.BLUE).width(8);
+                                try {
+                                    for (int i = 0; i < coordinates.length(); i++) {
+                                        JSONArray point = coordinates.getJSONArray(i);
+                                        double lng = point.getDouble(0);
+                                        double lat = point.getDouble(1);
+                                        routeLine.add(new LatLng(lat, lng));
+                                    }
+                                    ((Activity) context).runOnUiThread(() -> {
+                                        googleMap.addPolyline(routeLine);
+                                    });
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            } else {
+                                Log.d("RouteDebug", "No coordinates received.");
+                            }
+                        });
                     });
                 });
             });
         });
     }
+
 
     @Override
     public int getItemCount() {

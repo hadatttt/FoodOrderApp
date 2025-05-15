@@ -189,9 +189,13 @@ public class InfoActivity extends AppCompatActivity implements OnMapReadyCallbac
                 updateAvatar();
                 if (address != null && !address.trim().isEmpty()) {
                     loadMapWithAddress(address);
+                } else if (address == null || address.trim().isEmpty()) {
+                    if (mapFragment.getView() != null) {
+                        mapFragment.getView().setVisibility(View.GONE);
+                    }
                 }
             } else {
-                Toast.makeText(this, "Không thể lấy thông tin người dùng", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(this, "Không thể lấy thông tin người dùng", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -200,14 +204,6 @@ public class InfoActivity extends AppCompatActivity implements OnMapReadyCallbac
             Log.e("InfoActivity", "MapFragment hoặc GoogleMap chưa khởi tạo");
             return;
         }
-        if (address == null || address.trim().isEmpty()) {
-            Toast.makeText(this, "Địa chỉ trống, không thể hiển thị bản đồ", Toast.LENGTH_SHORT).show();
-            if (mapFragment.getView() != null) {
-                mapFragment.getView().setVisibility(View.GONE);
-            }
-            return;
-        }
-
         Log.d("InfoActivity", "Tìm tọa độ cho địa chỉ: " + address);
         mapService.getCoordinatesFromAddress(address, (lat, lng) -> {
 
@@ -225,7 +221,7 @@ public class InfoActivity extends AppCompatActivity implements OnMapReadyCallbac
                         mapFragment.getView().setVisibility(View.VISIBLE);
                     }
                 } else {
-                    Toast.makeText(this, "Không tìm thấy vị trí cho địa chỉ: " + address, Toast.LENGTH_LONG).show();
+//                    Toast.makeText(this, "Không tìm thấy vị trí cho địa chỉ: " + address, Toast.LENGTH_LONG).show();
                     Log.e("InfoActivity", "Không tìm thấy vị trí cho địa chỉ: " + address);
                     if (mapFragment.getView() != null) {
                         mapFragment.getView().setVisibility(View.GONE);

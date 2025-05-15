@@ -158,6 +158,23 @@ public class HomeActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         loadCartItems();
+        // Hiển thị thông tin người dùng
+        userService.getUser().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                String name = documentSnapshot.getString("fullName");
+                String addr = documentSnapshot.getString("address");
+                TextView nameTextView = findViewById(R.id.tv_full_name);
+                TextView addressTextView = findViewById(R.id.tv_address);
+                nameTextView.setText("Chào " + name + ", Ngon Miệng Nhé");
+                addressTextView.setText(addr);
+            } else {
+                Log.d(TAG, "User document does not exist.");
+            }
+        }).addOnFailureListener(e -> {
+            Log.e(TAG, "Failed to get user data", e);
+        });
+        loadAllFoods();
+        loadAllShops();
     }
 
     private void loadAllFoods() {

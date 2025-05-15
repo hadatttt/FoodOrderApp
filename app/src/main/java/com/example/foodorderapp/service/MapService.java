@@ -20,7 +20,43 @@ public class MapService {
     public interface OnTravelTimeResult {
         void onTimeResult(String timeStr);
     }
+    public interface OnRouteCoordinatesResult {
+        void onRouteCoordinates(JSONArray coordinates);
+    }
 
+    public void getRouteCoordinatesOSRM(double userLat, double userLng, double shopLat, double shopLng, OnRouteCoordinatesResult callback) {
+        new Thread(() -> {
+            try {
+                String url = String.format(
+                        "https://router.project-osrm.org/route/v1/driving/%.6f,%.6f;%.6f,%.6f?overview=full&geometries=geojson",
+                        userLng, userLat, shopLng, shopLat);
+
+                OkHttpClient client = new OkHttpClient();
+                Request request = new Request.Builder()
+                        .url(url)
+                        .header("User-Agent", "FastFood/1.0")
+                        .build();
+
+                Response response = client.newCall(request).execute();
+                if (response.isSuccessful()) {
+                    JSONObject json = new JSONObject(response.body().string());
+                    JSONArray routes = json.getJSONArray("routes");
+                    if (routes.length() > 0) {
+                        JSONObject geometry = routes.getJSONObject(0).getJSONObject("geometry");
+                        JSONArray coordinates = geometry.getJSONArray("coordinates");
+                        callback.onRouteCoordinates(coordinates);
+                    } else {
+                        callback.onRouteCoordinates(null);
+                    }
+                } else {
+                    callback.onRouteCoordinates(null);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                callback.onRouteCoordinates(null);
+            }
+        }).start();
+    }
     public void getCoordinatesFromAddress(String address, OnLocationResult callback) {
         new Thread(() -> {
             try {

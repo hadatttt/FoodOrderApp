@@ -136,4 +136,10 @@ public class MenuProfileActivity extends AppCompatActivity {
             }
         }
     }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        displayUserDetail();
+    }
+
 }
