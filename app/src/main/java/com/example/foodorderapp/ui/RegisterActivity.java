@@ -6,12 +6,17 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.model.UserModel;
@@ -41,12 +46,20 @@ public class RegisterActivity extends AppCompatActivity {
     private GoogleSignInClient mGoogleSignInClient;
     private ProgressBar progressBar;
 
+    private FrameLayout loadingOverlay;
     UserService userService = new UserService(); // để lưu người dùng vào firestore
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
-
+        EdgeToEdge.enable(this);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+        loadingOverlay = findViewById(R.id.loadingOverlay);
+        loadingOverlay.setVisibility(View.GONE);
         progressBar = findViewById(R.id.progressBar);
         progressBar.setVisibility(View.GONE);
 
@@ -69,6 +82,7 @@ public class RegisterActivity extends AppCompatActivity {
                 String phone = edtPhone.getText().toString().trim();
                 String password = edtPassword.getText().toString().trim();
 
+                loadingOverlay.setVisibility(View.VISIBLE);
                 progressBar.setVisibility(View.VISIBLE);
 
                 if (email.isEmpty() || password.isEmpty() || name.isEmpty() || phone.isEmpty()) {
@@ -87,9 +101,9 @@ public class RegisterActivity extends AppCompatActivity {
 
                             Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
                             startActivity(intent);
-                            finish();
                         })
                         .addOnFailureListener(e -> {
+                            loadingOverlay.setVisibility(View.GONE);
                             progressBar.setVisibility(View.GONE);
                             tvRegisterError.setText(e.getMessage());
                             tvRegisterError.setVisibility(View.VISIBLE);
@@ -106,6 +120,7 @@ public class RegisterActivity extends AppCompatActivity {
         googleLogin.setOnClickListener(v -> {
             Intent signInIntent = mGoogleSignInClient.getSignInIntent();
             progressBar.setVisibility(View.VISIBLE);
+            loadingOverlay.setVisibility(View.VISIBLE);
             startActivityForResult(signInIntent, RC_SIGN_IN);
         });
     }
@@ -125,15 +140,18 @@ public class RegisterActivity extends AppCompatActivity {
                             if (task1.isSuccessful()) {
                                 progressBar.setVisibility(View.VISIBLE);
 
+                                loadingOverlay.setVisibility(View.VISIBLE);
                                 Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
                                 startActivity(intent);
                                 finish();
                             } else {
+                                loadingOverlay.setVisibility(View.GONE);
                                 progressBar.setVisibility(View.GONE);
                                 Toast.makeText(RegisterActivity.this, "Đăng nhập Google thất bại", Toast.LENGTH_SHORT).show();
                             }
                         });
             } catch (ApiException e) {
+                loadingOverlay.setVisibility(View.GONE);
                 progressBar.setVisibility(View.GONE);
                 Log.w("GoogleSignIn", "Google sign in failed", e);
                 Toast.makeText(this, "Đăng nhập Google thất bại", Toast.LENGTH_SHORT).show();

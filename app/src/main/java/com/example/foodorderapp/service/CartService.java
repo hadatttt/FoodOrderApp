@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.example.foodorderapp.model.CartModel;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.TaskCompletionSource;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.*;
 
@@ -66,7 +67,6 @@ public class CartService {
 
 
     public void deleteCartItemByFoodId(String userId, int foodId, String size) {
-        Log.d("Sizeeeee", size);
         db.collection("carts")
                 .whereEqualTo("userId", userId)
                 .whereEqualTo("foodId", foodId)
@@ -81,54 +81,80 @@ public class CartService {
                     System.out.println("Xóa giỏ hàng thất bại: " + e.getMessage());
                 });
     }
-    public void checkAndAddOrUpdateCartItem(CartModel newCartItem) {
-        // Truy vấn món ăn từ bảng foods
+    public Task<Void> checkAndAddOrUpdateCartItem(CartModel newCartItem) {
+        TaskCompletionSource<Void> taskSource = new TaskCompletionSource<>();
+
         db.collection("foods")
                 .whereEqualTo("foodId", newCartItem.getFoodId())
                 .get()
                 .addOnSuccessListener(foodDoc -> {
                     if (!foodDoc.isEmpty()) {
-                        // Lấy document đầu tiên
                         DocumentSnapshot foodSnapshot = foodDoc.getDocuments().get(0);
 
+                        // Lấy map sizePrices (nếu có)
                         Map<String, Object> priceBySizeMap = (Map<String, Object>) foodSnapshot.get("sizePrices");
-                        if (priceBySizeMap != null && priceBySizeMap.containsKey(newCartItem.getSize())) {
-                            double price = ((Number) priceBySizeMap.get(newCartItem.getSize())).doubleValue();
-                            newCartItem.setPrice(price);
 
-                            // Kiểm tra xem món ăn đã có trong giỏ hàng chưa
-                            db.collection("carts")
-                                    .whereEqualTo("userId", newCartItem.getUserId())
-                                    .whereEqualTo("foodId", newCartItem.getFoodId())
-                                    .whereEqualTo("size", newCartItem.getSize())
-                                    .get()
-                                    .addOnSuccessListener(querySnapshot -> {
-                                        if (!querySnapshot.isEmpty()) {
-                                            DocumentSnapshot doc = querySnapshot.getDocuments().get(0);
-                                            CartModel existingItem = doc.toObject(CartModel.class);
+                        double price;
 
-                                            int newQuantity = existingItem.getQuantity() + newCartItem.getQuantity();
-                                            existingItem.setQuantity(newQuantity);
-                                            existingItem.setPrice(price);
-
-                                            db.collection("carts").document(doc.getId()).set(existingItem);
-                                        } else {
-                                            addToCart(newCartItem);
-                                        }
-                                    })
-                                    .addOnFailureListener(e -> {
-                                        System.out.println("Lỗi khi kiểm tra cart: " + e.getMessage());
-                                    });
+                        // Nếu có sizePrices và chọn size hợp lệ
+                        if (priceBySizeMap != null && newCartItem.getSize() != null && !newCartItem.getSize().isEmpty()) {
+                            if (priceBySizeMap.containsKey(newCartItem.getSize())) {
+                                price = ((Number) priceBySizeMap.get(newCartItem.getSize())).doubleValue();
+                            } else {
+                                taskSource.setException(new Exception("Không tìm thấy giá theo size"));
+                                Log.d("SIZEEEEE", "Không tìm thấy giá theo size: " + newCartItem.getSize());
+                                return;
+                            }
                         } else {
-                            System.out.println("Không tìm thấy giá theo size.");
+                            // Không có size → dùng giá mặc định từ trường "price"
+                            Number basePrice = foodSnapshot.getDouble("price");
+                            if (basePrice != null) {
+                                price = basePrice.doubleValue();
+                            } else {
+                                taskSource.setException(new Exception("Không có trường 'price' trong món ăn"));
+                                return;
+                            }
                         }
+
+                        newCartItem.setPrice(price);
+
+                        // Kiểm tra xem món này đã có trong giỏ chưa
+                        db.collection("carts")
+                                .whereEqualTo("userId", newCartItem.getUserId())
+                                .whereEqualTo("foodId", newCartItem.getFoodId())
+                                .whereEqualTo("size", newCartItem.getSize())
+                                .get()
+                                .addOnSuccessListener(querySnapshot -> {
+                                    if (!querySnapshot.isEmpty()) {
+                                        DocumentSnapshot doc = querySnapshot.getDocuments().get(0);
+                                        CartModel existingItem = doc.toObject(CartModel.class);
+
+                                        int newQuantity = existingItem.getQuantity() + newCartItem.getQuantity();
+                                        existingItem.setQuantity(newQuantity);
+                                        existingItem.setPrice(price);
+
+                                        db.collection("carts").document(doc.getId())
+                                                .set(existingItem)
+                                                .addOnSuccessListener(aVoid -> taskSource.setResult(null))
+                                                .addOnFailureListener(taskSource::setException);
+                                    } else {
+                                        db.collection("carts").add(newCartItem)
+                                                .addOnSuccessListener(docRef -> taskSource.setResult(null))
+                                                .addOnFailureListener(taskSource::setException);
+                                    }
+                                })
+                                .addOnFailureListener(taskSource::setException);
                     } else {
-                        System.out.println("Không tìm thấy món ăn với ID: " + newCartItem.getFoodId());
+                        taskSource.setException(new Exception("Không tìm thấy món ăn với ID: " + newCartItem.getFoodId()));
+                        Log.d("SIZEEEEE", "Không tìm thấy món ăn với ID");
                     }
-                });
+                })
+                .addOnFailureListener(taskSource::setException);
+
+        return taskSource.getTask();
     }
 
-        public void clearCartByUserId(String userId) {
+    public void clearCartByUserId(String userId) {
         db.collection("carts").whereEqualTo("userId", userId).get()
                 .addOnSuccessListener(querySnapshots -> {
                     for (DocumentSnapshot doc : querySnapshots.getDocuments()) {

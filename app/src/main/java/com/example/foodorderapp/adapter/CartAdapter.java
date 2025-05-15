@@ -60,17 +60,25 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
                         String imageUrl = foodSnapshot.getString("imageUrl");
                         holder.tvFoodName.setText(foodSnapshot.getString("name"));
                         Map<String, Object> sizePricesMap = (Map<String, Object>) foodSnapshot.get("sizePrices");
-                        if (sizePricesMap != null && sizePricesMap.containsKey(cartItem.getSize())) {
-                            Object priceObj = sizePricesMap.get(cartItem.getSize());
+                        String selectedSize = cartItem.getSize();
+                        double finalPrice = 0.0;
 
+                        if (sizePricesMap != null && !sizePricesMap.isEmpty() && selectedSize != null && sizePricesMap.containsKey(selectedSize)) {
+                            Object priceObj = sizePricesMap.get(selectedSize);
                             if (priceObj instanceof Number) {
-                                Double fetchedPrice = ((Number) priceObj).doubleValue();
-                                if (fetchedPrice != null) {
-                                    cartItem.setPrice(fetchedPrice);
-                                    holder.tvPrice.setText(fetchedPrice * cartItem.getQuantity() + "00 đ");
-                                }
+                                finalPrice = ((Number) priceObj).doubleValue();
+                            }
+                        } else {
+                            // Không có sizePrices -> lấy giá mặc định
+                            Double defaultPrice = foodSnapshot.getDouble("price");
+                            if (defaultPrice != null) {
+                                finalPrice = defaultPrice;
                             }
                         }
+
+                        // Gán giá và hiển thị
+                        cartItem.setPrice(finalPrice);
+                        holder.tvPrice.setText(String.format("%.3f đ", finalPrice * cartItem.getQuantity()));
                         Glide.with(context)
                                 .load(imageUrl)
                                 .into(holder.imgFood);

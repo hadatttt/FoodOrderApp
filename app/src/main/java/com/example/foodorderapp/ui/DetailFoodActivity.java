@@ -5,12 +5,14 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -45,12 +47,18 @@ public class DetailFoodActivity extends AppCompatActivity {
     private TextView tvQuantity, tvPrice, tvFoodName, tvRate, tvDesc, tvStore;
     private ImageView imgFood;
     private RadioButton rbS, rbM, rbL;
+    private LinearLayout llSizeRow;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_food);
-
+        EdgeToEdge.enable(this);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
         // Khởi tạo các dịch vụ và các thành phần giao diện
         initializeServices();
         setupViews();
@@ -93,6 +101,7 @@ public class DetailFoodActivity extends AppCompatActivity {
         rbS = findViewById(R.id.sizeSmall);
         rbM = findViewById(R.id.sizeMedium);
         rbL = findViewById(R.id.sizeLarge);
+        llSizeRow = findViewById(R.id.llSizeRow);
 
         tvQuantity.setText(String.valueOf(quantity));
     }
@@ -149,8 +158,17 @@ public class DetailFoodActivity extends AppCompatActivity {
     }
 
     private void updatePriceBasedOnSize() {
-        double price = sizePrices.getOrDefault(getSelectedSize(), 0.0);
+        String selectedSize = getSelectedSize();
+        double price;
+
+        if (selectedSize.isEmpty()) {
+            price = sizePrices.getOrDefault("DEFAULT", 0.0);
+        } else {
+            price = sizePrices.getOrDefault(selectedSize, 0.0);
+        }
+
         double total = price * quantity;
+
         tvPrice.setText("Giá: " + String.format("%.3f", total) + "đ");
     }
 
@@ -191,14 +209,26 @@ public class DetailFoodActivity extends AppCompatActivity {
         tvDesc.setText(caption != null ? caption : "Mô tả");
         tvRate.setText(String.valueOf(rating != null ? rating : 0.0f));
 
-        // Cập nhật giá dựa trên kích thước
         Map<String, Long> rawSizePrices = (Map<String, Long>) doc.get("sizePrices");
-        if (rawSizePrices != null) {
+
+        RadioGroup rgSize = findViewById(R.id.rgSize);
+
+        if (rawSizePrices == null || rawSizePrices.isEmpty()) {
+            llSizeRow.setVisibility(View.GONE);
+
+            Double price = doc.getDouble("price");
+            if (price != null) {
+                sizePrices.put("DEFAULT", price);
+            }
+        } else {
             for (Map.Entry<String, Long> entry : rawSizePrices.entrySet()) {
                 sizePrices.put(entry.getKey(), entry.getValue().doubleValue());
             }
-            updatePriceBasedOnSize();
+            rgSize.setVisibility(View.VISIBLE);
         }
+
+        updatePriceBasedOnSize();
+
     }
 
     private void loadShopInfo(Long storeIdLong) {

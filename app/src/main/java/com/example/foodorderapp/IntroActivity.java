@@ -6,11 +6,16 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.example.foodorderapp.model.FoodModel;
 import com.example.foodorderapp.model.ShopModel;
@@ -30,14 +35,19 @@ public class IntroActivity extends AppCompatActivity {
     private ImageView ivOrder;
     private TextView tv;
     private int[] imageResources;
+    private FrameLayout loadingOverlay;
 
-
-    private EditText edtUsername, edtPassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_intro);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
 //        ShopService shopService = new ShopService();
 //        FoodService foodService = new FoodService();
 //
@@ -135,7 +145,8 @@ public class IntroActivity extends AppCompatActivity {
 //        for (ShopModel shop : shopList) {
 //            shopService.addShop(shop);
 //        }
-
+        loadingOverlay = findViewById(R.id.loadingOverlay);
+        loadingOverlay.setVisibility(View.GONE);
         ProgressBar progressBar = findViewById(R.id.progressBar);
         progressBar.setVisibility(View.GONE);
 
@@ -169,6 +180,7 @@ public class IntroActivity extends AppCompatActivity {
                 }
                 updateDots();
             } else {
+                loadingOverlay.setVisibility(View.VISIBLE);
                 progressBar.setVisibility(View.VISIBLE);
                 Intent intent = new Intent(IntroActivity.this, LoginActivity.class);
                 startActivity(intent);
@@ -179,6 +191,7 @@ public class IntroActivity extends AppCompatActivity {
         btnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                loadingOverlay.setVisibility(View.VISIBLE);
                 progressBar.setVisibility(View.VISIBLE);
 
                 Intent intent = new Intent(IntroActivity.this, LoginActivity.class);
@@ -198,6 +211,8 @@ public class IntroActivity extends AppCompatActivity {
         super.onResume();
         // Ẩn progress bar nếu nó đang hiển thị
         ProgressBar progressBar = findViewById(R.id.progressBar);
+        FrameLayout loadingOverlay = findViewById(R.id.loadingOverlay);
+        loadingOverlay.setVisibility(View.GONE);
         progressBar.setVisibility(View.GONE);  // Đảm bảo rằng progress bar không hiển thị khi quay lại
     }
 }

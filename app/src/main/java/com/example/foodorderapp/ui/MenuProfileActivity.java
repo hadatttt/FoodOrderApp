@@ -26,6 +26,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.bumptech.glide.Glide;
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.service.UserService;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.io.File;
@@ -35,6 +36,7 @@ public class MenuProfileActivity extends AppCompatActivity {
     private ImageView imgAvatar;
     private TextView profileName;
     private ImageButton btnBack;
+    private LinearLayout btnOrders;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,6 +45,7 @@ public class MenuProfileActivity extends AppCompatActivity {
         userService = new UserService();
         imgAvatar = findViewById(R.id.profileImage);
         profileName = findViewById(R.id.profileName);
+        btnOrders = findViewById(R.id.btnOrders);
         displayUserDetail();
         Button btnLogout = findViewById(R.id.btnLogout);
         LinearLayout btnInfo = findViewById(R.id.btnInfo);
@@ -78,21 +81,28 @@ public class MenuProfileActivity extends AppCompatActivity {
                     .setTitle("Xác nhận")
                     .setMessage("Bạn có chắc chắn muốn đăng xuất?")
                     .setPositiveButton("Đăng xuất", (dialog, which) -> {
-                        // TODO: xử lý đăng xuất ở đây
-                        Toast.makeText(this, "Đã đăng xuất", Toast.LENGTH_SHORT).show();
-                        // Ví dụ: chuyển về màn hình đăng nhập
+                        FirebaseAuth.getInstance().signOut();
+
                         Intent intent = new Intent(this, LoginActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);
-                        finish(); // kết thúc activity hiện tại
                     })
                     .setNegativeButton("Hủy", null)
                     .show();
         });
 
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
+        });
+        btnOrders.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MenuProfileActivity.this, OrderActivity.class);
+                startActivity(intent);
+            }
         });
     }
 
