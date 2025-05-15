@@ -72,7 +72,6 @@ public class SearchHotFoodAdapter extends RecyclerView.Adapter<SearchHotFoodAdap
         public void bind(FoodModel item) {
             binding.favoriteName.setText(item.getName());
 
-            // Gọi bất đồng bộ đến Firestore
             foodService.getFoodsByStoreId(item.getStoreId())
                     .addOnSuccessListener(snapshot -> {
                         List<FoodModel> foodList = snapshot.toObjects(FoodModel.class);

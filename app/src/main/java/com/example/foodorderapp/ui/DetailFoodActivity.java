@@ -2,6 +2,7 @@ package com.example.foodorderapp.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -64,12 +65,12 @@ public class DetailFoodActivity extends AppCompatActivity {
         setupViews();
         setupListeners();
 
-        foodId = getIntent().getIntExtra("foodid", -1);
+        foodId = getIntent().getIntExtra("foodId", -1);
 
         if (foodId != -1) {
             loadFoodDetails(foodId);
         } else {
-            Toast.makeText(this, "Không tìm thấy món ăn!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Không tìm thấy món ăn! id:" + foodId, Toast.LENGTH_SHORT).show();
             finish();
         }
     }

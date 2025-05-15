@@ -157,6 +157,9 @@ public class SearchViewModel extends ViewModel {
         foodService.getLimitFoods(4)
                 .addOnSuccessListener(snapshot -> {
                     List<FoodModel> foods = snapshot.toObjects(FoodModel.class);
+                    for (  FoodModel food : foods) {
+                        Log.d("SearchViewModel", "Food: " + food.getStoreId());
+                    }
                     suggestions.setValue(foods);
                     hasResults.setValue(!foods.isEmpty());
                     isLoading.setValue(false);

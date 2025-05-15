@@ -38,6 +38,7 @@ public class SearchActivity extends AppCompatActivity {
     private SearchHotFoodAdapter searchHotFoodAdapter;
 
     private ActivitySearchBinding binding;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,6 +90,7 @@ public class SearchActivity extends AppCompatActivity {
             return;
         });
     }
+
     private void loadData() {
         searchViewModel = new ViewModelProvider(this, new SavedStateViewModelFactory(getApplication(), this)).get(SearchViewModel.class);
         searchQueryAdapter = new SearchSearchQueryAdapter(new ArrayList<>(), searchQuery -> {
@@ -106,7 +108,8 @@ public class SearchActivity extends AppCompatActivity {
                 startActivity(intent);
             } else if (item.getFoodId() != -1) {
                 // Navigate to food detail page
-                Intent intent = new Intent(this, DetailFoodActivity.class);
+                Intent intent = new Intent(this, DetailShopActivity.class);
+                intent.putExtra("storeId", item.getShopId());
                 intent.putExtra("foodId", item.getFoodId());
                 startActivity(intent);
             }
@@ -119,7 +122,8 @@ public class SearchActivity extends AppCompatActivity {
                 });
         searchHotFoodAdapter = new SearchHotFoodAdapter(new ArrayList<>(),
                 food -> {
-                    Intent intent = new Intent(this, DetailFoodActivity.class);
+                    Intent intent = new Intent(this, DetailShopActivity.class);
+                    intent.putExtra("storeId", food.getStoreId());
                     intent.putExtra("foodId", food.getFoodId());
                     startActivity(intent);
                 });
@@ -158,6 +162,7 @@ public class SearchActivity extends AppCompatActivity {
             }
         });
     }
+
     private void updateSearchResultsVisibility() {
         boolean hasResults = searchViewModel.getHasResults().getValue() != null && searchViewModel.getHasResults().getValue();
         binding.searchResultsRecyclerView.setVisibility(hasResults ? View.VISIBLE : View.GONE);
@@ -170,6 +175,7 @@ public class SearchActivity extends AppCompatActivity {
             showSearchResultsUI();
         }
     }
+
     private void showDefaultUI() {
         binding.searchResultsRecyclerView.setVisibility(View.GONE);
         binding.noResultsTextView.setVisibility(View.GONE);

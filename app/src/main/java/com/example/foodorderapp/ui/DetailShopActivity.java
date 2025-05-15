@@ -1,5 +1,7 @@
 package com.example.foodorderapp.ui;
 
+import static java.lang.Thread.sleep;
+
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -63,7 +65,6 @@ public class DetailShopActivity extends AppCompatActivity {
             finish();
             return;
         }
-
         loadShopInfo(storeId);
         loadFoods(storeId);
     }
@@ -157,8 +158,23 @@ public class DetailShopActivity extends AppCompatActivity {
 
                     updateCategoryButtonsVisibility(foundCategories);
                     selectCategory("tất cả");
+                    navigateToFoodDetail(); // Chuyển đến món ăn đầu tiên
                 })
                 .addOnFailureListener(e -> Toast.makeText(this, "Lỗi khi tải danh sách món ăn", Toast.LENGTH_SHORT).show());
+    }
+
+    private void navigateToFoodDetail() {
+        int foodId = getIntent().getIntExtra("foodId", -1);
+        if (foodId != -1) {
+            Intent intent = new Intent(this, DetailFoodActivity.class);
+            intent.putExtra("foodId", foodId);
+            try {
+                sleep(1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            startActivity(intent);
+        }
     }
 
     private void updateCategoryButtonsVisibility(Set<String> validCategories) {
