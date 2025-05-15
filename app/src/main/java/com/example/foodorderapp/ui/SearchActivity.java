@@ -150,6 +150,13 @@ public class SearchActivity extends AppCompatActivity {
             Log.d("SearchActivity", "Suggestions loaded: " + hotFoods.size());
             searchHotFoodAdapter.updateItems(hotFoods);
         });
+
+        binding.btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
     }
     private void updateSearchResultsVisibility() {
         boolean hasResults = searchViewModel.getHasResults().getValue() != null && searchViewModel.getHasResults().getValue();
@@ -173,6 +180,7 @@ public class SearchActivity extends AppCompatActivity {
         binding.searchSuggestionsTitle.setVisibility(View.VISIBLE);
         binding.searchFavoritesTitle.setVisibility(View.VISIBLE);
         binding.searchFavoritesRecyclerView.setVisibility(View.VISIBLE);
+        binding.btnBack.setVisibility(View.VISIBLE);
     }
 
     private void showSearchResultsUI() {
@@ -184,6 +192,7 @@ public class SearchActivity extends AppCompatActivity {
         binding.searchSuggestionsRecyclerView.setVisibility(View.GONE);
         binding.searchFavoritesTitle.setVisibility(View.GONE);
         binding.searchFavoritesRecyclerView.setVisibility(View.GONE);
+        binding.btnBack.setVisibility(View.VISIBLE);
     }
 
     private void updateEmptyHistoryVisibility(List<SearchQueryModel> historyItems) {

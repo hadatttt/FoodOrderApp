@@ -135,6 +135,7 @@
                 android:id="@+id/llBar"
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
+                android:scrollbars="none"
                 app:layout_constraintTop_toBottomOf="@+id/llInfo">
                 <LinearLayout
                     android:layout_width="wrap_content"

@@ -75,7 +75,13 @@ public class DetailShopActivity extends AppCompatActivity {
         recyclerHotFood.setAdapter(hotFoodAdapter);
 
         ImageButton btnBack = findViewById(R.id.btnBack);
-        btnBack.setOnClickListener(v -> startActivity(new Intent(this, HomeActivity.class)));
+//        btnBack.setOnClickListener(v -> startActivity(new Intent(this, HomeActivity.class)));
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
 
         // Gán từng button và category tương ứng
         Button btnAll = findViewById(R.id.btnAll);
