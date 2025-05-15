@@ -27,6 +27,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.model.UserModel;
+import com.example.foodorderapp.service.FCMTokenService;
 import com.example.foodorderapp.service.UserService;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -129,7 +130,7 @@ public class LoginActivity extends AppCompatActivity {
             userService.loginUser(inputEmail, inputPassword)
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
-
+                            FCMTokenService.sendTokenToFirestore();
                             Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
                             startActivity(intent);
                             finish();
@@ -173,6 +174,7 @@ public class LoginActivity extends AppCompatActivity {
                 userService.loginWithGoogle(idToken)
                         .addOnCompleteListener(this, task1 -> {
                             if (task1.isSuccessful()) {
+                                FCMTokenService.sendTokenToFirestore();
                                 Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
                                 startActivity(intent);
                                 finish();
