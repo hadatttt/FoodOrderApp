@@ -127,7 +127,8 @@ public class MenuProfileActivity extends AppCompatActivity {
     }
 
     private void openAccount() {
-        // xử lý khi bấm vào
+        Intent intent = new Intent(MenuProfileActivity.this, AccountActivity.class);
+        startActivityForResult(intent, REQUEST_CODE);
     }
 
     public void updateAvatar(){
