@@ -1,9 +1,12 @@
 package com.example.foodorderapp.ui;
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -39,7 +42,13 @@ import com.example.foodorderapp.model.DistrictModel;
 import com.example.foodorderapp.model.ProvinceModel;
 import com.example.foodorderapp.model.UserModel;
 import com.example.foodorderapp.model.WardModel;
+import com.example.foodorderapp.service.MapService;
 import com.example.foodorderapp.service.UserService;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -47,7 +56,9 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.type.LatLng;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -60,7 +71,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class InfoActivity extends AppCompatActivity {
+public class InfoActivity extends AppCompatActivity implements OnMapReadyCallback {
     private EditText editFullName;
     private EditText editAddress;
     private EditText editEmail;
@@ -75,6 +86,11 @@ public class InfoActivity extends AppCompatActivity {
     private ImageView iconSaved;
     private static final int PICK_IMAGE_REQUEST = 1;
     private ProgressBar progressBar;
+    private GoogleMap mMap;
+    private SupportMapFragment mapFragment;
+    private MapService mapService;
+    private double currentLat = 0, currentLng = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -91,9 +107,26 @@ public class InfoActivity extends AppCompatActivity {
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                String uriString;
+
+                if (selectedImageUri != null) {
+                    uriString = selectedImageUri.toString();
+                } else {
+                    // Lấy avatar hiện tại từ ImageView (nếu đã hiển thị từ đầu)
+                    Drawable drawable = imgAvatar.getDrawable();
+                    if (drawable instanceof BitmapDrawable) {
+                        Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
+                        Uri tempUri = getImageUri(getApplicationContext(), bitmap);
+                        uriString = tempUri.toString();
+                    } else {
+                        uriString = ""; // Trường hợp không có ảnh
+                    }
+                }
+
                 Intent resultIntent = new Intent();
-                resultIntent.putExtra("avatarUri", selectedImageUri.toString());
+                resultIntent.putExtra("avatarUri", uriString);
                 setResult(RESULT_OK, resultIntent);
+                finish();
             }
         });
 
@@ -110,6 +143,13 @@ public class InfoActivity extends AppCompatActivity {
             return insets;
         });
     }
+    private Uri getImageUri(Context context, Bitmap bitmap) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, "Avatar", null);
+        return Uri.parse(path);
+    }
+
     public void init(){
         btnBack = findViewById(R.id.btnBack);
         editFullName = findViewById(R.id.editFullName);
@@ -122,6 +162,11 @@ public class InfoActivity extends AppCompatActivity {
         iconSaved = findViewById(R.id.iconSaved);
         progressBar = findViewById(R.id.progressBar);
         userService = new UserService();
+        mapService = new MapService();
+        mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapFragment);
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(this);
+        }
         displayUserDetail();
     }
     private void displayUserDetail() {
@@ -142,11 +187,65 @@ public class InfoActivity extends AppCompatActivity {
                 editAddress.setText(address);
                 editPhone.setText(phone);
                 updateAvatar();
+                if (address != null && !address.trim().isEmpty()) {
+                    loadMapWithAddress(address);
+                }
             } else {
                 Toast.makeText(this, "Không thể lấy thông tin người dùng", Toast.LENGTH_SHORT).show();
             }
         });
     }
+    private void loadMapWithAddress(String address) {
+        if (mapFragment == null || mMap == null) {
+            Log.e("InfoActivity", "MapFragment hoặc GoogleMap chưa khởi tạo");
+            return;
+        }
+        if (address == null || address.trim().isEmpty()) {
+            Toast.makeText(this, "Địa chỉ trống, không thể hiển thị bản đồ", Toast.LENGTH_SHORT).show();
+            if (mapFragment.getView() != null) {
+                mapFragment.getView().setVisibility(View.GONE);
+            }
+            return;
+        }
+
+        Log.d("InfoActivity", "Tìm tọa độ cho địa chỉ: " + address);
+        mapService.getCoordinatesFromAddress(address, (lat, lng) -> {
+
+            Log.d("InfoActivity", "Received coordinates: lat=" + lat + ", lng=" + lng);
+
+            runOnUiThread(() -> {
+                if (lat != 0 && lng != 0) {
+                    currentLat = lat;
+                    currentLng = lng;
+                    mMap.clear();
+                    com.google.android.gms.maps.model.LatLng pos = new com.google.android.gms.maps.model.LatLng(lat, lng);
+                    mMap.addMarker(new MarkerOptions().position(pos).title("Địa chỉ của bạn"));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 15));
+                    if (mapFragment.getView() != null) {
+                        mapFragment.getView().setVisibility(View.VISIBLE);
+                    }
+                } else {
+                    Toast.makeText(this, "Không tìm thấy vị trí cho địa chỉ: " + address, Toast.LENGTH_LONG).show();
+                    Log.e("InfoActivity", "Không tìm thấy vị trí cho địa chỉ: " + address);
+                    if (mapFragment.getView() != null) {
+                        mapFragment.getView().setVisibility(View.GONE);
+                    }
+                }
+            });
+        });
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+        Log.d("InfoActivity", "GoogleMap đã sẵn sàng");
+        String address = editAddress.getText().toString();
+        if (address != null && !address.trim().isEmpty()) {
+            loadMapWithAddress(address);
+        }
+    }
+
+
     public void updateInfo(){
         loadingOverlay.setVisibility(View.VISIBLE);
         UserModel user = new UserModel(
@@ -338,6 +437,14 @@ public class InfoActivity extends AppCompatActivity {
             } else fullAddress = ward + ", " + district + ", " + province;
             editAddress.setText(fullAddress);
             dialog.dismiss();
+            if (!fullAddress.trim().isEmpty()) {
+                loadMapWithAddress(fullAddress);
+            } else {
+//                Toast.makeText(this, "Địa chỉ trống, không thể hiển thị bản đồ", Toast.LENGTH_SHORT).show();
+                if (mapFragment != null && mapFragment.getView() != null) {
+                    mapFragment.getView().setVisibility(View.GONE);
+                }
+            }
         });
         dialog.show();
     }

@@ -1,8 +1,10 @@
 package com.example.foodorderapp.adapter;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -16,23 +18,34 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.model.CartModel;
+import com.example.foodorderapp.model.FoodModel;
 import com.example.foodorderapp.model.OrderModel;
 import com.example.foodorderapp.service.CartService;
 import com.example.foodorderapp.service.FoodService;
+import com.example.foodorderapp.service.MapService;
 import com.example.foodorderapp.service.OrderService;
+import com.example.foodorderapp.service.ShopService;
 import com.example.foodorderapp.service.UserService;
 import com.example.foodorderapp.ui.CartActivity;
 import com.example.foodorderapp.ui.HomeActivity;
 import com.example.foodorderapp.ui.OrderActivity;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.auth.User;
+import com.google.type.LatLng;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -93,7 +106,34 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 TypedValue.COMPLEX_UNIT_DIP, 60, context.getResources().getDisplayMetrics());
         holder.vBetween.setLayoutParams(params);
 
+        holder.btnFollow.setOnClickListener(v -> {
+            UserService userService = new UserService();
+            userService.getUserAddress().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    String userAddress = task.getResult();
 
+                    new FoodService().getFoodDetails(order.getFoodId()).addOnCompleteListener(foodTask -> {
+                        if (foodTask.isSuccessful() && foodTask.getResult() != null && !foodTask.getResult().isEmpty()) {
+                            DocumentSnapshot doc = foodTask.getResult().getDocuments().get(0);
+                            FoodModel food = doc.toObject(FoodModel.class);
+                            if (food != null) {
+                                int storeId = doc.getLong("storeId").intValue();
+                                new ShopService().getShopById(storeId).addOnCompleteListener(shopTask -> {
+                                    if (shopTask.isSuccessful() && shopTask.getResult() != null && !shopTask.getResult().isEmpty()) {
+                                        DocumentSnapshot shopDoc = shopTask.getResult().getDocuments().get(0);
+                                        String shopAddress = shopDoc.getString("address");
+                                        if (shopAddress != null && !shopAddress.isEmpty()) {
+                                            // Đã có userAddress và shopAddress
+                                            showRouteDialog(userAddress, shopAddress);
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+            });
+        });
 
         holder.btnCancel.setOnClickListener(v -> {
             OrderService orderService = new OrderService();
@@ -169,6 +209,76 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                     }
                 });
             }
+        });
+    }
+    private void showRouteDialog(String userAddress, String shopAddress) {
+        if (!(context instanceof androidx.fragment.app.FragmentActivity)) return;
+        FragmentActivity activity = (androidx.fragment.app.FragmentActivity) context;
+        FragmentManager fm = activity.getSupportFragmentManager();
+
+        View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_map_route, null);
+
+        SupportMapFragment mapFragment = (SupportMapFragment) fm.findFragmentById(R.id.dialog_map_fragment);
+        if (mapFragment == null) {
+            mapFragment = SupportMapFragment.newInstance();
+            fm.beginTransaction().replace(R.id.dialog_map_fragment, mapFragment).commit();
+        }
+
+        AlertDialog dialog = new AlertDialog.Builder(context)
+                .setTitle("Đường đi đến cửa hàng")
+                .setView(dialogView)
+                .setNegativeButton("Đóng", (d, which) -> d.dismiss())
+                .create();
+
+        dialog.show();
+
+        MapService mapService = new MapService();
+
+        // Lấy tọa độ user
+        SupportMapFragment finalMapFragment = mapFragment;
+        mapService.getCoordinatesFromAddress(userAddress, (userLat, userLng) -> {
+            if (userLat == 0 && userLng == 0) {
+                return;
+            }
+
+            // Lấy tọa độ shop
+            mapService.getCoordinatesFromAddress(shopAddress, (shopLat, shopLng) -> {
+                if (shopLat == 0 && shopLng == 0) {
+                    return;
+                }
+
+                // Hiển thị map và đường đi trên UI thread
+                ((Activity) context).runOnUiThread(() -> {
+                    finalMapFragment.getMapAsync(googleMap -> {
+                        googleMap.clear();
+
+                        com.google.android.gms.maps.model.LatLng userLatLng = new com.google.android.gms.maps.model.LatLng(userLat, userLng);
+                        com.google.android.gms.maps.model.LatLng shopLatLng = new com.google.android.gms.maps.model.LatLng(shopLat, shopLng);
+
+                        // Thêm marker user và shop
+                        googleMap.addMarker(new MarkerOptions().position(userLatLng).title("Bạn"));
+                        googleMap.addMarker(new MarkerOptions().position(shopLatLng).title("Cửa hàng"));
+
+                        // Zoom bản đồ để hiện cả 2 điểm
+                        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                        builder.include(userLatLng);
+                        builder.include(shopLatLng);
+                        LatLngBounds bounds = builder.build();
+                        int padding = 100; // padding cho bản đồ
+                        googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
+
+                        // Vẽ đường đi giữa 2 điểm (đơn giản dạng đường thẳng)
+                        PolylineOptions polylineOptions = new PolylineOptions()
+                                .add(userLatLng)
+                                .add(shopLatLng)
+                                .color(Color.BLUE)
+                                .width(8);
+                        googleMap.addPolyline(polylineOptions);
+
+                        // Nếu muốn bạn có thể dùng MapService.getTravelTimeOSRM để lấy thời gian và hiển thị
+                    });
+                });
+            });
         });
     }
 

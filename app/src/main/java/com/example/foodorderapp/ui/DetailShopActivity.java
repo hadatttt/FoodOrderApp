@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -28,10 +29,20 @@ import com.example.foodorderapp.R;
 import com.example.foodorderapp.adapter.HotFoodAdapter;
 import com.example.foodorderapp.model.FoodModel;
 import com.example.foodorderapp.service.FoodService;
+import com.example.foodorderapp.service.MapService;
 import com.example.foodorderapp.service.ShopService;
+import com.example.foodorderapp.service.UserService;
 import com.google.firebase.firestore.DocumentSnapshot;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.net.URLEncoder;
 import java.util.*;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class DetailShopActivity extends AppCompatActivity {
 
@@ -44,6 +55,9 @@ public class DetailShopActivity extends AppCompatActivity {
 
     private final FoodService foodService = new FoodService();
     private final ShopService shopService = new ShopService();
+    private TextView tvTime;
+    private ProgressBar progressTime;
+    private final MapService mapService = new MapService();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,6 +106,8 @@ public class DetailShopActivity extends AppCompatActivity {
         Button btnBurger = findViewById(R.id.btnBurger);
         Button btnChicken = findViewById(R.id.btnChicken);
         Button btnDrink = findViewById(R.id.btnDrink);
+        tvTime = findViewById(R.id.time);
+        progressTime = findViewById(R.id.progressTime);
 
         addCategoryButton(btnAll, "tất cả");
         addCategoryButton(btnSpaghetti, "spaghetti");
@@ -102,6 +118,46 @@ public class DetailShopActivity extends AppCompatActivity {
         addCategoryButton(btnDrink, "drink");
     }
 
+    private void setupTime(String shopAddress) {
+        runOnUiThread(() -> {
+            progressTime.setVisibility(View.VISIBLE);
+            tvTime.setVisibility(View.GONE);
+        });
+
+        UserService userService = new UserService();
+
+        userService.getUser().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                String userAddress = documentSnapshot.getString("address");
+
+                if (userAddress != null && !userAddress.isEmpty()) {
+                    mapService.getCoordinatesFromAddress(userAddress, (userLat, userLng) -> {
+                        mapService.getCoordinatesFromAddress(shopAddress, (shopLat, shopLng) -> {
+                            if (userLat != 0 && userLng != 0 && shopLat != 0 && shopLng != 0) {
+                                mapService.getTravelTimeOSRM(userLat, userLng, shopLat, shopLng, this::showTimeResult);
+                            } else {
+                                showTimeResult("--");
+                            }
+                        });
+                    });
+                } else {
+                    showTimeResult("--");
+                }
+            } else {
+                showTimeResult("--");
+            }
+        }).addOnFailureListener(e -> {
+            showTimeResult("--");
+        });
+    }
+
+    private void showTimeResult(String text) {
+        runOnUiThread(() -> {
+            progressTime.setVisibility(View.GONE);
+            tvTime.setVisibility(View.VISIBLE);
+            tvTime.setText(text);
+        });
+    }
     private void addCategoryButton(Button button, String category) {
         categoryButtons.add(button);
         buttonCategoryMap.put(button, category);
@@ -135,6 +191,10 @@ public class DetailShopActivity extends AppCompatActivity {
                 doc.getDouble("rating") != null ? String.format("%.1f", doc.getDouble("rating")) : "N/A");
         ((TextView) findViewById(R.id.tvDesc)).setText(doc.getString("advertisement"));
         String imageUrl = doc.getString("imageUrl");
+        String shopAddress = doc.getString("address");
+        if (shopAddress != null && !shopAddress.isEmpty()) {
+            setupTime(shopAddress);
+        }
         if (imageUrl != null && !imageUrl.isEmpty()) {
             Glide.with(this).load(imageUrl).into((ImageView) findViewById(R.id.imgShop));
         }

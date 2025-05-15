@@ -2,16 +2,16 @@
     android:id="@+id/allshopsale"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingLeft="20dp"
-    android:paddingRight="20dp"
-    android:paddingTop="10dp"
-    android:paddingBottom="10dp"
     android:orientation="vertical">
 
     <!-- Toolbar with Back button and Search bar -->
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:paddingTop="10dp"
         android:paddingBottom="8dp">
 
         <ImageView
@@ -44,6 +44,8 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
             android:orientation="horizontal">
 
             <!-- Danh mục: Tất cả -->
@@ -120,6 +122,8 @@
     <!-- RecyclerView to display food items -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerShopSale"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 </LinearLayout>
