@@ -46,7 +46,19 @@ public class MenuProfileActivity extends AppCompatActivity {
         displayUserDetail();
         Button btnLogout = findViewById(R.id.btnLogout);
         LinearLayout btnInfo = findViewById(R.id.btnInfo);
+        LinearLayout btnAccount = findViewById(R.id.btnAccount);
+        LinearLayout btnOrders = findViewById(R.id.btnOrders);
+        LinearLayout btnFavourite = findViewById(R.id.btnFavourite);
+        LinearLayout btnPayment = findViewById(R.id.btnPayment);
+        LinearLayout btnFAQs = findViewById(R.id.btnFAQs);
+        LinearLayout btnSetting = findViewById(R.id.btnSetting);
         btnBack = findViewById(R.id.btnBack);
+        btnAccount.setOnClickListener(v -> openAccount());
+        btnOrders.setOnClickListener(v -> openOrders());
+        btnFavourite.setOnClickListener(v -> openFavourite());
+        btnPayment.setOnClickListener(v -> openPayment());
+        btnFAQs.setOnClickListener(v -> openFAQs());
+        btnSetting.setOnClickListener(v -> openSetting());
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -83,6 +95,31 @@ public class MenuProfileActivity extends AppCompatActivity {
             return insets;
         });
     }
+
+    private void openSetting() {
+        // xử lý khi bấm vào
+    }
+
+    private void openFAQs() {
+        // xử lý khi bấm vào
+    }
+
+    private void openPayment() {
+        // xử lý khi bấm vào
+    }
+
+    private void openFavourite() {
+        // xử lý khi bấm vào
+    }
+
+    private void openOrders() {
+        // xử lý khi bấm vào
+    }
+
+    private void openAccount() {
+        // xử lý khi bấm vào
+    }
+
     public void updateAvatar(){
         File file = new File(getFilesDir(), "avatarIMG.jpg");
         Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
