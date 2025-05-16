@@ -7,16 +7,15 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.AccountActivity">
+    tools:context=".ui.SettingActivity">
     <LinearLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginRight="20dp"
+        android:layout_marginVertical="12dp"
         android:layout_marginLeft="20dp"
-        android:layout_marginBottom="30dp"
-        android:paddingTop="10dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -33,32 +32,26 @@
             android:id="@+id/tvTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Tài khoản"
+            android:text="Cài đặt"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:textColor="?attr/colorOnBackground"
             android:layout_gravity="center_vertical"
             android:layout_marginStart="12dp"/>
     </LinearLayout>
-    <EditText
-        android:id="@+id/editEmail"
+    <com.google.android.material.materialswitch.MaterialSwitch
+        android:id="@+id/switch_theme"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Email"
-        android:inputType="textEmailAddress"
-        android:layout_marginBottom="5dp"
-        android:padding="12dp"
-        android:enabled="false"
+        android:textSize="18dp"
+        android:text="Chế độ tối"
         android:background="@drawable/edittext_background"
-        android:textColor="#333333" />
-    <Button
-        android:id="@+id/btnChangePassword"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Đổi mật khẩu"
-        android:background="@android:color/transparent"
-        android:textColor="@android:color/holo_blue_dark"
-        android:padding="8dp"
-        android:textSize="16sp" />
-
+        android:layout_marginBottom="20dp"
+        android:padding="16dp"/>
+    <Spinner
+        android:id="@+id/spinnerLanguage"
+        android:padding="15dp"
+        android:backgroundTint="@color/black"
+        android:spinnerMode="dropdown"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 </LinearLayout>
