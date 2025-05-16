@@ -7,8 +7,7 @@
     android:layout_marginVertical="4dp"
     android:layout_marginHorizontal="16dp"
     app:cardElevation="2dp"
-    app:cardCornerRadius="8dp"
-    app:cardBackgroundColor="@color/white">
+    app:cardCornerRadius="8dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -41,7 +40,7 @@
                 android:text="Tên món ăn"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                android:textColor="?attr/colorOnSurface"
+                android:textColor="?attr/colorOnBackground"
                 android:maxLines="1"
                 android:ellipsize="end" />
 
