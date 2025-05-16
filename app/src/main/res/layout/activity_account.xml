@@ -46,62 +46,19 @@
         android:layout_height="wrap_content"
         android:hint="Email"
         android:inputType="textEmailAddress"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="5dp"
         android:padding="12dp"
-        android:background="@drawable/edittext_background"
-        android:textColor="#333333" />
-
-    <!-- Địa chỉ -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/passwordLayout"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Mật khẩu "
-        android:paddingBottom="12dp"
-        app:endIconMode="password_toggle">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/password"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:focusable="false"
-            android:clickable="false"
-            android:cursorVisible="false"
-            android:longClickable="false"
-            android:background="@drawable/edittext_background"
-            android:inputType="textPassword" />
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <EditText
-        android:id="@+id/editNewPassword"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:background="@drawable/edittext_background"
-        android:hint="Mật khẩu mới"
-        android:inputType="textPostalAddress"
-        android:padding="12dp"
-        android:textColor="#333333" />
-
-    <EditText
-        android:id="@+id/editConfirmPassword"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Xác nhận mật khẩu mới"
-        android:inputType="textPostalAddress"
-        android:layout_marginBottom="32dp"
-        android:padding="12dp"
+        android:enabled="false"
         android:background="@drawable/edittext_background"
         android:textColor="#333333" />
     <Button
-        android:id="@+id/btnSave"
-        android:layout_width="match_parent"
+        android:id="@+id/btnChangePassword"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Lưu thay đổi"
-        android:textAllCaps="false"
-        android:backgroundTint="#FF9800"
-        android:textColor="#FFFFFF"
-        android:layout_marginBottom="16dp"
-        android:padding="12dp" />
+        android:text="Đổi mật khẩu"
+        android:background="@android:color/transparent"
+        android:textColor="@android:color/holo_blue_dark"
+        android:padding="8dp"
+        android:textSize="16sp" />
+
 </LinearLayout>
