@@ -17,6 +17,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -76,6 +78,19 @@ public class MenuProfileActivity extends AppCompatActivity {
 
             }
         });
+        ActivityResultLauncher<Intent> infoLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK) {
+                        Intent data = result.getData();
+                        if (data != null) {
+                            String avatarUri = data.getStringExtra("avatarUri");
+                            if (avatarUri != null && !avatarUri.isEmpty()) {
+                                imgAvatar.setImageURI(Uri.parse(avatarUri));
+                            }
+                        }
+                    }
+                });
         btnLogout.setOnClickListener(v -> {
             new AlertDialog.Builder(this)
                     .setTitle("Xác nhận")
@@ -159,4 +174,10 @@ public class MenuProfileActivity extends AppCompatActivity {
             }
         }
     }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        displayUserDetail();
+    }
+
 }

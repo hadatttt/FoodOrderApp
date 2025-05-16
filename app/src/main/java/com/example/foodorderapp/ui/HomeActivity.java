@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.adapter.HotFoodAdapter;
 import com.example.foodorderapp.adapter.SaleShopAdapter;
+import com.example.foodorderapp.databinding.ActivityHomeBinding;
 import com.example.foodorderapp.model.FoodModel;
 import com.example.foodorderapp.model.ShopModel;
 import com.example.foodorderapp.service.CartService;
@@ -36,6 +37,7 @@ import java.util.Map;
 
 public class HomeActivity extends AppCompatActivity {
     private static final String TAG = "HomeActivity";
+    private ActivityHomeBinding binding;
     private RecyclerView recyclerHotFood, recyclerSaleShop;
     private HotFoodAdapter hotFoodAdapter;
     private SaleShopAdapter saleShopAdapter;
@@ -58,7 +60,8 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
+        binding = ActivityHomeBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         userService = new UserService();
         foodService = new FoodService();
@@ -68,6 +71,10 @@ public class HomeActivity extends AppCompatActivity {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
+        });
+        binding.mainSearchLayout.setOnClickListener(v -> {
+            Intent intent = new Intent(HomeActivity.this, SearchActivity.class);
+            startActivity(intent);
         });
         // Hiển thị thông tin người dùng
         userService.getUser().addOnSuccessListener(documentSnapshot -> {
@@ -151,6 +158,23 @@ public class HomeActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         loadCartItems();
+        // Hiển thị thông tin người dùng
+        userService.getUser().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                String name = documentSnapshot.getString("fullName");
+                String addr = documentSnapshot.getString("address");
+                TextView nameTextView = findViewById(R.id.tv_full_name);
+                TextView addressTextView = findViewById(R.id.tv_address);
+                nameTextView.setText("Chào " + name + ", Ngon Miệng Nhé");
+                addressTextView.setText(addr);
+            } else {
+                Log.d(TAG, "User document does not exist.");
+            }
+        }).addOnFailureListener(e -> {
+            Log.e(TAG, "Failed to get user data", e);
+        });
+        loadAllFoods();
+        loadAllShops();
     }
 
     private void loadAllFoods() {

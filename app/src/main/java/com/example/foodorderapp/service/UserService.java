@@ -1,4 +1,5 @@
 package com.example.foodorderapp.service;
+
 import android.util.Log;
 
 import com.example.foodorderapp.model.UserModel;
@@ -11,6 +12,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
 public class UserService {
     private FirebaseFirestore db;
 
@@ -28,6 +31,15 @@ public class UserService {
         } else {
             // Xử lý khi người dùng chưa đăng nhập
             return Tasks.forException(new Exception("User not logged in"));
+        }
+    }
+
+    public String getUserId() {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            return currentUser.getUid();
+        } else {
+            return null;
         }
     }
 
@@ -68,6 +80,17 @@ public class UserService {
             // Xử lý khi người dùng chưa đăng nhập
             return Tasks.forException(new Exception("User not logged in"));
         }
+    }
+    public Task<String> getUserAddress() {
+        return getUser().continueWith(task -> {
+            if (task.isSuccessful() && task.getResult().exists()) {
+                UserModel user = task.getResult().toObject(UserModel.class);
+                if (user != null) {
+                    return user.getAddress();  // lấy trường address
+                }
+            }
+            return "";
+        });
     }
     public Task<FirebaseUser> loginUser(String email, String password) {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
@@ -131,7 +154,6 @@ public class UserService {
     }
 
 
-
     public Task<Void> loginWithGoogle(String idToken) {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
@@ -162,5 +184,16 @@ public class UserService {
                 });
     }
 
+    public Task<QuerySnapshot> getUserByEmail(String email) {
+        return FirebaseFirestore.getInstance()
+                .collection("users")
+                .whereEqualTo("email", email)
+                .get();
+    }
+
+
+    public void logout() {
+        FirebaseAuth.getInstance().signOut();
+    }
 
 }
