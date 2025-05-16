@@ -7,8 +7,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:fillViewport="true"
     android:id="@+id/main"
-    tools:context=".ui.OrderActivity"
-    android:background="@color/white">
+    tools:context=".ui.OrderActivity">
 
     <LinearLayout
         android:id="@+id/linearLayout2"
@@ -40,7 +39,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Đơn hàng của tôi"
-            android:textColor="@color/black"
+            android:textColor="?attr/colorOnBackground"
             android:textSize="16sp" />
     </LinearLayout>
 

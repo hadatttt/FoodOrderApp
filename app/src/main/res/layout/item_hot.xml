@@ -4,7 +4,6 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:padding="16dp"
-    android:background="@android:color/white"
     android:elevation="4dp"
     android:layout_margin="12dp">
 
@@ -31,8 +30,7 @@
             android:layout_height="wrap_content"
             android:text="Burger khổng lồ"
             android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="#000000" />
+            android:textStyle="bold" />
 
         <LinearLayout
             android:orientation="horizontal"
