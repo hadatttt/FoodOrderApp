@@ -45,6 +45,9 @@ public class SearchActivity extends AppCompatActivity {
     private SearchHotFoodAdapter searchHotFoodAdapter;
 
     private ActivitySearchBinding binding;
+    private String currentKeyword = "";
+    private List<SearchResultModel> currentSearchResults = new ArrayList<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,17 +96,28 @@ public class SearchActivity extends AppCompatActivity {
                 userService.getUserId()
         );
 
-        searchResultAdapter = new SearchResultAdapter(item -> {
-            String keyword = binding.searchInput.getText().toString().trim();
-            if (!keyword.isEmpty()) {
-                saveSearchQuery(keyword);
-            }
-            if (item.getStoreId() != -1) {
-                Intent intent = new Intent(this, DetailShopActivity.class);
-                intent.putExtra("storeId", item.getStoreId());
-                if (item.getFoodId() != -1) {
-                    intent.putExtra("foodId", item.getFoodId());
+        searchResultAdapter = new SearchResultAdapter(new SearchResultAdapter.OnItemClickListener() {
+            @Override
+            public void onFoodClick(FoodModel item) {
+                String keyword = binding.searchInput.getText().toString().trim();
+                if (!keyword.isEmpty()) {
+                    saveSearchQuery(keyword);
                 }
+                if (item.getStoreId() != -1) {
+                    Intent intent = new Intent(SearchActivity.this, DetailFoodActivity.class);
+                    intent.putExtra("foodId", item.getFoodId());
+                    startActivity(intent);
+                }
+            }
+
+            @Override
+            public void onShopClick(ShopModel shop) {
+                String keyword = binding.searchInput.getText().toString().trim();
+                if (!keyword.isEmpty()) {
+                    saveSearchQuery(keyword);
+                }
+                Intent intent = new Intent(SearchActivity.this, DetailShopActivity.class);
+                intent.putExtra("storeId", shop.getStoreid());
                 startActivity(intent);
             }
         });
@@ -193,34 +207,30 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     private void performSearch(String keyword) {
+        currentKeyword = keyword;
+
         if (keyword.isEmpty()) {
             showDefaultUI();
             loadSearchHistory();
             loadHotShopsAndFoods();
             searchResultAdapter.updateResults(new ArrayList<>());
             binding.noResultsTextView.setVisibility(View.GONE);
+            currentSearchResults.clear();
             return;
         }
 
-        // Nếu từ khóa không rỗng, tiến hành tìm kiếm bình thường
-        searchQueryService.searchByKeyword(keyword)
-                .addOnSuccessListener(querySnapshot -> {
-                    List<FoodModel> results = new ArrayList<>();
-                    for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
-                        FoodModel item = doc.toObject(FoodModel.class);
-                        if (item != null) results.add(item);
-                    }
-                    searchResultAdapter.updateResults(results);
+        searchQueryService.searchFoodsAndShopsByKeyword(keyword)
+                .addOnSuccessListener(searchResults -> {
+                    currentSearchResults = searchResults;
+                    searchResultAdapter.updateResults(searchResults);
 
-                    // Ẩn phần gợi ý và yêu thích
-                    showSearchResultsUI();
-
-                    // Nếu không có kết quả, hiển thị thông báo
-                    if (results.isEmpty()) {
+                    if (searchResults.isEmpty()) {
                         binding.noResultsTextView.setVisibility(View.VISIBLE);
                     } else {
                         binding.noResultsTextView.setVisibility(View.GONE);
                     }
+
+                    showSearchResultsUI();
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Lỗi tìm kiếm: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -298,4 +308,24 @@ public class SearchActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (searchResultAdapter == null) {
+            return;
+        }
+        if (!currentKeyword.isEmpty() && currentSearchResults != null && !currentSearchResults.isEmpty()) {
+            binding.searchInput.setText(currentKeyword);
+            searchResultAdapter.updateResults(currentSearchResults);
+            showSearchResultsUI();
+            binding.noResultsTextView.setVisibility(View.GONE);
+        } else {
+            showDefaultUI();
+            binding.noResultsTextView.setVisibility(View.GONE);
+            searchResultAdapter.updateResults(new ArrayList<>());
+            loadSearchHistory();
+            loadHotShopsAndFoods();
+        }
+    }
+
 }

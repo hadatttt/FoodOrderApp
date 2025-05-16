@@ -1,6 +1,9 @@
 package com.example.foodorderapp.service;
 
+import com.example.foodorderapp.model.FoodModel;
 import com.example.foodorderapp.model.SearchQueryModel;
+import com.example.foodorderapp.model.SearchResultModel;
+import com.example.foodorderapp.model.ShopModel;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.CollectionReference;
@@ -104,15 +107,46 @@ public class SearchQueryService {
                 .get();
     }
 
-    public Task<QuerySnapshot> searchByKeyword(String keyword) {
+    public Task<List<SearchResultModel>> searchFoodsAndShopsByKeyword(String keyword) {
         if (keyword == null || keyword.isEmpty()) {
-            return Tasks.forResult(null);
+            return Tasks.forResult(new ArrayList<>());
         }
-        return db.collection("foods")
+
+        Task<QuerySnapshot> foodTask = db.collection("foods")
                 .orderBy("name")
                 .startAt(keyword)
                 .endAt(keyword + "\uf8ff")
                 .limit(20)
                 .get();
+
+        Task<QuerySnapshot> shopTask = db.collection("shops")
+                .orderBy("shopName")
+                .startAt(keyword)
+                .endAt(keyword + "\uf8ff")
+                .limit(20)
+                .get();
+
+        return Tasks.whenAllSuccess(foodTask, shopTask)
+                .onSuccessTask(results -> {
+                    List<SearchResultModel> searchResults = new ArrayList<>();
+
+                    QuerySnapshot foodSnapshot = (QuerySnapshot) results.get(0);
+                    for (DocumentSnapshot doc : foodSnapshot.getDocuments()) {
+                        FoodModel food = doc.toObject(FoodModel.class);
+                        if (food != null) {
+                            searchResults.add(new SearchResultModel("food", food, null));
+                        }
+                    }
+
+                    QuerySnapshot shopSnapshot = (QuerySnapshot) results.get(1);
+                    for (DocumentSnapshot doc : shopSnapshot.getDocuments()) {
+                        ShopModel shop = doc.toObject(ShopModel.class);
+                        if (shop != null) {
+                            searchResults.add(new SearchResultModel("shop", null, shop));
+                        }
+                    }
+
+                    return Tasks.forResult(searchResults);
+                });
     }
 }

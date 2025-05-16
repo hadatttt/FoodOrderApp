@@ -1,5 +1,6 @@
 package com.example.foodorderapp.adapter;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,21 +12,27 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.foodorderapp.databinding.SearchItemFoodBinding;
 import com.example.foodorderapp.model.FoodModel;
+import com.example.foodorderapp.model.SearchResultModel;
+import com.example.foodorderapp.model.ShopModel;
+import com.example.foodorderapp.service.ShopService;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapter.FoodViewHolder> {
+    private final List<SearchResultModel> resultList = new ArrayList<>();
 
-    private final List<FoodModel> foodList = new ArrayList<>();
     private final OnItemClickListener listener;
-
+    private ShopService shopService;
     public interface OnItemClickListener {
-        void onItemClick(FoodModel item);
+        void onFoodClick(FoodModel item);
+        void onShopClick(ShopModel shop);
     }
 
     public SearchResultAdapter(OnItemClickListener listener) {
         this.listener = listener;
+        this.shopService = new ShopService();
     }
 
     @NonNull
@@ -38,18 +45,19 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
 
     @Override
     public void onBindViewHolder(@NonNull FoodViewHolder holder, int position) {
-        FoodModel item = foodList.get(position);
+        SearchResultModel item = resultList.get(position);
         holder.bind(item);
     }
 
+
     @Override
     public int getItemCount() {
-        return foodList.size();
+        return resultList.size();
     }
 
-    public void updateResults(List<FoodModel> newResults) {
-        foodList.clear();
-        if (newResults != null) foodList.addAll(newResults);
+    public void updateResults(List<SearchResultModel> newResults) {
+        resultList.clear();
+        if (newResults != null) resultList.addAll(newResults);
         notifyDataSetChanged();
     }
 
@@ -61,21 +69,46 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
             this.binding = binding;
         }
 
-        void bind(FoodModel item) {
-            binding.searchFoodName.setText(item.getName());
+        void bind(SearchResultModel result) {
+            if ("food".equals(result.getType()) && result.getFood() != null) {
+                FoodModel food = result.getFood();
+                binding.searchFoodName.setText(food.getName());
+                Glide.with(binding.searchFoodImage.getContext())
+                        .load(food.getImageUrl())
+                        .centerCrop()
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .into(binding.searchFoodImage);
 
-            String priceText = String.format("%.2f", item.getPrice()) + " ₫";
-            binding.searchFoodPrice.setText(priceText);
+                binding.searchFoodPrice.setTextColor(Color.RED);
+                String priceText = String.format("%.3f", food.getPrice()) + " ₫";
+                binding.searchFoodPrice.setText(priceText);
 
-            Glide.with(binding.searchFoodImage.getContext())
-                    .load(item.getImageUrl())
-                    .centerCrop()
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .into(binding.searchFoodImage);
+                binding.getRoot().setOnClickListener(v -> {
+                    if (listener != null) {
+                        listener.onFoodClick(food);
+                    }
+                });
 
-            binding.getRoot().setOnClickListener(v -> {
-                if (listener != null) listener.onItemClick(item);
-            });
+            } else if ("shop".equals(result.getType()) && result.getShop() != null) {
+                ShopModel shop = result.getShop();
+                binding.searchFoodName.setText(shop.getShopName());
+                Glide.with(binding.searchFoodImage.getContext())
+                        .load(shop.getImageUrl())
+                        .centerCrop()
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .into(binding.searchFoodImage);
+
+                double rating = shop.getRating();
+                binding.searchFoodPrice.setTextColor(Color.parseColor("#FF9800"));
+                binding.searchFoodPrice.setText("★ " + String.format("%.1f", rating));
+
+                binding.getRoot().setOnClickListener(v -> {
+                    if (listener != null) {
+                        listener.onShopClick(shop);
+                    }
+                });
+            }
         }
+
     }
 }
