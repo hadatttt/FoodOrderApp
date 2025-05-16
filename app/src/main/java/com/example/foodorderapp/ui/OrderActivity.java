@@ -30,14 +30,12 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import java.util.ArrayList;
 
 public class OrderActivity extends AppCompatActivity {
-    private RecyclerView rvDelivery, rvHistory;
-    public ArrayList<OrderModel> orderList, historyList;
+    private RecyclerView rvDelivery, rvHistory, rvConfirm;
+    public ArrayList<OrderModel> orderList, historyList, confirmList;
     private OrderAdapter myOrdersAdapter;
-    private LinearLayout btnDelivery, btnHistory;
-    private TextView tvDelivery, tvHistory;
-    private View vDelivery, vHistory;
-    private ViewGroup.LayoutParams params;
-    private int widthInPx;
+    private LinearLayout btnDelivery, btnHistory, btnConfirm;
+    private TextView tvDelivery, tvHistory, tvConfirm;
+    private View vDelivery, vHistory, vConfirm;
     private OrderService orderService;
     private ImageButton btnBack;
 
@@ -55,27 +53,34 @@ public class OrderActivity extends AppCompatActivity {
 
         rvDelivery = findViewById(R.id.rv_delivery);
         rvHistory = findViewById(R.id.rv_history);
+        rvConfirm = findViewById(R.id.rv_confirm);
         btnDelivery = findViewById(R.id.btn_delivery);
         btnHistory = findViewById(R.id.btn_history);
+        btnConfirm = findViewById(R.id.btn_confirm);
         tvDelivery = findViewById(R.id.tv_delivery);
         tvHistory = findViewById(R.id.tv_history);
+        tvConfirm = findViewById(R.id.tv_confirm);
         vDelivery = findViewById(R.id.v_delivery);
         vHistory = findViewById(R.id.v_history);
+        vConfirm = findViewById(R.id.v_confirm);
 
         btnBack = findViewById(R.id.btn_back);
 
-        rvDelivery.setVisibility(View.VISIBLE);
+        rvDelivery.setVisibility(View.GONE);
         rvHistory.setVisibility(View.GONE);
-
+        rvConfirm.setVisibility(View.VISIBLE);
 
         orderList = new ArrayList<>();
         historyList = new ArrayList<>();
+        confirmList = new ArrayList<>();
         rvDelivery.setLayoutManager(new LinearLayoutManager(this));
         rvHistory.setLayoutManager(new LinearLayoutManager(this));
+        rvConfirm.setLayoutManager(new LinearLayoutManager(this));
 
-        myOrdersAdapter = new OrderAdapter(orderList, this);
+        myOrdersAdapter = new OrderAdapter(confirmList, this);
         rvDelivery.setAdapter(myOrdersAdapter);
         rvHistory.setAdapter(myOrdersAdapter);
+        rvConfirm.setAdapter(myOrdersAdapter);
 
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null) {
@@ -86,12 +91,15 @@ public class OrderActivity extends AppCompatActivity {
                     .addOnSuccessListener(queryDocumentSnapshots -> {
                         orderList.clear();
                         historyList.clear();
+                        confirmList.clear();
 
                         for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
                             OrderModel order = doc.toObject(OrderModel.class);
                             if (order != null) {
                                 String status = order.getStatus();
-                                if (status != null && status.equalsIgnoreCase("Đang giao")) {
+                                if (status != null && status.equalsIgnoreCase("Chờ xác nhận")) {
+                                    confirmList.add(order);
+                                } else if (status != null && status.equalsIgnoreCase("Đang giao")) {
                                     orderList.add(order);
                                 } else if (status != null &&
                                         (status.equalsIgnoreCase("Hoàn thành") || status.equalsIgnoreCase("Đã hủy"))) {
@@ -108,10 +116,16 @@ public class OrderActivity extends AppCompatActivity {
             public void onClick(View view) {
                 tvDelivery.setTextColor(ContextCompat.getColor(view.getContext(), R.color.orange));
                 vDelivery.setBackgroundColor(ContextCompat.getColor(view.getContext(), R.color.orange));
+                vDelivery.setVisibility(View.VISIBLE);
                 tvHistory.setTextColor(Color.parseColor("#8E8E8E"));
                 vHistory.setBackgroundColor(Color.parseColor("#8E8E8E"));
+                vHistory.setVisibility(View.GONE);
+                tvConfirm.setTextColor(Color.parseColor("#8E8E8E"));
+                vConfirm.setBackgroundColor(Color.parseColor("#8E8E8E"));
+                vConfirm.setVisibility(View.GONE);
                 rvDelivery.setVisibility(View.VISIBLE);
                 rvHistory.setVisibility(View.GONE);
+                rvConfirm.setVisibility(View.GONE);
                 myOrdersAdapter = new OrderAdapter(orderList, OrderActivity.this);
                 rvDelivery.setAdapter(myOrdersAdapter);
                 myOrdersAdapter.notifyDataSetChanged();
@@ -122,10 +136,36 @@ public class OrderActivity extends AppCompatActivity {
             public void onClick(View view) {
                 tvDelivery.setTextColor(Color.parseColor("#8E8E8E"));
                 vDelivery.setBackgroundColor(Color.parseColor("#8E8E8E"));
+                vDelivery.setVisibility(View.GONE);
                 tvHistory.setTextColor(ContextCompat.getColor(view.getContext(), R.color.orange));
                 vHistory.setBackgroundColor(ContextCompat.getColor(view.getContext(), R.color.orange));
+                vHistory.setVisibility(View.VISIBLE);
+                tvConfirm.setTextColor(Color.parseColor("#8E8E8E"));
+                vConfirm.setBackgroundColor(Color.parseColor("#8E8E8E"));
+                vConfirm.setVisibility(View.GONE);
                 rvDelivery.setVisibility(View.GONE);
                 rvHistory.setVisibility(View.VISIBLE);
+                rvConfirm.setVisibility(View.GONE);
+                myOrdersAdapter = new OrderAdapter(historyList, OrderActivity.this);
+                rvHistory.setAdapter(myOrdersAdapter);
+                myOrdersAdapter.notifyDataSetChanged();
+            }
+        });
+        btnConfirm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tvDelivery.setTextColor(Color.parseColor("#8E8E8E"));
+                vDelivery.setBackgroundColor(Color.parseColor("#8E8E8E"));
+                vDelivery.setVisibility(View.GONE);
+                tvHistory.setTextColor(Color.parseColor("#8E8E8E"));
+                vHistory.setBackgroundColor(Color.parseColor("#8E8E8E"));
+                vHistory.setVisibility(View.GONE);
+                tvConfirm.setTextColor(ContextCompat.getColor(view.getContext(), R.color.orange));
+                vConfirm.setBackgroundColor(ContextCompat.getColor(view.getContext(), R.color.orange));
+                vConfirm.setVisibility(View.VISIBLE);
+                rvDelivery.setVisibility(View.GONE);
+                rvHistory.setVisibility(View.GONE);
+                rvConfirm.setVisibility(View.VISIBLE);
                 myOrdersAdapter = new OrderAdapter(historyList, OrderActivity.this);
                 rvHistory.setAdapter(myOrdersAdapter);
                 myOrdersAdapter.notifyDataSetChanged();

@@ -59,7 +59,30 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
         app:layout_constraintVertical_bias="0.0">
+        <LinearLayout
+            android:layout_width="0dp"
+            android:id="@+id/btn_confirm"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
 
+            <TextView
+                android:id="@+id/tv_confirm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:text="Chờ xác nhận"
+                android:textColor="@color/orange"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <View
+                android:id="@+id/v_confirm"
+                android:layout_width="match_parent"
+                android:layout_height="3dp"
+                android:background="@color/orange" />
+        </LinearLayout>
         <LinearLayout
             android:layout_width="0dp"
             android:id="@+id/btn_delivery"
@@ -74,7 +97,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
                 android:text="Đang giao"
-                android:textColor="@color/orange"
+                android:textColor="#8E8E8E"
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
@@ -82,7 +105,7 @@
                 android:id="@+id/v_delivery"
                 android:layout_width="match_parent"
                 android:layout_height="3dp"
-                android:background="@color/orange" />
+                android:textColor="#8E8E8E" />
         </LinearLayout>
 
         <LinearLayout
@@ -142,5 +165,21 @@
         app:layout_constraintTop_toBottomOf="@+id/linearLayout"
         app:layout_constraintVertical_bias="0.0"
         tools:listitem="@layout/item_order_food" />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_confirm"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+        app:layout_constraintVertical_bias="0.0"
+        tools:listitem="@layout/item_order_food" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

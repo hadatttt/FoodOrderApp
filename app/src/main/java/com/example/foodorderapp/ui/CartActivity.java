@@ -226,7 +226,7 @@ public class CartActivity extends AppCompatActivity {
                         cartItem.getPrice() * cartItem.getQuantity(),
                         cartItem.getSize(),
                         sdf.format(date),
-                        "Đang giao",
+                        "Chờ xác nhận",
                         tvAddress.getText().toString()
                 );
                 orderService.addOrder(order).addOnSuccessListener(aVoid -> {
