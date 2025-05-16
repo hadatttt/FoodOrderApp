@@ -10,73 +10,79 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.foodorderapp.databinding.SearchItemHotFoodBinding;
 import com.example.foodorderapp.model.FoodModel;
-import com.example.foodorderapp.service.FoodService;
+import com.example.foodorderapp.model.ShopModel;
+import com.example.foodorderapp.service.ShopService;
+
 
 import java.util.List;
 
-public class SearchHotFoodAdapter extends RecyclerView.Adapter<SearchHotFoodAdapter.FavoriteViewHolder> {
+public class SearchHotFoodAdapter extends RecyclerView.Adapter<SearchHotFoodAdapter.FoodViewHolder> {
 
-    private final List<FoodModel> favoriteItems;
+    private final List<FoodModel> hotFoods;
     private final OnItemClickListener listener;
-    private final FoodService foodService = new FoodService();
+    private final ShopService shopService = new ShopService();
 
     public interface OnItemClickListener {
         void onItemClick(FoodModel item);
     }
 
-    public SearchHotFoodAdapter(List<FoodModel> favoriteItems, OnItemClickListener listener) {
-        this.favoriteItems = favoriteItems;
+    public SearchHotFoodAdapter(List<FoodModel> hotFoods, OnItemClickListener listener) {
+        this.hotFoods = hotFoods;
         this.listener = listener;
     }
 
     @NonNull
     @Override
-    public FavoriteViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public FoodViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         SearchItemHotFoodBinding binding = SearchItemHotFoodBinding.inflate(
                 LayoutInflater.from(parent.getContext()), parent, false);
-        return new FavoriteViewHolder(binding);
+        return new FoodViewHolder(binding);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull FavoriteViewHolder holder, int position) {
-        FoodModel item = favoriteItems.get(position);
-        holder.bind(item);
+    public void onBindViewHolder(@NonNull FoodViewHolder holder, int position) {
+        holder.bind(hotFoods.get(position));
     }
 
     @Override
     public int getItemCount() {
-        return favoriteItems.size();
+        return hotFoods.size();
     }
 
-    public void updateItems(List<FoodModel> newFavorites) {
-        favoriteItems.clear();
-        favoriteItems.addAll(newFavorites);
+    public void updateItems(List<FoodModel> newItems) {
+        hotFoods.clear();
+        hotFoods.addAll(newItems);
         notifyDataSetChanged();
     }
 
-    class FavoriteViewHolder extends RecyclerView.ViewHolder {
+    class FoodViewHolder extends RecyclerView.ViewHolder {
         private final SearchItemHotFoodBinding binding;
 
-        public FavoriteViewHolder(@NonNull SearchItemHotFoodBinding binding) {
+        public FoodViewHolder(@NonNull SearchItemHotFoodBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
 
             binding.getRoot().setOnClickListener(v -> {
-                int position = getAdapterPosition();
-                if (position != RecyclerView.NO_POSITION && listener != null) {
-                    listener.onItemClick(favoriteItems.get(position));
+                int pos = getAdapterPosition();
+                if (pos != RecyclerView.NO_POSITION && listener != null) {
+                    listener.onItemClick(hotFoods.get(pos));
                 }
             });
         }
 
-        public void bind(FoodModel item) {
-            binding.favoriteName.setText(item.getName());
+        public void bind(FoodModel food) {
+            binding.favoriteName.setText(food.getName());
 
-            foodService.getFoodsByStoreId(item.getStoreId())
+            // Load shop name từ storeId
+            shopService.getShopById(food.getStoreId())
                     .addOnSuccessListener(snapshot -> {
-                        List<FoodModel> foodList = snapshot.toObjects(FoodModel.class);
-                        if (foodList != null && !foodList.isEmpty()) {
-                            binding.shopName.setText(foodList.get(0).getName());
+                        if (!snapshot.isEmpty()) {
+                            ShopModel shop = snapshot.getDocuments().get(0).toObject(ShopModel.class);
+                            if (shop != null) {
+                                binding.shopName.setText(shop.getShopName());
+                            } else {
+                                binding.shopName.setText("Unknown shop");
+                            }
                         } else {
                             binding.shopName.setText("Unknown shop");
                         }
@@ -86,9 +92,10 @@ public class SearchHotFoodAdapter extends RecyclerView.Adapter<SearchHotFoodAdap
                         Log.e("SearchHotFoodAdapter", "Error loading shop name: " + e.getMessage());
                     });
 
-            // Load ảnh
+
+            // Load ảnh món ăn
             Glide.with(binding.favoriteImage.getContext())
-                    .load(item.getImageUrl())
+                    .load(food.getImageUrl())
                     .into(binding.favoriteImage);
         }
     }
