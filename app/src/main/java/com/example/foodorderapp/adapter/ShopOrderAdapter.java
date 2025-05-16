@@ -22,18 +22,25 @@ import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 public class ShopOrderAdapter extends RecyclerView.Adapter<ShopOrderAdapter.OrderViewHolder> {
 
-    private final List<OrderModel> orderList;
-    private final Context context;
+    public interface OnOrderStatusUpdatedListener {
+        void onOrderStatusUpdated();
+    }
 
-    public ShopOrderAdapter(Context context, List<OrderModel> orders) {
+    private List<OrderModel> orderList;
+    private final Context context;
+    private final OnOrderStatusUpdatedListener listener;
+
+    public ShopOrderAdapter(Context context, List<OrderModel> orders, OnOrderStatusUpdatedListener listener) {
         this.context = context;
-        this.orderList = orders;
+        this.orderList = new ArrayList<>(orders); // tránh thay đổi ngoài ý muốn
+        this.listener = listener;
     }
 
     @NonNull
@@ -47,7 +54,7 @@ public class ShopOrderAdapter extends RecyclerView.Adapter<ShopOrderAdapter.Orde
     public void onBindViewHolder(@NonNull OrderViewHolder holder, int position) {
         OrderModel order = orderList.get(position);
 
-        // Gọi FoodService để lấy tên và ảnh món ăn dựa trên foodId
+        // Lấy thông tin món ăn
         FoodService foodService = new FoodService();
         foodService.getFoodDetails(order.getFoodId())
                 .addOnSuccessListener(queryDocumentSnapshots -> {
@@ -56,7 +63,6 @@ public class ShopOrderAdapter extends RecyclerView.Adapter<ShopOrderAdapter.Orde
                         String name = doc.getString("name");
                         String imageUrl = doc.getString("imageUrl");
 
-                        // Hiển thị tên và ảnh món ăn
                         holder.tvFoodName.setText(name);
                         Glide.with(context)
                                 .load(imageUrl)
@@ -64,12 +70,11 @@ public class ShopOrderAdapter extends RecyclerView.Adapter<ShopOrderAdapter.Orde
                     }
                 });
 
-        // Gán các thông tin đơn hàng
+        // Hiển thị thông tin đơn hàng
         holder.tvOrderId.setText("Order ID: " + order.getOrderId());
         holder.tvFoodQuantity.setText("Số lượng: " + order.getQuantity());
         holder.tvFoodSize.setText("Size: " + order.getSize());
 
-        // Định dạng giá tiền: double * 1000 → chuỗi "xxx.xxx đ"
         double priceInVND = order.getPrice() * 1000;
         NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
         String formattedPrice = formatter.format(priceInVND);
@@ -77,49 +82,69 @@ public class ShopOrderAdapter extends RecyclerView.Adapter<ShopOrderAdapter.Orde
 
         holder.tvOrderDate.setText(order.getOrderDate());
 
-        // Xử lý sự kiện nút "Hoàn thành"
-        holder.btnMarkComplete.setOnClickListener(v -> {
-            OrderService orderService = new OrderService();
-            order.setStatus("Hoàn thành");
-            orderService.updateOrder(order.getOrderId(), order)
-                    .addOnSuccessListener(aVoid -> {
-                        orderList.remove(position);
+        // Reset trạng thái nút để tránh tái sử dụng ViewHolder lỗi
+        holder.btnMarkComplete.setVisibility(View.VISIBLE);
+        holder.btnCancelOrder.setVisibility(View.VISIBLE);
+        holder.btnMarkComplete.setEnabled(true);
+        holder.btnCancelOrder.setEnabled(true);
 
-                        Date date = new Date();
-                        SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm");
-                        order.setOrderDate(sdf.format(date));
+        String status = order.getStatus();
 
+        if ("Hoàn thành".equalsIgnoreCase(status)) {
+            // Đơn hoàn thành: disable nút Hoàn thành, ẩn nút Hủy
+            holder.btnMarkComplete.setText("Hoàn thành");
+            holder.btnMarkComplete.setEnabled(false);
+            holder.btnCancelOrder.setVisibility(View.GONE);
+        } else if ("Đã hủy".equalsIgnoreCase(status)) {
+            // Đơn đã hủy: disable nút Hủy, ẩn nút Hoàn thành
+            holder.btnCancelOrder.setText("Đã hủy");
+            holder.btnCancelOrder.setEnabled(false);
+            holder.btnMarkComplete.setVisibility(View.GONE);
+        } else {
+            // Đơn đang chờ xử lý: hiển thị cả 2 nút, enable cả 2
+            holder.btnMarkComplete.setText("Hoàn thành");
+            holder.btnMarkComplete.setEnabled(true);
+            holder.btnMarkComplete.setVisibility(View.VISIBLE);
+
+            holder.btnCancelOrder.setText("Hủy");
+            holder.btnCancelOrder.setEnabled(true);
+            holder.btnCancelOrder.setVisibility(View.VISIBLE);
+
+            holder.btnMarkComplete.setOnClickListener(v -> {
+                order.setStatus("Hoàn thành");
+                updateOrderStatus(order, position);
+            });
+
+            holder.btnCancelOrder.setOnClickListener(v -> {
+                order.setStatus("Đã hủy");
+                updateOrderStatus(order, position);
+            });
+        }
+    }
+
+    private void updateOrderStatus(OrderModel order, int position) {
+        OrderService orderService = new OrderService();
+        orderService.updateOrder(order.getOrderId(), order)
+                .addOnSuccessListener(aVoid -> {
+                    orderList.remove(position);
+                    notifyItemRemoved(position);
+                    notifyDataSetChanged();
+
+                    // Cập nhật thời gian đơn hàng
+                    Date date = new Date();
+                    SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm", Locale.getDefault());
+                    order.setOrderDate(sdf.format(date));
+
+                    if (context instanceof OrderActivity) {
                         ((OrderActivity) context).historyList.add(order);
+                    }
 
-                        notifyItemRemoved(position);
-                        notifyDataSetChanged();
-                    })
-                    .addOnFailureListener(e -> {
-                        Log.e("OrderAdapter", "Lỗi cập nhật trạng thái: " + e.getMessage());
-                    });
-        });
-
-        // Xử lý sự kiện nút "Hủy"
-        holder.btnCancelOrder.setOnClickListener(v -> {
-            OrderService orderService = new OrderService();
-            order.setStatus("Đã hủy");
-            orderService.updateOrder(order.getOrderId(), order)
-                    .addOnSuccessListener(aVoid -> {
-                        orderList.remove(position);
-
-                        Date date = new Date();
-                        SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm");
-                        order.setOrderDate(sdf.format(date));
-
-                        ((OrderActivity) context).historyList.add(order);
-
-                        notifyItemRemoved(position);
-                        notifyDataSetChanged();
-                    })
-                    .addOnFailureListener(e -> {
-                        Log.e("OrderAdapter", "Lỗi cập nhật trạng thái: " + e.getMessage());
-                    });
-        });
+                    // Gọi callback báo Activity cập nhật lại UI hoặc tải lại danh sách
+                    if (listener != null) {
+                        listener.onOrderStatusUpdated();
+                    }
+                })
+                .addOnFailureListener(e -> Log.e("OrderAdapter", "Lỗi cập nhật trạng thái: " + e.getMessage()));
     }
 
     @Override
@@ -127,7 +152,6 @@ public class ShopOrderAdapter extends RecyclerView.Adapter<ShopOrderAdapter.Orde
         return orderList.size();
     }
 
-    // ViewHolder ánh xạ layout item_shop_order.xml
     public static class OrderViewHolder extends RecyclerView.ViewHolder {
         TextView tvOrderId, tvFoodName, tvFoodQuantity, tvFoodSize, tvFoodPrice, tvOrderDate;
         ImageView imgFood;
@@ -147,9 +171,15 @@ public class ShopOrderAdapter extends RecyclerView.Adapter<ShopOrderAdapter.Orde
         }
     }
 
-    // Hàm thêm đơn hàng mới vào danh sách
+    // Thêm đơn hàng
     public void addOrder(OrderModel order) {
         orderList.add(order);
         notifyItemInserted(orderList.size() - 1);
+    }
+
+    // Cập nhật toàn bộ danh sách đơn hàng
+    public void setOrders(List<OrderModel> newOrders) {
+        this.orderList = new ArrayList<>(newOrders);
+        notifyDataSetChanged();
     }
 }

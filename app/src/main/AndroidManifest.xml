@@ -29,6 +29,7 @@
         <activity
             android:name=".ui.InfoActivity"
             android:exported="false" />
+
         <activity
             android:name=".ui.SearchActivity"
             android:exported="false" />
