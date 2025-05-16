@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">FoodOrderApp</string>
-
+    <string name="app_name">Đặt món ăn</string>
+    <string name="change_language">Đổi ngôn ngữ</string>
 </resources>
