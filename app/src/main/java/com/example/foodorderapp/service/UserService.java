@@ -81,7 +81,17 @@ public class UserService {
             return Tasks.forException(new Exception("User not logged in"));
         }
     }
-
+    public Task<String> getUserAddress() {
+        return getUser().continueWith(task -> {
+            if (task.isSuccessful() && task.getResult().exists()) {
+                UserModel user = task.getResult().toObject(UserModel.class);
+                if (user != null) {
+                    return user.getAddress();  // lấy trường address
+                }
+            }
+            return "";
+        });
+    }
     public Task<FirebaseUser> loginUser(String email, String password) {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
 

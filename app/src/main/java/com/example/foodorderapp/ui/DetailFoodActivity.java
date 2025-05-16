@@ -25,6 +25,7 @@ import com.example.foodorderapp.model.CartModel;
 import com.example.foodorderapp.model.FoodModel;
 import com.example.foodorderapp.service.CartService;
 import com.example.foodorderapp.service.FoodService;
+import com.example.foodorderapp.service.MapService;
 import com.example.foodorderapp.service.ShopService;
 import com.example.foodorderapp.service.UserService;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -49,6 +50,9 @@ public class DetailFoodActivity extends AppCompatActivity {
     private ImageView imgFood;
     private RadioButton rbS, rbM, rbL;
     private LinearLayout llSizeRow;
+    private ProgressBar progressTime;
+    private TextView tvTime;
+    private final MapService mapService = new MapService();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,10 +107,51 @@ public class DetailFoodActivity extends AppCompatActivity {
         rbM = findViewById(R.id.sizeMedium);
         rbL = findViewById(R.id.sizeLarge);
         llSizeRow = findViewById(R.id.llSizeRow);
+        tvTime = findViewById(R.id.time);
+        progressTime = findViewById(R.id.progressTime);
 
         tvQuantity.setText(String.valueOf(quantity));
     }
+    private void setupTime(String shopAddress) {
+        runOnUiThread(() -> {
+            progressTime.setVisibility(View.VISIBLE);
+            tvTime.setVisibility(View.GONE);
+        });
 
+        UserService userService = new UserService();
+
+        userService.getUser().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                String userAddress = documentSnapshot.getString("address");
+
+                if (userAddress != null && !userAddress.isEmpty()) {
+                    mapService.getCoordinatesFromAddress(userAddress, (userLat, userLng) -> {
+                        mapService.getCoordinatesFromAddress(shopAddress, (shopLat, shopLng) -> {
+                            if (userLat != 0 && userLng != 0 && shopLat != 0 && shopLng != 0) {
+                                mapService.getTravelTimeOSRM(userLat, userLng, shopLat, shopLng, this::showTimeResult);
+                            } else {
+                                showTimeResult("--");
+                            }
+                        });
+                    });
+                } else {
+                    showTimeResult("--");
+                }
+            } else {
+                showTimeResult("--");
+            }
+        }).addOnFailureListener(e -> {
+            showTimeResult("--");
+        });
+    }
+
+    private void showTimeResult(String text) {
+        runOnUiThread(() -> {
+            progressTime.setVisibility(View.GONE);
+            tvTime.setVisibility(View.VISIBLE);
+            tvTime.setText(text);
+        });
+    }
     private void setupListeners() {
         // Thiết lập các sự kiện cho nút cộng, trừ số lượng
         findViewById(R.id.btnPlus).setOnClickListener(v -> updateQuantity(1));
@@ -146,7 +191,6 @@ public class DetailFoodActivity extends AppCompatActivity {
             }
         });
     }
-
 
     private void addCartItem(CartModel cartModel) {
         cartService.addToCart(cartModel).addOnCompleteListener(cartTask -> {
@@ -241,7 +285,9 @@ public class DetailFoodActivity extends AppCompatActivity {
                 DocumentSnapshot shopDoc = task.getResult().getDocuments().get(0);
                 String shopName = shopDoc.getString("shopName");
                 String address = shopDoc.getString("address");
-
+                if (address != null && !address.isEmpty()) {
+                    setupTime(address);
+                }
                 tvStore.setText(shopName != null ? shopName : "Tên cửa hàng");
             } else {
                 Toast.makeText(this, "Không tìm thấy cửa hàng", Toast.LENGTH_SHORT).show();

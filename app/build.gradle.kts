@@ -2,11 +2,9 @@ plugins {
     alias(libs.plugins.android.application)
     id("com.google.gms.google-services")
 }
-
 android {
     namespace = "com.example.foodorderapp"
     compileSdk = 35
-
     defaultConfig {
         applicationId = "com.example.foodorderapp"
         minSdk = 24
@@ -15,7 +13,6 @@ android {
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -25,52 +22,44 @@ android {
             )
         }
     }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-
     buildFeatures {
         viewBinding = true
         dataBinding = true
     }
 }
-
 dependencies {
-    // Firebase BOM (version only defined here)
+    // Retrofit
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    // AndroidX & UI
+    implementation(libs.appcompat)
+    implementation(libs.material)
+    implementation(libs.activity)
+    implementation(libs.constraintlayout)
+    // Firebase BOM
     implementation(platform("com.google.firebase:firebase-bom:32.7.3"))
-
-    // Firebase SDKs (no version needed)
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-storage")
     implementation("com.google.firebase:firebase-messaging")
-    implementation("com.google.firebase:firebase-inappmessaging-display")
-
-    // Retrofit
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-
-    // UI Libraries
-    implementation(libs.appcompat)
-    implementation(libs.material)
-    implementation(libs.activity)
-    implementation(libs.constraintlayout)
-
-    // Glide (1 lần thôi)
+    // Google Play Services
+    implementation("com.google.android.gms:play-services-auth:20.5.0")
+    implementation("com.google.android.gms:play-services-maps:18.1.0")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+    // Glide (Image loading)
     implementation("com.github.bumptech.glide:glide:4.13.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.13.0")
-
-    // Google Sign-In
-    implementation("com.google.android.gms:play-services-auth:20.5.0")
-
-    // QR Code
+    // ZXing (QR code)
     implementation("com.google.zxing:core:3.4.1")
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
-
-    // Testing
+    // OkHttp
+    implementation("com.squareup.okhttp3:okhttp:4.9.3")
+    // Test
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
