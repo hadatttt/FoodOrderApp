@@ -122,7 +122,8 @@ public class MenuProfileActivity extends AppCompatActivity {
     }
 
     private void openSetting() {
-        // xử lý khi bấm vào
+        Intent intent = new Intent(MenuProfileActivity.this, SettingActivity.class);
+        startActivityForResult(intent, REQUEST_CODE);
     }
 
     private void openFAQs() {
