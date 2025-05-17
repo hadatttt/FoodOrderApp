@@ -118,7 +118,7 @@ public class AllShopSaleActivity extends AppCompatActivity {
 
     private void updateCategoryUI(Button selectedButton) {
         for (Button button : categoryButtons) {
-            int color = (button == selectedButton) ? 0xFFFFD700 : 0xFFEEEEEE; // Vàng / Xám
+            int color = (button == selectedButton) ? 0xFFFFD700 : 0xFFFFE4B5; // Vàng / Xám
             button.setBackgroundTintList(android.content.res.ColorStateList.valueOf(color));
         }
     }

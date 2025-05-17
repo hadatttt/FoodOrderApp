@@ -17,7 +17,9 @@ public class OrderService {
 
     // Lấy tất cả đơn hàng của 1 người dùng
     public Task<QuerySnapshot> getOrdersByUserId(String userId) {
-        return orderCollection.whereEqualTo("userId", userId).get();
+        return orderCollection
+                .whereEqualTo("userId", userId)
+                .get(Source.SERVER);
     }
 
     // Lấy toàn bộ đơn hàng
@@ -78,4 +80,10 @@ public class OrderService {
         data.put("price", order.getPrice());
         return data;
     }
+    public Task<QuerySnapshot> getOrdersByFoodIds(List<Integer> foodIds) {
+        return db.collection("orders")
+                .whereIn("foodId", foodIds)
+                .get();
+    }
+
 }

@@ -30,7 +30,9 @@ import com.example.foodorderapp.service.ShopService;
 import com.example.foodorderapp.service.UserService;
 import com.google.firebase.firestore.DocumentSnapshot;
 
+import java.text.NumberFormat;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class DetailFoodActivity extends AppCompatActivity {
@@ -213,8 +215,10 @@ public class DetailFoodActivity extends AppCompatActivity {
         }
 
         double total = price * quantity;
-
-        tvPrice.setText("Giá: " + String.format("%.3f", total) + "đ");
+        double priceInVND = total * 1000;
+        NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
+        String formattedPrice = formatter.format(priceInVND);
+        tvPrice.setText(formattedPrice + " đ");
     }
 
     private String getSelectedSize() {

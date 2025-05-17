@@ -53,9 +53,11 @@ import com.google.firebase.firestore.auth.User;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
 
 public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> {
     private ArrayList<OrderModel> orderList;
@@ -98,7 +100,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                     }
                 });
         holder.tvId.setText("#"+order.getOrderId());
-        holder.tvPrice.setText(order.getPrice() + "00 đ");
+        double priceInVND = order.getPrice() * 1000;
+        NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
+        String formattedPrice = formatter.format(priceInVND);
+        holder.tvPrice.setText(formattedPrice + " đ");
         holder.tvQuantity.setText(order.getQuantity()+ " món");
         holder.tvSize.setText(order.getSize());
         holder.tvStatus.setText(order.getStatus());
@@ -138,134 +143,153 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             });
         });
 
-        if (orderList.get(position).getStatus().equals("Chờ xác nhận")) {
+        if (orderList.get(position).getStatus().equals("Chờ xác nhận") || orderList.get(position).getStatus().equals("Đang hủy")) {
             holder.tvStatus.setVisibility(View.VISIBLE);
-            holder.tvStatus.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.green));
+            if (orderList.get(position).getStatus().equals("Chờ xác nhận")) {
+                holder.tvStatus.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.green));
+                holder.btnCancel.setEnabled(true);
+            }else {
+                holder.tvStatus.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.red));
+                holder.btnCancel.setEnabled(false);
+            }
             holder.btnFollow.setVisibility(View.GONE);
             holder.btnCancel.setVisibility(View.VISIBLE);
             holder.btnFeedback.setVisibility(View.GONE);
             holder.btnRepurchase.setVisibility(View.GONE);
-            holder.tvDate.setText(orderList.get(position).getOrderDate());
-            holder.tvDate.setVisibility(View.VISIBLE);
+            holder.tvDate.setVisibility(View.GONE);
             params = (LinearLayout.LayoutParams) holder.vBetween.getLayoutParams();
             params.width = (int) TypedValue.applyDimension(
                     TypedValue.COMPLEX_UNIT_DIP, 0, context.getResources().getDisplayMetrics());
             params.weight = 1;
             holder.vBetween.setLayoutParams(params);
             holder.btnCancel.setOnClickListener(v -> {
-                OrderService orderService = new OrderService();
-                order.setStatus("Đã hủy");
-                orderService.updateOrder(order.getOrderId(), order)
-                        .addOnSuccessListener(aVoid -> {
-                            orderList.remove(position);
-                            Date date = new Date();
-                            SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm");
-                            order.setOrderDate(sdf.format(date));
-                            ((OrderActivity) context).historyList.add(order);
-                            notifyItemRemoved(position);
-                            notifyDataSetChanged();
+                new AlertDialog.Builder(context)
+                        .setTitle("Xác nhận hủy đơn")
+                        .setMessage("Bạn chắc chắn muốn hủy đơn hàng này?")
+                        .setPositiveButton("Có", (dialog, which) -> {
+                            OrderService orderService = new OrderService();
+                            order.setStatus("Đang hủy");
+                            orderService.updateOrder(order.getOrderId(), order)
+                                    .addOnSuccessListener(aVoid -> {
+//                                        orderList.remove(position);
+//                                        Date date = new Date();
+//                                        SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm");
+//                                        order.setOrderDate(sdf.format(date));
+//                                        ((OrderActivity) context).historyList.add(order);
+//                                        notifyItemRemoved(position);
+                                        foodService.getStoreIdFromFoodId(order.getFoodId(), storeId -> {
+                                            if (storeId != null) {
+                                                WebSocketManager.getInstance().sendCancelOrder(storeId, order.getOrderId(), "Khách hàng yêu cầu hủy đơn");
+                                            } else {
+                                                Log.e("OrderAdapter", "Không tìm thấy storeId từ foodId");
+                                            }
+                                        });
+                                        notifyDataSetChanged();
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Log.e("OrderAdapter", "Lỗi cập nhật trạng thái: " + e.getMessage());
+                                    });
                         })
-                        .addOnFailureListener(e -> {
-                            Log.e("OrderAdapter", "Lỗi cập nhật trạng thái: " + e.getMessage());
-                        });
+                        .setNegativeButton("Không", null)
+                        .show();
             });
         } else if (orderList.get(position).getStatus().equals("Đang giao")) {
             holder.tvDate.setVisibility(View.GONE);
             holder.btnFollow.setVisibility(View.VISIBLE);
             holder.tvStatus.setVisibility(View.GONE);
-            holder.btnCancel.setVisibility(View.VISIBLE);
+            holder.btnCancel.setVisibility(View.GONE);
             holder.btnFeedback.setVisibility(View.GONE);
             holder.btnRepurchase.setVisibility(View.GONE);
             params = (LinearLayout.LayoutParams) holder.vBetween.getLayoutParams();
             params.width = (int) TypedValue.applyDimension(
-                    TypedValue.COMPLEX_UNIT_DIP, 60, context.getResources().getDisplayMetrics());
-            params.weight = 0;
+                    TypedValue.COMPLEX_UNIT_DIP, 0, context.getResources().getDisplayMetrics());
+            params.weight = 1;
             holder.vBetween.setLayoutParams(params);
 
-            holder.btnCancel.setOnClickListener(v -> {
-                OrderService orderService = new OrderService();
-                foodService.getStoreIdFromFoodId(order.getFoodId(), storeId -> {
-                    if (storeId != null) {
-                        WebSocketManager.getInstance().sendCancelOrder(storeId, order.getOrderId(), "Khách hàng yêu cầu hủy đơn");
-                    } else {
-                        Log.e("OrderAdapter", "Không tìm thấy storeId từ foodId");
-                    }
-                });
-
-//                // Lắng nghe tin nhắn từ WebSocket
-//                WebSocketManager.getInstance().setOnMessageListener(message -> {
-//                    try {
-//                        JSONObject json = new JSONObject(message);
-//                        String type = json.optString("type");
-//                        String orderIdFromServer = json.optString("orderId");
-//
-//                        if ("accept_cancel".equals(type) && orderIdFromServer.equals(order.getOrderId())) {
-//                            order.setStatus("Đã hủy");
-//
-//                            Date date = new Date();
-//                            SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm");
-//                            order.setOrderDate(sdf.format(date));
-//
-//                            orderService.updateOrder(order.getOrderId(), order)
-//                                    .addOnSuccessListener(aVoid2 -> {
-//                                        ((Activity) context).runOnUiThread(() -> {
-//                                            notifyItemChanged(position);
-//                                            if (context instanceof OrderActivity) {
-//                                                ((OrderActivity) context).historyList.add(order);
-//                                            }
-//                                        });
-//                                    });
-//                        }
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
+//            holder.btnCancel.setOnClickListener(v -> {
+//                OrderService orderService = new OrderService();
+//                foodService.getStoreIdFromFoodId(order.getFoodId(), storeId -> {
+//                    if (storeId != null) {
+//                        WebSocketManager.getInstance().sendCancelOrder(storeId, order.getOrderId(), "Khách hàng yêu cầu hủy đơn");
+//                    } else {
+//                        Log.e("OrderAdapter", "Không tìm thấy storeId từ foodId");
 //                    }
 //                });
-//                order.setStatus("Đang chờ hủy");
-//                orderService.updateOrder(order.getOrderId(), order)
-//                        .addOnSuccessListener(aVoid -> {
-//                            notifyItemChanged(position);
 //
-//                            foodService.getStoreIdFromFoodId(order.getFoodId(), storeId -> {
-//                                if (storeId != null) {
+////                // Lắng nghe tin nhắn từ WebSocket
+////                WebSocketManager.getInstance().setOnMessageListener(message -> {
+////                    try {
+////                        JSONObject json = new JSONObject(message);
+////                        String type = json.optString("type");
+////                        String orderIdFromServer = json.optString("orderId");
+////
+////                        if ("accept_cancel".equals(type) && orderIdFromServer.equals(order.getOrderId())) {
+////                            order.setStatus("Đã hủy");
+////
+////                            Date date = new Date();
+////                            SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm");
+////                            order.setOrderDate(sdf.format(date));
+////
+////                            orderService.updateOrder(order.getOrderId(), order)
+////                                    .addOnSuccessListener(aVoid2 -> {
+////                                        ((Activity) context).runOnUiThread(() -> {
+////                                            notifyItemChanged(position);
+////                                            if (context instanceof OrderActivity) {
+////                                                ((OrderActivity) context).historyList.add(order);
+////                                            }
+////                                        });
+////                                    });
+////                        }
+////                    } catch (Exception e) {
+////                        e.printStackTrace();
+////                    }
+////                });
+////                order.setStatus("Đang chờ hủy");
+////                orderService.updateOrder(order.getOrderId(), order)
+////                        .addOnSuccessListener(aVoid -> {
+////                            notifyItemChanged(position);
+////
+////                            foodService.getStoreIdFromFoodId(order.getFoodId(), storeId -> {
+////                                if (storeId != null) {
 //                                    WebSocketManager.getInstance().sendCancelOrder(storeId, order.getOrderId(), "Khách hàng yêu cầu hủy đơn");
-//                                } else {
-//                                    Log.e("OrderAdapter", "Không tìm thấy storeId từ foodId");
-//                                }
-//                            });
-//
-//                            // Lắng nghe tin nhắn từ WebSocket
-//                            WebSocketManager.getInstance().setOnMessageListener(message -> {
-//                                try {
-//                                    JSONObject json = new JSONObject(message);
-//                                    String type = json.optString("type");
-//                                    String orderIdFromServer = json.optString("orderId");
-//
-//                                    if ("accept_cancel".equals(type) && orderIdFromServer.equals(order.getOrderId())) {
-//                                        order.setStatus("Đã hủy");
-//
-//                                        Date date = new Date();
-//                                        SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm");
-//                                        order.setOrderDate(sdf.format(date));
-//
-//                                        orderService.updateOrder(order.getOrderId(), order)
-//                                                .addOnSuccessListener(aVoid2 -> {
-//                                                    ((Activity) context).runOnUiThread(() -> {
-//                                                        notifyItemChanged(position);
-//                                                        if (context instanceof OrderActivity) {
-//                                                            ((OrderActivity) context).historyList.add(order);
-//                                                        }
-//                                                    });
-//                                                });
-//                                    }
-//                                } catch (Exception e) {
-//                                    e.printStackTrace();
-//                                }
-//                            });
-//                        })
-//                        .addOnFailureListener(e -> {
-//                            Log.e("OrderAdapter", "Lỗi cập nhật trạng thái: " + e.getMessage());
-//                        });
-            });
+////                                } else {
+////                                    Log.e("OrderAdapter", "Không tìm thấy storeId từ foodId");
+////                                }
+////                            });
+////
+////                            // Lắng nghe tin nhắn từ WebSocket
+////                            WebSocketManager.getInstance().setOnMessageListener(message -> {
+////                                try {
+////                                    JSONObject json = new JSONObject(message);
+////                                    String type = json.optString("type");
+////                                    String orderIdFromServer = json.optString("orderId");
+////
+////                                    if ("accept_cancel".equals(type) && orderIdFromServer.equals(order.getOrderId())) {
+////                                        order.setStatus("Đã hủy");
+////
+////                                        Date date = new Date();
+////                                        SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm");
+////                                        order.setOrderDate(sdf.format(date));
+////
+////                                        orderService.updateOrder(order.getOrderId(), order)
+////                                                .addOnSuccessListener(aVoid2 -> {
+////                                                    ((Activity) context).runOnUiThread(() -> {
+////                                                        notifyItemChanged(position);
+////                                                        if (context instanceof OrderActivity) {
+////                                                            ((OrderActivity) context).historyList.add(order);
+////                                                        }
+////                                                    });
+////                                                });
+////                                    }
+////                                } catch (Exception e) {
+////                                    e.printStackTrace();
+////                                }
+////                            });
+////                        })
+////                        .addOnFailureListener(e -> {
+////                            Log.e("OrderAdapter", "Lỗi cập nhật trạng thái: " + e.getMessage());
+////                        });
+//            });
         } else if (orderList.get(position).getStatus().equals("Hoàn thành")) {
             holder.tvStatus.setVisibility(View.VISIBLE);
             holder.tvStatus.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.green));

@@ -107,7 +107,7 @@ public class AllHotFoodActivity extends AppCompatActivity {
     private void selectCategory(String category, Button selectedButton) {
         filterFoods(category);
         for (Button button : categoryButtons) {
-            int color = (button == selectedButton) ? 0xFFFFD700 : 0xFFEEEEEE; // gold for selected, light gray for others
+            int color = (button == selectedButton) ? 0xFFFFD700 : 0xFFFFE4B5; // gold for selected, light gray for others
             button.setBackgroundTintList(android.content.res.ColorStateList.valueOf(color));
         }
     }

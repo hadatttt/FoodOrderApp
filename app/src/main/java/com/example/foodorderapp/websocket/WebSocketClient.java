@@ -63,17 +63,82 @@ public class WebSocketClient {
         });
     }
 
+    public void registerStore(int storeId) {
+        JSONObject json = new JSONObject();
+        try {
+            json.put("type", "register");
+            json.put("storeId", storeId);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        if (webSocket != null) {
+            webSocket.send(json.toString());
+            Log.d(TAG, "Sent register message: " + json.toString());
+        } else {
+            Log.e(TAG, "WebSocket not connected");
+        }
+    }
+    public void registerUser(String userId) {
+        JSONObject json = new JSONObject();
+        try {
+            json.put("type", "register_user");
+            json.put("userId", userId);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        if (webSocket != null) {
+            webSocket.send(json.toString());
+            Log.d(TAG, "Sent register user message: " + json.toString());
+        } else {
+            Log.e(TAG, "WebSocket not connected");
+        }
+    }
     public void sendCancelOrderMessage(int storeId, String orderId, String reason) {
         JSONObject json = new JSONObject();
         try {
             json.put("type", "cancel_request");
-            json.put("storeId", String.valueOf(storeId));
+            json.put("storeId", storeId);
             json.put("orderId", orderId);
             json.put("reason", reason);
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
+        if (webSocket != null) {
+            webSocket.send(json.toString());
+            Log.d(TAG, "Sent cancel message: " + json.toString());
+        }
+    }
+    public void sendAccept(String type, String userId, String orderId, String reason) {
+        try {
+            JSONObject json = new JSONObject();
+            json.put("type", type);
+            json.put("userId", userId);
+            json.put("orderId", orderId);
+            if (reason != null) {
+                json.put("reason", reason);
+            }
+            if (webSocket != null && webSocket.send(json.toString())) {
+                Log.d("WebSocket", "Sent to user: " + json.toString());
+            } else {
+                Log.e("WebSocket", "WebSocket not connected or failed to send");
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+    public void sendMessage(String message, int storeId) {
+        JSONObject json = new JSONObject();
+        try {
+            json.put("type", message);
+            json.put("storeId", storeId);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         if (webSocket != null) {
             webSocket.send(json.toString());
             Log.d(TAG, "Sent cancel message: " + json.toString());

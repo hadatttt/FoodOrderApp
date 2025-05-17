@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layoutShopManager"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFF8E1">
+
+    <TextView
+        android:id="@+id/tvManagerTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="🛒 Quản lý đơn hàng"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_margin="16dp"
+        android:textColor="#FF9800"
+        android:gravity="center"
+        android:paddingBottom="12dp" />
+
+    <!-- Thanh chọn loại đơn -->
+    <LinearLayout
+        android:id="@+id/layoutTab"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_margin="16dp"
+        android:layout_marginBottom="12dp">
+        <TextView
+            android:id="@+id/tabConfirm"
+            android:layout_width="0dp"
+            android:layout_marginRight="10dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="⏳ Đang chờ"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:padding="10dp"
+            android:gravity="center"
+            android:background="@drawable/bg_tag_selected"
+            android:textColor="#FFFFFF" />
+
+        <TextView
+            android:id="@+id/tabPending"
+            android:layout_width="0dp"
+            android:layout_marginRight="10dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="🛵 Đang giao"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:padding="10dp"
+            android:gravity="center"
+            android:background="@drawable/bg_tag_unselected"
+            android:textColor="#F57C00"/>
+
+        <TextView
+            android:id="@+id/tabHistory"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="📦 Lịch sử"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:padding="10dp"
+            android:gravity="center"
+            android:background="@drawable/bg_tag_unselected"
+            android:textColor="#F57C00" />
+    </LinearLayout>
+
+    <!-- RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerOrders"
+        android:layout_margin="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        tools:listitem="@layout/item_shop_order" />
+</LinearLayout>

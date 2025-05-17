@@ -115,7 +115,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:backgroundTint="@color/red"
-            app:icon="@drawable/ic_right_arrow"
+            app:icon="@drawable/ic_arrow_right"
             app:iconGravity="textEnd"
             app:iconPadding="0dp"
             android:padding="12dp"
