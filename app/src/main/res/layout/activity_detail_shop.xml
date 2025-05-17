@@ -172,7 +172,7 @@
                         android:backgroundTint="#EEEEEE"
                         android:drawableLeft="@drawable/spaghetti"
                         android:text="Mỳ ý"
-                        android:textColor="?attr/colorOnBackground" />
+                        android:textColor="@color/black" />
 
                     <Button
                         android:id="@+id/btnPotato"
@@ -182,7 +182,7 @@
                         android:backgroundTint="#EEEEEE"
                         android:drawableLeft="@drawable/potato"
                         android:text="Khoai tây chiên"
-                        android:textColor="?attr/colorOnBackground" />
+                        android:textColor="@color/black" />
 
                     <Button
                         android:id="@+id/btnPizza"
@@ -192,7 +192,7 @@
                         android:backgroundTint="#EEEEEE"
                         android:drawableLeft="@drawable/pizza"
                         android:text="Pizza"
-                        android:textColor="?attr/colorOnBackground" />
+                        android:textColor="@color/black" />
 
                     <Button
                         android:id="@+id/btnBurger"
@@ -202,7 +202,7 @@
                         android:backgroundTint="#EEEEEE"
                         android:drawableLeft="@drawable/burger"
                         android:text="Burger"
-                        android:textColor="?attr/colorOnBackground" />
+                        android:textColor="@color/black" />
 
                     <Button
                         android:id="@+id/btnChicken"
@@ -212,7 +212,7 @@
                         android:backgroundTint="#EEEEEE"
                         android:drawableLeft="@drawable/chicken"
                         android:text="Gà rán"
-                        android:textColor="?attr/colorOnBackground" />
+                        android:textColor="@color/black" />
                     <Button
                         android:id="@+id/btnDrink"
                         android:layout_width="wrap_content"
@@ -221,7 +221,7 @@
                         android:backgroundTint="#EEEEEE"
                         android:drawableLeft="@drawable/drink"
                         android:text="Đồ uống"
-                        android:textColor="?attr/colorOnBackground" />
+                        android:textColor="@color/black" />
                 </LinearLayout>
             </HorizontalScrollView>
             <androidx.recyclerview.widget.RecyclerView

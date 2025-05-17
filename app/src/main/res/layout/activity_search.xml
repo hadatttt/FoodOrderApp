@@ -31,10 +31,10 @@
                     android:id="@+id/btnBack"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="Quay lại"
-                    android:padding="12dp"
-                    android:src="@drawable/ic_back" />
+                    android:layout_marginRight="15dp"
+                    android:background="@drawable/bg_circle"
+                    android:src="@drawable/ic_back"
+                    android:contentDescription="Back" />
 
                 <TextView
                     android:id="@+id/txtSearchTitle"
