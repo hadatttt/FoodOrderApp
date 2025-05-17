@@ -2,9 +2,7 @@ const WebSocket = require('ws');
 const os = require('os');
 const db = require('./firebase');
 
-const PORT = process.env.PORT || 8080;
-
-const wss = new WebSocket.Server({ port: PORT /* host: '0.0.0.0' có thể bỏ */ });
+const wss = new WebSocket.Server({ port: 8080, host: '0.0.0.0' });
 
 const storeConnections = new Map(); // storeId -> WebSocket
 const userConnections = new Map(); // userId -> WebSocket
@@ -68,12 +66,12 @@ wss.on('connection', function connection(ws) {
 
                     if (userWs && userWs.readyState === WebSocket.OPEN) {
                         userWs.send(JSON.stringify(msg));
-                        console.log(`📩 Sent message to user ${userId}:`, msg);
+                        console.log(`📩 Sent cancel message to user ${userId}:`, msg);
                     } else {
-                        console.log(`❌ User ${userId} not connected`);
+                        console.log(`❌ Store ${shopId} not connected`);
                     }
                 } else {
-                    console.log(`⚠️ Cannot find user for order ${data.orderId}`);
+                    console.log(`⚠️ Cannot find store for order ${data.orderId}`);
                 }
             } else if (data.type === 'reload_orders' && data.storeId) {
                 const shopId = data.storeId;
@@ -81,21 +79,22 @@ wss.on('connection', function connection(ws) {
                 if (shopId) {
                     const storeWs = storeConnections.get(shopId);
 
-                    const reloadMsg = {
+                    const cancelMsg = {
                         type: 'reload_orders',
                         shopId: shopId || '',
                     };
 
                     if (storeWs && storeWs.readyState === WebSocket.OPEN) {
-                        storeWs.send(JSON.stringify(reloadMsg));
-                        console.log(`📩 Sent reload_orders message to store ${shopId}:`, reloadMsg);
+                        storeWs.send(JSON.stringify(cancelMsg));
+                        console.log(`📩 Sent cancel message to store ${shopId}:`, cancelMsg);
                     } else {
                         console.log(`❌ Store ${shopId} not connected`);
                     }
                 } else {
-                    console.log(`⚠️ Cannot find store for reload_orders`);
+                    console.log(`⚠️ Cannot find store for order ${data.orderId}`);
                 }
             }
+
 
             // Unknown type
             else {
@@ -127,10 +126,22 @@ wss.on('connection', function connection(ws) {
     });
 });
 
-// Không cần get IP LAN, chỉ in port và localhost
-console.log(`🚀 WebSocket server running on ws://localhost:${PORT}`);
+// 🔍 Lấy IP LAN để kết nối từ thiết bị thật
+function getLocalIP() {
+    const interfaces = os.networkInterfaces();
+    for (const iface of Object.values(interfaces)) {
+        for (const i of iface) {
+            if (i.family === 'IPv4' && !i.internal) {
+                return i.address;
+            }
+        }
+    }
+    return 'localhost';
+}
 
-// Truy vấn Firestore lấy userId từ orderId (giữ nguyên)
+console.log(`🚀 WebSocket server running on ws://${getLocalIP()}:8080`);
+
+// 🔎 Truy vấn Firestore để lấy userId từ orderId
 async function getUserIdByOrderId(orderId) {
     try {
         const doc = await db.collection('orders').doc(orderId).get();
