@@ -1,18 +1,16 @@
 package com.example.foodorderapp.ui;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.graphics.Insets;
@@ -21,14 +19,15 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.foodorderapp.R;
 import com.google.android.material.materialswitch.MaterialSwitch;
-
-import java.util.Locale;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class SettingActivity extends AppCompatActivity {
-    private Spinner spinnerLanguage;
     private MaterialSwitch switchTheme;
     private ImageButton btnBack;
-    private boolean isFirstTime = true;
+    private Button btnDeleteAccount;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,29 +41,12 @@ public class SettingActivity extends AppCompatActivity {
             }
         });
         changeTheme();
-        String[] languages = {"Tiếng Việt", "English"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, languages);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerLanguage.setAdapter(adapter);
-
-        spinnerLanguage.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        btnDeleteAccount.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (isFirstTime) {
-                    isFirstTime = false;
-                    return; // Bỏ qua lần đầu khi setAdapter
-                }
-
-                String langCode = "vi";
-                if (position == 1) langCode = "en";
-                setLocale(langCode);
+            public void onClick(View view) {
+                showDeleteAccountDialog();
             }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
         });
-
-
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -72,31 +54,10 @@ public class SettingActivity extends AppCompatActivity {
         });
     }
     public void init(){
-        spinnerLanguage = findViewById(R.id.spinnerLanguage);
+        btnDeleteAccount = findViewById(R.id.btnDeleteAccount);
         btnBack = findViewById(R.id.btnBack);
         switchTheme = findViewById(R.id.switch_theme);
     }
-    public void setLocale(String langCode) {
-        Locale locale = new Locale(langCode);
-        Locale.setDefault(locale);
-
-        Configuration config = new Configuration();
-        config.setLocale(locale);
-
-        getBaseContext().getResources().updateConfiguration(config, getBaseContext().getResources().getDisplayMetrics());
-
-        // Lưu ngôn ngữ được chọn vào SharedPreferences (nếu cần)
-        SharedPreferences.Editor editor = getSharedPreferences("Settings", MODE_PRIVATE).edit();
-        editor.putString("App_Lang", langCode);
-        editor.apply();
-
-        // Khởi động lại activity để áp dụng ngôn ngữ mới
-        Intent intent = new Intent(getApplicationContext(), SettingActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-        finish();
-    }
-
     public void changeTheme(){
         int currentNightMode = getResources().getConfiguration().uiMode
                 & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
@@ -114,6 +75,69 @@ public class SettingActivity extends AppCompatActivity {
             }
             recreate();
         });
+    }
+    private void showDeleteAccountDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_reauthenticate, null);
+        builder.setView(dialogView);
 
+        EditText etPassword = dialogView.findViewById(R.id.et_password);
+
+        builder.setTitle("Xác nhận xóa tài khoản");
+        builder.setPositiveButton("Xác nhận", null);  // set lại sau để không tự đóng dialog
+        builder.setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss());
+
+        AlertDialog dialog = builder.create();
+
+        // Override nút positive để kiểm tra mật khẩu trước khi đóng dialog
+        dialog.setOnShowListener(dialogInterface -> {
+            Button btnPositive = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            btnPositive.setOnClickListener(view -> {
+                String password = etPassword.getText().toString().trim();
+                if (password.isEmpty()) {
+                    etPassword.setError("Vui lòng nhập mật khẩu");
+                    return;
+                }
+                reauthenticateAndDelete(password, dialog);
+            });
+        });
+
+        dialog.show();
+    }
+
+    private void reauthenticateAndDelete(String password, AlertDialog dialog) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (user == null) {
+            Toast.makeText(this, "Bạn chưa đăng nhập", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        AuthCredential credential = EmailAuthProvider.getCredential(user.getEmail(), password);
+
+        user.reauthenticate(credential).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                user.delete().addOnCompleteListener(deleteTask -> {
+                    if (deleteTask.isSuccessful()) {
+                        Toast.makeText(this, "Tài khoản đã được xóa", Toast.LENGTH_LONG).show();
+                        FirebaseAuth.getInstance().signOut();
+                        dialog.dismiss();
+                        goToLoginScreen();
+                    } else {
+                        Toast.makeText(this, "Xóa tài khoản thất bại: " + deleteTask.getException().getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
+            } else {
+                Toast.makeText(this, "Xác thực lại thất bại: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void goToLoginScreen() {
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 }

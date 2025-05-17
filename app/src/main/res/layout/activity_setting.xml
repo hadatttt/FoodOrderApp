@@ -47,11 +47,15 @@
         android:background="@drawable/edittext_background"
         android:layout_marginBottom="20dp"
         android:padding="16dp"/>
-    <Spinner
-        android:id="@+id/spinnerLanguage"
-        android:padding="15dp"
-        android:backgroundTint="@color/black"
-        android:spinnerMode="dropdown"
+    <Button
+        android:id="@+id/btnDeleteAccount"
+        android:layout_marginRight="20dp"
+        android:layout_marginLeft="20dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:text="Xóa tài khoản"
+        android:textAllCaps="false"
+        android:backgroundTint="#F44336"
+        android:textColor="#FFFFFF"
+        android:layout_marginTop="16dp"/>
 </LinearLayout>
