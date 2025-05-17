@@ -95,23 +95,17 @@ public class UserService {
     public Task<FirebaseUser> loginUser(String email, String password) {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
-        // Thực hiện đăng nhập bằng email và password
         return mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(task -> {
+                .continueWithTask(task -> {
                     if (task.isSuccessful()) {
                         FirebaseUser user = mAuth.getCurrentUser();
-                        if (user != null) {
-                            Log.d("UserService", "Đăng nhập thành công: " + user.getEmail());
-                        }
+                        Log.d("UserService", "Đăng nhập thành công: " + (user != null ? user.getEmail() : "null"));
+                        return Tasks.forResult(user);
                     } else {
-                        Log.e("UserService", "Đăng nhập thất bại", task.getException());
-                        throw new RuntimeException("Login failed: " + task.getException().getMessage());
-                    }
-                }).continueWith(task -> {
-                    if (task.isSuccessful()) {
-                        return mAuth.getCurrentUser();
-                    } else {
-                        return null;
+                        Exception e = task.getException();
+                        Log.e("UserService", "Đăng nhập thất bại", e);
+                        // Trả về lỗi cho caller xử lý, không throw
+                        return Tasks.forException(e != null ? e : new Exception("Unknown login error"));
                     }
                 });
     }

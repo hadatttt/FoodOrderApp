@@ -9,6 +9,7 @@ import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -26,18 +27,17 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.foodorderapp.R;
-import com.example.foodorderapp.model.UserModel;
+import com.example.foodorderapp.service.FCMTokenService;
 import com.example.foodorderapp.service.UserService;
+import com.example.foodorderapp.websocket.WebSocketManager;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class LoginActivity extends AppCompatActivity {
@@ -45,51 +45,66 @@ public class LoginActivity extends AppCompatActivity {
     private TextView tvSignup, tvLoginError;
     private Button btnForget, btnLogin;
     private EditText edtUsername, edtPassword;
-    private FirebaseAuth mAuth;
-    private static final int RC_SIGN_IN = 9001;
-    private GoogleSignInClient mGoogleSignInClient;
-    public UserService userService = new UserService();
     private ProgressBar progressBar;
     private FrameLayout loadingOverlay;
+
+    private FirebaseAuth mAuth;
+    private GoogleSignInClient mGoogleSignInClient;
+    private final UserService userService = new UserService();
+    private FirebaseUser user;
+
+    private static final int RC_SIGN_IN = 9001;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        WebSocketManager.init(getApplicationContext());
+
+        initEdgeToEdge();
+        initViews();
+        setupClickableSignupText();
+        setupButtons();
+        setupGoogleSignIn();
+    }
+
+    private void initEdgeToEdge() {
         EdgeToEdge.enable(this);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+    }
+
+    private void initViews() {
         tvSignup = findViewById(R.id.tv_signup);
         tvLoginError = findViewById(R.id.tv_login_error);
         btnForget = findViewById(R.id.btn_forget);
         btnLogin = findViewById(R.id.btn_login);
         edtUsername = findViewById(R.id.edt_email);
         edtPassword = findViewById(R.id.edt_password);
-
-        loadingOverlay = findViewById(R.id.loadingOverlay);
-        loadingOverlay.setVisibility(View.GONE);
         progressBar = findViewById(R.id.progressBar);
-        progressBar.setVisibility(View.GONE);
+        loadingOverlay = findViewById(R.id.loadingOverlay);
 
         mAuth = FirebaseAuth.getInstance();
 
-        // Tạo đoạn văn bản có phần "Đăng kí" có thể click
+        hideLoading();
+        tvLoginError.setVisibility(View.GONE);
+    }
+
+    private void setupClickableSignupText() {
         String text = "Nếu bạn chưa có tài khoản, vui lòng Đăng kí.";
         SpannableString spannableString = new SpannableString(text);
+
         int start = text.indexOf("Đăng kí");
         int end = start + "Đăng kí".length();
+
         ClickableSpan clickableSpan = new ClickableSpan() {
             @Override
             public void onClick(View widget) {
-
-                loadingOverlay.setVisibility(View.VISIBLE);
-                progressBar.setVisibility(View.VISIBLE);
-                Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
-                startActivity(intent);
-                loadingOverlay.setVisibility(View.GONE);
-                progressBar.setVisibility(View.GONE);
+                startActivityWithLoading(RegisterActivity.class);
             }
 
             @Override
@@ -99,92 +114,170 @@ public class LoginActivity extends AppCompatActivity {
                 ds.setUnderlineText(false);
             }
         };
+
         spannableString.setSpan(clickableSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         tvSignup.setText(spannableString);
         tvSignup.setMovementMethod(LinkMovementMethod.getInstance());
         tvSignup.setHighlightColor(Color.TRANSPARENT);
+    }
 
-        // Quên mật khẩu
-        btnForget.setOnClickListener(view -> {
-            loadingOverlay.setVisibility(View.VISIBLE);
-            progressBar.setVisibility(View.VISIBLE);
-            Intent intent = new Intent(LoginActivity.this, ForgetActivity.class);
-            startActivity(intent);
-            loadingOverlay.setVisibility(View.GONE);
-            progressBar.setVisibility(View.GONE);
-        });
+    private void setupButtons() {
+        btnForget.setOnClickListener(v -> startActivityWithLoading(ForgetActivity.class));
 
-        // Đăng nhập bằng email & mật khẩu
-        btnLogin.setOnClickListener(view -> {
-            loadingOverlay.setVisibility(View.VISIBLE);
-            progressBar.setVisibility(View.VISIBLE);
-            String inputEmail = edtUsername.getText().toString().trim();
-            String inputPassword = edtPassword.getText().toString().trim();
-            if (inputEmail.isEmpty() || inputPassword.isEmpty()) {
-                tvLoginError.setVisibility(View.VISIBLE);
-                tvLoginError.setText("Vui lòng nhập đủ thông tin");
+        btnLogin.setOnClickListener(v -> {
+            tvLoginError.setVisibility(View.GONE);
+
+            String email = edtUsername.getText().toString().trim();
+            String password = edtPassword.getText().toString().trim();
+
+            if (email.isEmpty() || password.isEmpty()) {
+                showError("Vui lòng nhập đủ thông tin");
                 return;
             }
 
-            userService.loginUser(inputEmail, inputPassword)
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
+            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                showError("Email không đúng định dạng");
+                return;
+            }
 
-                            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-                            startActivity(intent);
-                            finish();
+            Log.d("LoginActivity", "Email nhập vào: " + email);
+
+            showLoading();
+            userService.loginUser(email, password)
+                    .addOnCompleteListener(task -> {
+                        hideLoading(); // Đảm bảo ẩn loading bất kể thành công hay thất bại
+
+                        if (task.isSuccessful()) {
+                            onLoginSuccess();
                         } else {
-                            tvLoginError.setVisibility(View.VISIBLE);
-                            loadingOverlay.setVisibility(View.GONE);
-                            progressBar.setVisibility(View.GONE);
-                            tvLoginError.setText("Sai tài khoản hoặc mật khẩu");
+                            Exception e = task.getException();
+                            Log.e("LoginActivity", "Login failed", e);
+                            showError("Sai tài khoản hoặc mật khẩu"); // Luôn dùng câu này
                         }
                     });
+
         });
 
-        // Cấu hình đăng nhập bằng Google
+    }
+
+    private void setupGoogleSignIn() {
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
-        // Sự kiện click nút Google
-        LinearLayout googleLogin = findViewById(R.id.btn_login_google);
-        googleLogin.setOnClickListener(v -> {
-            Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-            progressBar.setVisibility(View.VISIBLE);
-            loadingOverlay.setVisibility(View.VISIBLE);
-            startActivityForResult(signInIntent, RC_SIGN_IN);
+        LinearLayout googleLoginBtn = findViewById(R.id.btn_login_google);
+        googleLoginBtn.setOnClickListener(v -> {
+            showLoading();
+            startActivityForResult(mGoogleSignInClient.getSignInIntent(), RC_SIGN_IN);
         });
     }
 
-    // Nhận kết quả từ Google Sign-in
+    private void onLoginSuccess() {
+        FCMTokenService.sendTokenToFirestore();
+
+        user = mAuth.getCurrentUser();
+        if (user == null) {
+            hideLoading();
+            showError("Không lấy được thông tin người dùng");
+            return;
+        }
+
+        FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(user.getUid())
+                .get()
+                .addOnSuccessListener(doc -> {
+                    hideLoading();
+                    if (doc.exists()) {
+                        Long storeIdLong = doc.getLong("shopid");
+                        String storeId = (storeIdLong != null) ? String.valueOf(storeIdLong) : null;
+                        redirectAfterLogin(storeId);
+                    } else {
+                        showError("Không tìm thấy dữ liệu user");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    hideLoading();
+                    showError("Lỗi truy vấn dữ liệu");
+                    Log.e("Firestore", "Lỗi: ", e);
+                });
+    }
+
+    private void redirectAfterLogin(String storeId) {
+        Intent intent;
+        if (storeId != null && !storeId.isEmpty()) {
+            Log.d("LoginActivity", "Chuyển sang ShopManager với shopid = " + storeId);
+            try {
+                int storeIdInt = Integer.parseInt(storeId);
+                WebSocketManager.getInstance().registerStore(storeIdInt);
+            } catch (NumberFormatException e) {
+                Log.e("LoginActivity", "Lỗi chuyển đổi storeId sang int", e);
+            }
+
+            intent = new Intent(this, ShopManager.class);
+            intent.putExtra("shopid", storeId);
+        } else {
+            Log.d("LoginActivity", "Chuyển sang HomeActivity, không có shopid");
+            WebSocketManager.getInstance().registerUser(user.getUid());
+            intent = new Intent(this, HomeActivity.class);
+
+        }
+        startActivity(intent);
+        finish();
+    }
+
+
+    private void showLoading() {
+        loadingOverlay.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
+        btnLogin.setEnabled(false);
+        btnForget.setEnabled(false);
+    }
+
+    private void hideLoading() {
+        loadingOverlay.setVisibility(View.GONE);
+        progressBar.setVisibility(View.GONE);
+        btnLogin.setEnabled(true);
+        btnForget.setEnabled(true);
+    }
+
+    private void showError(String message) {
+        tvLoginError.setVisibility(View.VISIBLE);
+        tvLoginError.setText(message);
+    }
+
+    private void startActivityWithLoading(Class<?> clazz) {
+        showLoading();
+        startActivity(new Intent(LoginActivity.this, clazz));
+        hideLoading();
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
         if (requestCode == RC_SIGN_IN) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
+                if (account == null) ;
                 String idToken = account.getIdToken();
 
-                // Đăng nhập vào Firebase thông qua UserService
+                showLoading();
                 userService.loginWithGoogle(idToken)
                         .addOnCompleteListener(this, task1 -> {
                             if (task1.isSuccessful()) {
-                                Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-                                startActivity(intent);
-                                finish();
+                                onLoginSuccess();
                             } else {
-                                loadingOverlay.setVisibility(View.GONE);
-                                progressBar.setVisibility(View.GONE);
+                                hideLoading();
                                 Toast.makeText(LoginActivity.this, "Đăng nhập Google thất bại", Toast.LENGTH_SHORT).show();
                             }
                         });
+
             } catch (ApiException e) {
-                loadingOverlay.setVisibility(View.GONE);
-                progressBar.setVisibility(View.GONE);
+                hideLoading();
                 Log.w("GoogleSignIn", "Google sign in failed", e);
                 Toast.makeText(this, "Đăng nhập Google thất bại", Toast.LENGTH_SHORT).show();
             }
