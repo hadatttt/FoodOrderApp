@@ -79,13 +79,13 @@ public class WebSocketManager {
                             title = "";
                         }
 
-                        if (orderUpdateListener != null) {
-                            Log.d("WebSocketManager", "Calling onOrderUpdate listener with delay");
-                            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                                notificationHelper.showAcceptNotification(title, orderId, reason);
+                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                            notificationHelper.showAcceptNotification(title, orderId, reason);
+                            if (orderUpdateListener != null) {
+                                Log.d("WebSocketManager", "Calling onOrderUpdate listener with delay");
                                 orderUpdateListener.onOrderUpdate();
-                            }, 1500); // delay 1.5 giây
-                        }
+                            }
+                        }, 1500); // delay 1.5 giây
                     } else if ("reload_orders".equals(json.optString("type"))) {
                         Log.d("WebSocketManager", "Received reload_orders WebSocket message");
                         if (cancelRequestListener != null) {
