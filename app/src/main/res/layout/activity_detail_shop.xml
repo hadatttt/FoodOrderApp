@@ -6,8 +6,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.DetailShopActivity"
-    android:background="#FFFFFF">
+    tools:context=".ui.DetailShopActivity">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -42,7 +41,6 @@
                 android:text="Nhà hàng"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                android:textColor="#000"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toEndOf="@id/btnBack"
                 app:layout_constraintBottom_toBottomOf="@id/btnBack"
@@ -78,7 +76,6 @@
                 android:text="Nhà hàng cay"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:textColor="#000"
                 app:layout_constraintTop_toBottomOf="@id/imgShop"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -113,7 +110,7 @@
                     android:drawablePadding="4dp"
                     android:paddingRight="30dp"
                     android:text="4.7"
-                    android:textColor="#000" />
+                    android:textColor="?attr/colorOnBackground" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -122,7 +119,7 @@
                     android:drawableLeft="@drawable/ic_delivery"
                     android:drawablePadding="4dp"
                     android:paddingRight="13dp"
-                    android:textColor="#000" />
+                    android:textColor="?attr/colorOnBackground" />
                 <FrameLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -136,7 +133,7 @@
                         android:text="20 Phút"
                         android:drawableLeft="@drawable/ic_clock"
                         android:drawablePadding="4dp"
-                        android:textColor="#000" />
+                        android:textColor="?attr/colorOnBackground" />
 
                     <ProgressBar
                         android:id="@+id/progressTime"
@@ -165,8 +162,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
                         android:backgroundTint="#FFD700"
-                        android:text="Tất cả"
-                        android:textColor="#000" />
+                        android:text="Tất cả" />
 
                     <Button
                         android:id="@+id/btnSpaghetti"
@@ -176,7 +172,7 @@
                         android:backgroundTint="#EEEEEE"
                         android:drawableLeft="@drawable/spaghetti"
                         android:text="Mỳ ý"
-                        android:textColor="#000" />
+                        android:textColor="@color/black" />
 
                     <Button
                         android:id="@+id/btnPotato"
@@ -186,7 +182,7 @@
                         android:backgroundTint="#EEEEEE"
                         android:drawableLeft="@drawable/potato"
                         android:text="Khoai tây chiên"
-                        android:textColor="#000" />
+                        android:textColor="@color/black" />
 
                     <Button
                         android:id="@+id/btnPizza"
@@ -196,7 +192,7 @@
                         android:backgroundTint="#EEEEEE"
                         android:drawableLeft="@drawable/pizza"
                         android:text="Pizza"
-                        android:textColor="#000" />
+                        android:textColor="@color/black" />
 
                     <Button
                         android:id="@+id/btnBurger"
@@ -206,7 +202,7 @@
                         android:backgroundTint="#EEEEEE"
                         android:drawableLeft="@drawable/burger"
                         android:text="Burger"
-                        android:textColor="#000" />
+                        android:textColor="@color/black" />
 
                     <Button
                         android:id="@+id/btnChicken"
@@ -216,7 +212,7 @@
                         android:backgroundTint="#EEEEEE"
                         android:drawableLeft="@drawable/chicken"
                         android:text="Gà rán"
-                        android:textColor="#000" />
+                        android:textColor="@color/black" />
                     <Button
                         android:id="@+id/btnDrink"
                         android:layout_width="wrap_content"
@@ -225,7 +221,7 @@
                         android:backgroundTint="#EEEEEE"
                         android:drawableLeft="@drawable/drink"
                         android:text="Đồ uống"
-                        android:textColor="#000" />
+                        android:textColor="@color/black" />
                 </LinearLayout>
             </HorizontalScrollView>
             <androidx.recyclerview.widget.RecyclerView

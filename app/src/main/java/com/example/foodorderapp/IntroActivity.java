@@ -1,6 +1,9 @@
 package com.example.foodorderapp;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -26,6 +29,7 @@ import com.example.foodorderapp.ui.LoginActivity;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public class IntroActivity extends AppCompatActivity {
 
@@ -215,4 +219,19 @@ public class IntroActivity extends AppCompatActivity {
         loadingOverlay.setVisibility(View.GONE);
         progressBar.setVisibility(View.GONE);  // Đảm bảo rằng progress bar không hiển thị khi quay lại
     }
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        SharedPreferences prefs = newBase.getSharedPreferences("settings", MODE_PRIVATE);
+        String lang = prefs.getString("lang", "vi");
+
+        Locale newLocale = new Locale(lang);
+        Locale.setDefault(newLocale);
+
+        Configuration config = new Configuration();
+        config.setLocale(newLocale);
+
+        Context context = newBase.createConfigurationContext(config);
+        super.attachBaseContext(context);
+    }
+
 }

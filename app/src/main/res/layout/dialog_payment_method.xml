@@ -30,7 +30,7 @@
             android:text="Thanh toán khi nhận hàng"
             android:textSize="16sp"
             android:padding="8dp"
-            android:textColor="@android:color/black"/>
+            android:textColor="?attr/colorOnBackground"/>
 
         <RadioButton
             android:id="@+id/radioTransferBefore"
@@ -39,7 +39,7 @@
             android:text="Thanh toán bằng MoMo"
             android:textSize="16sp"
             android:padding="8dp"
-            android:textColor="@android:color/black"/>
+            android:textColor="?attr/colorOnBackground"/>
     </RadioGroup>
 
     <Button

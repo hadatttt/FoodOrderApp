@@ -4,12 +4,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
     android:id="@+id/main">
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#FFFFFF"
         android:fitsSystemWindows="true"
         android:clipToPadding="false">
 
@@ -33,10 +31,10 @@
                     android:id="@+id/btnBack"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="Quay lại"
-                    android:padding="12dp"
-                    android:src="@drawable/ic_back" />
+                    android:layout_marginRight="15dp"
+                    android:background="@drawable/bg_circle"
+                    android:src="@drawable/ic_back"
+                    android:contentDescription="Back" />
 
                 <TextView
                     android:id="@+id/txtSearchTitle"
@@ -44,7 +42,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:text="Tìm Kiếm"
-                    android:textColor="?attr/colorOnSurface"
+                    android:textColor="?attr/colorOnBackground"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
@@ -91,8 +89,8 @@
                     android:hint="Tìm kiếm"
                     android:inputType="text"
                     android:paddingStart="8dp"
-                    android:textColor="?attr/colorOnSurface"
-                    android:textColorHint="?attr/colorOnSurfaceVariant" />
+                    android:textColor="?attr/colorOnBackground"
+                    android:textColorHint="?attr/colorOnBackground" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- No Results Text -->
@@ -103,7 +101,7 @@
                 android:gravity="center"
                 android:padding="16dp"
                 android:text="Không tìm thấy kết quả"
-                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textColor="?attr/colorOnBackground"
                 android:textSize="14sp"
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -129,7 +127,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:text="Gần đây"
-                android:textColor="?attr/colorOnSurface"
+                android:textColor="?attr/colorOnBackground"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
@@ -154,7 +152,7 @@
                 android:gravity="center"
                 android:padding="16dp"
                 android:text="Không có lịch sử tìm kiếm"
-                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textColor="?attr/colorOnBackground"
                 android:textSize="14sp"
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -179,7 +177,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:text="Gợi ý"
-                android:textColor="?attr/colorOnSurface"
+                android:textColor="?attr/colorOnBackground"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
@@ -202,7 +200,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:text="Ưa chuộng"
-                android:textColor="?attr/colorOnSurface"
+                android:textColor="?attr/colorOnBackground"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"

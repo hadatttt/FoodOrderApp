@@ -5,7 +5,6 @@
     android:layout_height="wrap_content"
     android:padding="12dp"
     android:orientation="horizontal"
-    android:background="@color/white"
     android:gravity="center_vertical">
 
     <!-- Image -->

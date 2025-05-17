@@ -25,7 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Burger"
-            android:textColor="@color/black"
+            android:textColor="?attr/colorOnBackground"
             android:textSize="14sp" />
 
         <!-- Close Icon -->

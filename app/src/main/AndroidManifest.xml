@@ -9,6 +9,9 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -25,8 +28,20 @@
             android:name=".ui.ShopManager"
             android:exported="true" />
 
+        <activity
+            android:name=".ui.SettingActivity"
+            android:exported="false" />
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyB34EF17TirLMB4-NW_7bRVZbma-Qw1s40" />
+
+        <activity
+            android:name=".ui.PasswordActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.AccountActivity"
+            android:exported="false" />
             android:value="AIzaSyB34EF17TirLMB4-NW_7bRVZbma-Qw1s40" />
 
         <activity
