@@ -43,4 +43,4 @@
         android:textSize="25dp"
         android:layout_height="wrap_content"
         android:text="Mọi vấn đề thắc mắc hãy liên hệ đến email: hadat@gmail.com hoặc số điện thoại 0123456789"></TextView>
-</LinearLayout>>
+</LinearLayout>
