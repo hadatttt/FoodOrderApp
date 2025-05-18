@@ -54,14 +54,12 @@ public class MenuProfileActivity extends AppCompatActivity {
         LinearLayout btnAccount = findViewById(R.id.btnAccount);
         LinearLayout btnOrders = findViewById(R.id.btnOrders);
         LinearLayout btnFavourite = findViewById(R.id.btnFavourite);
-        LinearLayout btnPayment = findViewById(R.id.btnPayment);
         LinearLayout btnFAQs = findViewById(R.id.btnFAQs);
         LinearLayout btnSetting = findViewById(R.id.btnSetting);
         btnBack = findViewById(R.id.btnBack);
         btnAccount.setOnClickListener(v -> openAccount());
         btnOrders.setOnClickListener(v -> openOrders());
         btnFavourite.setOnClickListener(v -> openFavourite());
-        btnPayment.setOnClickListener(v -> openPayment());
         btnFAQs.setOnClickListener(v -> openFAQs());
         btnSetting.setOnClickListener(v -> openSetting());
         btnBack.setOnClickListener(new View.OnClickListener() {
@@ -129,10 +127,6 @@ public class MenuProfileActivity extends AppCompatActivity {
     private void openFAQs() {
         Intent intent = new Intent(MenuProfileActivity.this, FAQsActivity.class);
         startActivityForResult(intent, REQUEST_CODE);
-    }
-
-    private void openPayment() {
-        // xử lý khi bấm vào
     }
 
     private void openFavourite() {
