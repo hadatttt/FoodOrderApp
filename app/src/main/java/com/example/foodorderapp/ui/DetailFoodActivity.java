@@ -371,7 +371,7 @@ public class DetailFoodActivity extends AppCompatActivity {
         super.onStop();
         detachCartListener();
     }
-
+ 
     private void detachCartListener() {
         if (cartListener != null) {
             cartListener.remove();
