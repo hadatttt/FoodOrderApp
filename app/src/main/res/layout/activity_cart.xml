@@ -107,12 +107,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Tổng tiền: "></TextView>
+
             <TextView
                 android:id="@+id/tvPrice"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:paddingLeft="10dp"
                 android:layout_weight="1"
+                android:paddingLeft="10dp"
                 android:text="0đ"
                 android:textColor="?attr/colorOnBackground"
                 android:textSize="18sp"

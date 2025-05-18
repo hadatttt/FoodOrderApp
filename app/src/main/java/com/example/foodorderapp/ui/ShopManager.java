@@ -17,6 +17,7 @@ import com.example.foodorderapp.adapter.ShopOrderAdapter;
 import com.example.foodorderapp.model.OrderModel;
 import com.example.foodorderapp.service.FoodService;
 import com.example.foodorderapp.service.OrderService;
+import com.example.foodorderapp.websocket.WebSocketManager;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
@@ -32,14 +33,28 @@ public class ShopManager extends AppCompatActivity {
     private ShopOrderAdapter shopOrderAdapter;
     private List<OrderModel> orderList = new ArrayList<>();
 
-    private TextView tabPending, tabHistory;
-    private String selectedTab = "pending"; // mặc định là đơn đang chờ
+    private TextView tabPending, tabHistory, tabConfirm;
+    private String selectedTab = "confirm";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_shop_manager);
+
+        WebSocketManager.getInstance().setOnCancelRequestListener(() -> {
+            runOnUiThread(() -> {
+                String shopIdStr = getIntent().getStringExtra("shopid");
+                if (shopIdStr != null) {
+                    try {
+                        int shopId = Integer.parseInt(shopIdStr);
+                        loadFoodsAndOrders(shopId);  // Reload lại danh sách đơn
+                    } catch (NumberFormatException e) {
+                        Log.e(TAG, "Invalid shopId format in WebSocket callback");
+                    }
+                }
+            });
+        });
 
         recyclerViewOrders = findViewById(R.id.recyclerOrders);
         recyclerViewOrders.setLayoutManager(new LinearLayoutManager(this));
@@ -56,17 +71,23 @@ public class ShopManager extends AppCompatActivity {
 
         tabPending = findViewById(R.id.tabPending);
         tabHistory = findViewById(R.id.tabHistory);
+        tabConfirm = findViewById(R.id.tabConfirm);
 
         // Bắt sự kiện khi bấm tab
         tabPending.setOnClickListener(v -> {
             selectedTab = "pending";
-            updateTabUI(tabPending, tabHistory);
+            updateTabUI(tabPending, tabConfirm, tabHistory);
             filterOrders();
         });
 
+        tabConfirm.setOnClickListener(v -> {
+            selectedTab = "confirm";
+            updateTabUI(tabConfirm, tabPending, tabHistory);
+            filterOrders();
+        });
         tabHistory.setOnClickListener(v -> {
             selectedTab = "done";
-            updateTabUI(tabHistory, tabPending);
+            updateTabUI(tabHistory, tabPending, tabConfirm);
             filterOrders();
         });
 
@@ -85,7 +106,7 @@ public class ShopManager extends AppCompatActivity {
             finish();
             return;
         }
-
+        Log.d(TAG, "Received shopId: " + shopIdStr);
         loadFoodsAndOrders(shopId);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.layoutShopManager), (v, insets) -> {
@@ -136,11 +157,11 @@ public class ShopManager extends AppCompatActivity {
         List<OrderModel> filteredList = new ArrayList<>();
         for (OrderModel order : orderList) {
             String status = order.getStatus();
-            if (selectedTab.equals("pending") &&
-                    ("Đang giao".equalsIgnoreCase(status))) {
+            if (selectedTab.equals("confirm") && ("Chờ xác nhận".equalsIgnoreCase(status) || "Đang hủy".equalsIgnoreCase(status))) {
                 filteredList.add(order);
-            } else if (selectedTab.equals("done") &&
-                    ("Đã hủy".equalsIgnoreCase(status) || "Hoàn thành".equalsIgnoreCase(status))) {
+            } else if (selectedTab.equals("pending") && ("Đang giao".equalsIgnoreCase(status))) {
+                filteredList.add(order);
+            } else if (selectedTab.equals("done") && ("Đã hủy".equalsIgnoreCase(status) || "Hoàn thành".equalsIgnoreCase(status))) {
                 filteredList.add(order);
             }
         }
@@ -148,11 +169,14 @@ public class ShopManager extends AppCompatActivity {
         // Không cần gọi notifyDataSetChanged ở đây vì setOrders() đã gọi rồi
     }
 
-    private void updateTabUI(TextView selected, TextView unselected) {
+    private void updateTabUI(TextView selected, TextView unselected1, TextView unselected2) {
         selected.setBackgroundResource(R.drawable.bg_tag_selected);
         selected.setTextColor(getResources().getColor(android.R.color.white));
 
-        unselected.setBackgroundResource(R.drawable.bg_tag_unselected);
-        unselected.setTextColor(getResources().getColor(R.color.orange)); // màu cam
+        unselected1.setBackgroundResource(R.drawable.bg_tag_unselected);
+        unselected1.setTextColor(getResources().getColor(R.color.orange)); // màu cam
+
+        unselected2.setBackgroundResource(R.drawable.bg_tag_unselected);
+        unselected2.setTextColor(getResources().getColor(R.color.orange)); // màu cam
     }
 }

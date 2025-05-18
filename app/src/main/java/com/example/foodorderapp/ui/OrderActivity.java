@@ -5,7 +5,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -23,6 +22,7 @@ import com.example.foodorderapp.adapter.OrderAdapter;
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.model.OrderModel;
 import com.example.foodorderapp.service.OrderService;
+import com.example.foodorderapp.websocket.WebSocketManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -30,16 +30,17 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import java.util.ArrayList;
 
 public class OrderActivity extends AppCompatActivity {
-    private RecyclerView rvDelivery, rvHistory;
-    public ArrayList<OrderModel> orderList, historyList;
-    private OrderAdapter myOrdersAdapter;
-    private LinearLayout btnDelivery, btnHistory;
-    private TextView tvDelivery, tvHistory;
-    private View vDelivery, vHistory;
-    private ViewGroup.LayoutParams params;
-    private int widthInPx;
+    private RecyclerView rvDelivery, rvHistory, rvConfirm;
+    private ArrayList<OrderModel> orderList, historyList, confirmList;
+    private OrderAdapter adapterDelivery, adapterHistory, adapterConfirm;
+
+    private LinearLayout btnDelivery, btnHistory, btnConfirm;
+    private TextView tvDelivery, tvHistory, tvConfirm;
+    private View vDelivery, vHistory, vConfirm;
     private OrderService orderService;
     private ImageButton btnBack;
+
+    private String currentTab = "CONFIRM"; // CONFIRM, DELIVERY, HISTORY
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,93 +52,190 @@ public class OrderActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
         orderService = new OrderService();
 
         rvDelivery = findViewById(R.id.rv_delivery);
         rvHistory = findViewById(R.id.rv_history);
+        rvConfirm = findViewById(R.id.rv_confirm);
+
         btnDelivery = findViewById(R.id.btn_delivery);
         btnHistory = findViewById(R.id.btn_history);
+        btnConfirm = findViewById(R.id.btn_confirm);
+
         tvDelivery = findViewById(R.id.tv_delivery);
         tvHistory = findViewById(R.id.tv_history);
+        tvConfirm = findViewById(R.id.tv_confirm);
+
         vDelivery = findViewById(R.id.v_delivery);
         vHistory = findViewById(R.id.v_history);
+        vConfirm = findViewById(R.id.v_confirm);
 
         btnBack = findViewById(R.id.btn_back);
 
-        rvDelivery.setVisibility(View.VISIBLE);
-        rvHistory.setVisibility(View.GONE);
-
-
         orderList = new ArrayList<>();
         historyList = new ArrayList<>();
+        confirmList = new ArrayList<>();
+
         rvDelivery.setLayoutManager(new LinearLayoutManager(this));
         rvHistory.setLayoutManager(new LinearLayoutManager(this));
+        rvConfirm.setLayoutManager(new LinearLayoutManager(this));
 
-        myOrdersAdapter = new OrderAdapter(orderList, this);
-        rvDelivery.setAdapter(myOrdersAdapter);
-        rvHistory.setAdapter(myOrdersAdapter);
+        adapterDelivery = new OrderAdapter(orderList, this);
+        adapterHistory = new OrderAdapter(historyList, this);
+        adapterConfirm = new OrderAdapter(confirmList, this);
+
+        rvDelivery.setAdapter(adapterDelivery);
+        rvHistory.setAdapter(adapterHistory);
+        rvConfirm.setAdapter(adapterConfirm);
+
+        // Mặc định hiển thị tab Confirm
+        showConfirmTab();
+        reloadOrdersData();
+
+        btnDelivery.setOnClickListener(view -> {
+            showDeliveryTab();
+            updateCurrentTab();
+        });
+
+        btnHistory.setOnClickListener(view -> {
+            showHistoryTab();
+            updateCurrentTab();
+        });
+
+        btnConfirm.setOnClickListener(view -> {
+            showConfirmTab();
+            updateCurrentTab();
+        });
+
+        btnBack.setOnClickListener(view -> finish());
+
+        WebSocketManager.getInstance().setOnOrderUpdateListener(() -> {
+            runOnUiThread(() -> {
+                reloadOrdersData();
+            });
+        });
+    }
+
+    private void showDeliveryTab() {
+        currentTab = "DELIVERY";
+
+        tvDelivery.setTextColor(ContextCompat.getColor(this, R.color.orange));
+        vDelivery.setBackgroundColor(ContextCompat.getColor(this, R.color.orange));
+        vDelivery.setVisibility(View.VISIBLE);
+
+        tvHistory.setTextColor(Color.parseColor("#8E8E8E"));
+        vHistory.setVisibility(View.GONE);
+
+        tvConfirm.setTextColor(Color.parseColor("#8E8E8E"));
+        vConfirm.setVisibility(View.GONE);
+
+        rvDelivery.setVisibility(View.VISIBLE);
+        rvHistory.setVisibility(View.GONE);
+        rvConfirm.setVisibility(View.GONE);
+    }
+
+    private void showHistoryTab() {
+        currentTab = "HISTORY";
+
+        tvHistory.setTextColor(ContextCompat.getColor(this, R.color.orange));
+        vHistory.setBackgroundColor(ContextCompat.getColor(this, R.color.orange));
+        vHistory.setVisibility(View.VISIBLE);
+
+        tvDelivery.setTextColor(Color.parseColor("#8E8E8E"));
+        vDelivery.setVisibility(View.GONE);
+
+        tvConfirm.setTextColor(Color.parseColor("#8E8E8E"));
+        vConfirm.setVisibility(View.GONE);
+
+        rvHistory.setVisibility(View.VISIBLE);
+        rvDelivery.setVisibility(View.GONE);
+        rvConfirm.setVisibility(View.GONE);
+    }
+
+    private void showConfirmTab() {
+        currentTab = "CONFIRM";
+
+        tvConfirm.setTextColor(ContextCompat.getColor(this, R.color.orange));
+        vConfirm.setBackgroundColor(ContextCompat.getColor(this, R.color.orange));
+        vConfirm.setVisibility(View.VISIBLE);
+
+        tvDelivery.setTextColor(Color.parseColor("#8E8E8E"));
+        vDelivery.setVisibility(View.GONE);
+
+        tvHistory.setTextColor(Color.parseColor("#8E8E8E"));
+        vHistory.setVisibility(View.GONE);
+
+        rvConfirm.setVisibility(View.VISIBLE);
+        rvDelivery.setVisibility(View.GONE);
+        rvHistory.setVisibility(View.GONE);
+    }
+
+    private void updateCurrentTab() {
+        switch (currentTab) {
+            case "DELIVERY":
+                adapterDelivery.notifyDataSetChanged();
+                break;
+            case "HISTORY":
+                adapterHistory.notifyDataSetChanged();
+                break;
+            case "CONFIRM":
+            default:
+                adapterConfirm.notifyDataSetChanged();
+                break;
+        }
+    }
+
+    private void reloadOrdersData() {
 
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser != null) {
-            String userId = currentUser.getUid();
+        if (currentUser == null) return;
 
-            // Gọi OrderService để lấy danh sách đơn hàng theo userId
-            orderService.getOrdersByUserId(userId)
-                    .addOnSuccessListener(queryDocumentSnapshots -> {
-                        orderList.clear();
-                        historyList.clear();
+        String userId = currentUser.getUid();
 
-                        for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
-                            OrderModel order = doc.toObject(OrderModel.class);
-                            if (order != null) {
-                                String status = order.getStatus();
+        orderService.getOrdersByUserId(userId)
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    orderList.clear();
+                    historyList.clear();
+                    confirmList.clear();
+
+                    for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
+                        OrderModel order = doc.toObject(OrderModel.class);
+
+                        if (order != null) {
+                            String status = order.getStatus();
+                            if (status != null && (status.equalsIgnoreCase("Chờ xác nhận") || status.equalsIgnoreCase("Đang hủy"))) {
+                                confirmList.add(order);
+                            } else
                                 if (status != null && status.equalsIgnoreCase("Đang giao")) {
-                                    orderList.add(order);
-                                } else if (status != null &&
-                                        (status.equalsIgnoreCase("Hoàn thành") || status.equalsIgnoreCase("Đã hủy"))) {
-                                    historyList.add(order);
-                                }
+                                orderList.add(order);
+                            } else if (status != null &&
+                                    (status.equalsIgnoreCase("Hoàn thành") || status.equalsIgnoreCase("Đã hủy"))) {
+                                historyList.add(order);
                             }
                         }
-                        myOrdersAdapter.notifyDataSetChanged();
-                    })
-                    .addOnFailureListener(e -> Log.e("OrderActivity", "Lỗi lấy đơn hàng: " + e.getMessage()));
-        }
-        btnDelivery.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                tvDelivery.setTextColor(ContextCompat.getColor(view.getContext(), R.color.orange));
-                vDelivery.setBackgroundColor(ContextCompat.getColor(view.getContext(), R.color.orange));
-                tvHistory.setTextColor(Color.parseColor("#8E8E8E"));
-                vHistory.setBackgroundColor(Color.parseColor("#8E8E8E"));
-                rvDelivery.setVisibility(View.VISIBLE);
-                rvHistory.setVisibility(View.GONE);
-                myOrdersAdapter = new OrderAdapter(orderList, OrderActivity.this);
-                rvDelivery.setAdapter(myOrdersAdapter);
-                myOrdersAdapter.notifyDataSetChanged();
-            }
-        });
-        btnHistory.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                tvDelivery.setTextColor(Color.parseColor("#8E8E8E"));
-                vDelivery.setBackgroundColor(Color.parseColor("#8E8E8E"));
-                tvHistory.setTextColor(ContextCompat.getColor(view.getContext(), R.color.orange));
-                vHistory.setBackgroundColor(ContextCompat.getColor(view.getContext(), R.color.orange));
-                rvDelivery.setVisibility(View.GONE);
-                rvHistory.setVisibility(View.VISIBLE);
-                myOrdersAdapter = new OrderAdapter(historyList, OrderActivity.this);
-                rvHistory.setAdapter(myOrdersAdapter);
-                myOrdersAdapter.notifyDataSetChanged();
-            }
-        });
+                    }
+                    updateCurrentTab();
+                })
+                .addOnFailureListener(e -> Log.e("OrderActivity", "Lỗi reload đơn hàng: " + e.getMessage()));
+    }
 
-        btnBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();;
-            }
-        });
+    @Override
+    protected void onResume() {
+        super.onResume();
+        WebSocketManager.getInstance().setOnOrderUpdateListener(() -> {
+            runOnUiThread(() -> {
 
+                Log.d("OrderActivity", "WebSocket cập nhật, reload dữ liệu");
+                reloadOrdersData();
+
+            });
+        });
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        WebSocketManager.getInstance().setOnOrderUpdateListener(null);
     }
 }

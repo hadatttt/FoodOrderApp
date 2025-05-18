@@ -17,7 +17,9 @@ public class OrderService {
 
     // Lấy tất cả đơn hàng của 1 người dùng
     public Task<QuerySnapshot> getOrdersByUserId(String userId) {
-        return orderCollection.whereEqualTo("userId", userId).get();
+        return orderCollection
+                .whereEqualTo("userId", userId)
+                .get(Source.SERVER);
     }
 
     // Lấy toàn bộ đơn hàng

@@ -110,6 +110,7 @@ public class UserService {
                 });
     }
 
+
     public Task<Void> registerUser(String email, String password, UserModel userModel) {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
 

@@ -39,8 +39,10 @@ import com.example.foodorderapp.model.OrderModel;
 import com.example.foodorderapp.model.ProvinceModel;
 import com.example.foodorderapp.model.WardModel;
 import com.example.foodorderapp.service.CartService;
+import com.example.foodorderapp.service.FoodService;
 import com.example.foodorderapp.service.OrderService;
 import com.example.foodorderapp.service.UserService;
+import com.example.foodorderapp.websocket.WebSocketManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -50,12 +52,14 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -72,6 +76,7 @@ public class CartActivity extends AppCompatActivity {
     private Button btnPay, btnAddress;
     private ProgressBar progressBar;
     private FrameLayout loadingOverlay;
+    private FoodService foodService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +90,7 @@ public class CartActivity extends AppCompatActivity {
             return insets;
         });
 
+        foodService = new FoodService();
         loadingOverlay = findViewById(R.id.loadingOverlay);
         loadingOverlay.setVisibility(View.GONE);
         progressBar = findViewById(R.id.progressBar);
@@ -188,7 +194,10 @@ public class CartActivity extends AppCompatActivity {
         for (CartModel cartItem : cartList) {
             totalPrice += cartItem.getPrice()*cartItem.getQuantity();
         }
-        tvPrice.setText(String.format("%.3fđ", totalPrice));
+        double priceInVND = totalPrice * 1000;
+        NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
+        String formattedPrice = formatter.format(priceInVND);
+        tvPrice.setText(formattedPrice + " đ");
         if (cartList.isEmpty()) {
             btnPay.setEnabled(false);
             btnPay.setBackgroundColor(getResources().getColor(R.color.gray_black)); // màu xám
@@ -226,9 +235,10 @@ public class CartActivity extends AppCompatActivity {
                         cartItem.getPrice() * cartItem.getQuantity(),
                         cartItem.getSize(),
                         sdf.format(date),
-                        "Đang giao",
+                        "Chờ xác nhận",
                         tvAddress.getText().toString()
                 );
+                OrderModel finalOrder = order;
                 orderService.addOrder(order).addOnSuccessListener(aVoid -> {
                     d[0]++;
                     if (d[0] == cartList.size()) {
@@ -237,6 +247,13 @@ public class CartActivity extends AppCompatActivity {
                         progressBar.setVisibility(View.GONE);
                         Log.d("CartActivity", "Tất cả đơn hàng đã được thêm");
 
+                        foodService.getStoreIdFromFoodId(finalOrder.getFoodId(), storeId -> {
+                            if (storeId != null) {
+                                WebSocketManager.getInstance().sendMessage("reload_orders", finalOrder.getFoodId());
+                            } else {
+                                Log.e("OrderAdapter", "Không tìm thấy storeId từ foodId");
+                            }
+                        });
                          clearCart(userId);
 
                         Intent intent = new Intent(CartActivity.this, OrderActivity.class);
@@ -402,7 +419,7 @@ public class CartActivity extends AppCompatActivity {
                 // Nếu chọn Chuyển khoản
                 showQRCodeDialog(); // Hiển thị QR code
             } else {
-                Toast.makeText(CartActivity.this, "Vui lòng chọn phương thức thanh toán", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(CartActivity.this, "Vui lòng chọn phương thức thanh toán", Toast.LENGTH_SHORT).show();
             }
             dialog.dismiss();
         });

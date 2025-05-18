@@ -21,22 +21,19 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.model.UserModel;
 import com.example.foodorderapp.service.UserService;
+import com.example.foodorderapp.websocket.WebSocketManager;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.auth.User;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class RegisterActivity extends AppCompatActivity {
+
     private EditText edtName, edtEmail, edtPhone, edtPassword;
     private Button btnRegister;
     private FirebaseAuth mAuth;
@@ -45,85 +42,95 @@ public class RegisterActivity extends AppCompatActivity {
     private static final int RC_SIGN_IN = 9001;
     private GoogleSignInClient mGoogleSignInClient;
     private ProgressBar progressBar;
-
     private FrameLayout loadingOverlay;
-    UserService userService = new UserService(); // để lưu người dùng vào firestore
+
+    private final UserService userService = new UserService(); // để lưu người dùng vào firestore
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
         EdgeToEdge.enable(this);
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        loadingOverlay = findViewById(R.id.loadingOverlay);
-        loadingOverlay.setVisibility(View.GONE);
-        progressBar = findViewById(R.id.progressBar);
-        progressBar.setVisibility(View.GONE);
 
+        loadingOverlay = findViewById(R.id.loadingOverlay);
+        progressBar = findViewById(R.id.progressBar);
         edtName = findViewById(R.id.edt_name);
         edtEmail = findViewById(R.id.edt_email);
         edtPhone = findViewById(R.id.edt_phonenumber);
         edtPassword = findViewById(R.id.edt_password);
         btnRegister = findViewById(R.id.btn_register);
         tvRegisterError = findViewById(R.id.tv_register_error);
-        tvRegisterError.setVisibility(View.GONE);  // Ẩn khi chưa có lỗi
+
+        loadingOverlay.setVisibility(View.GONE);
+        progressBar.setVisibility(View.GONE);
+        tvRegisterError.setVisibility(View.GONE);
 
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        btnRegister.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String name = edtName.getText().toString().trim();
-                String email = edtEmail.getText().toString().trim();
-                String phone = edtPhone.getText().toString().trim();
-                String password = edtPassword.getText().toString().trim();
+        btnRegister.setOnClickListener(view -> {
+            String name = edtName.getText().toString().trim();
+            String email = edtEmail.getText().toString().trim();
+            String phone = edtPhone.getText().toString().trim();
+            String password = edtPassword.getText().toString().trim();
 
-                loadingOverlay.setVisibility(View.VISIBLE);
-                progressBar.setVisibility(View.VISIBLE);
-
-                if (email.isEmpty() || password.isEmpty() || name.isEmpty() || phone.isEmpty()) {
-                    tvRegisterError.setText("Vui lòng điền đầy đủ thông tin");
-                    tvRegisterError.setVisibility(View.VISIBLE);
-                    return;
-                }
-                UserModel userModel = new UserModel();
-                userModel.setFullName(name);
-                userModel.setPhone(phone);
-                userModel.setAddress(""); // Có thể thêm sau
-
-                userService.registerUser(email, password, userModel)
-                        .addOnSuccessListener(aVoid -> {
-                            tvRegisterError.setVisibility(View.GONE);
-
-                            Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
-                            startActivity(intent);
-                        })
-                        .addOnFailureListener(e -> {
-                            loadingOverlay.setVisibility(View.GONE);
-                            progressBar.setVisibility(View.GONE);
-                            tvRegisterError.setText(e.getMessage());
-                            tvRegisterError.setVisibility(View.VISIBLE);
-                        });
+            if (email.isEmpty() || password.isEmpty() || name.isEmpty() || phone.isEmpty()) {
+                tvRegisterError.setText("Vui lòng điền đầy đủ thông tin");
+                tvRegisterError.setVisibility(View.VISIBLE);
+                return;
             }
+
+            loadingOverlay.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.VISIBLE);
+
+            UserModel userModel = new UserModel();
+            userModel.setFullName(name);
+            userModel.setPhone(phone);
+            userModel.setAddress("");
+
+            userService.registerUser(email, password, userModel)
+                    .addOnSuccessListener(aVoid -> {
+                        tvRegisterError.setVisibility(View.GONE);
+                        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                        if (user != null) {
+                            WebSocketManager.getInstance().registerUser(user.getUid());
+                        }
+                        loadingOverlay.setVisibility(View.GONE);
+                        progressBar.setVisibility(View.GONE);
+                        startActivity(new Intent(RegisterActivity.this, HomeActivity.class));
+                        finish();
+                    })
+                    .addOnFailureListener(e -> {
+                        loadingOverlay.setVisibility(View.GONE);
+                        progressBar.setVisibility(View.GONE);
+                        tvRegisterError.setText(e.getMessage());
+                        tvRegisterError.setVisibility(View.VISIBLE);
+                    });
         });
+
+        // Google Sign-In config
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id)) // Lấy từ Firebase > Project settings
+                .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
+
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
         LinearLayout googleLogin = findViewById(R.id.btn_login_google);
         googleLogin.setOnClickListener(v -> {
-            Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-            progressBar.setVisibility(View.VISIBLE);
             loadingOverlay.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.VISIBLE);
+            Intent signInIntent = mGoogleSignInClient.getSignInIntent();
             startActivityForResult(signInIntent, RC_SIGN_IN);
         });
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -134,22 +141,24 @@ public class RegisterActivity extends AppCompatActivity {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 String idToken = account.getIdToken();
 
-                // Đăng nhập vào Firebase thông qua UserService
                 userService.loginWithGoogle(idToken)
                         .addOnCompleteListener(this, task1 -> {
                             if (task1.isSuccessful()) {
-                                progressBar.setVisibility(View.VISIBLE);
-
-                                loadingOverlay.setVisibility(View.VISIBLE);
-                                Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
-                                startActivity(intent);
+                                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                                if (user != null) {
+                                    WebSocketManager.getInstance().registerUser(user.getUid());
+                                }
+                                loadingOverlay.setVisibility(View.GONE);
+                                progressBar.setVisibility(View.GONE);
+                                startActivity(new Intent(RegisterActivity.this, HomeActivity.class));
                                 finish();
                             } else {
                                 loadingOverlay.setVisibility(View.GONE);
                                 progressBar.setVisibility(View.GONE);
-                                Toast.makeText(RegisterActivity.this, "Đăng nhập Google thất bại", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(this, "Đăng nhập Google thất bại", Toast.LENGTH_SHORT).show();
                             }
                         });
+
             } catch (ApiException e) {
                 loadingOverlay.setVisibility(View.GONE);
                 progressBar.setVisibility(View.GONE);
@@ -158,5 +167,4 @@ public class RegisterActivity extends AppCompatActivity {
             }
         }
     }
-
 }

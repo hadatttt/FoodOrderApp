@@ -89,6 +89,34 @@ public class FoodService {
         }
     }
 
+    // Lấy document món ăn theo foodId (dùng cho getStoreIdFromFoodId)
+    public Task<QuerySnapshot> getFoodById(int foodId) {
+        // Truy vấn collection foodCollection, tìm document có trường "foodId" == foodId
+        return foodCollection.whereEqualTo("foodId", foodId).get();
+    }
+    // Lấy storeId từ foodId (callback)
+    public void getStoreIdFromFoodId(int foodId, OnStoreIdCallback callback) {
+        getFoodById(foodId).addOnSuccessListener(queryDocumentSnapshots -> {
+            if (!queryDocumentSnapshots.isEmpty()) {
+                DocumentSnapshot doc = queryDocumentSnapshots.getDocuments().get(0);
+                Long storeIdLong = doc.getLong("storeId");
+                if (storeIdLong != null) {
+                    callback.onStoreId(storeIdLong.intValue());
+                } else {
+                    callback.onStoreId(null);
+                }
+            } else {
+                callback.onStoreId(null);
+            }
+        }).addOnFailureListener(e -> {
+            callback.onStoreId(null);
+        });
+    }
+
+
+    public interface OnStoreIdCallback {
+        void onStoreId(Integer storeId);
+    }
     // Chuyển đổi FoodModel sang Map để lưu Firestore
     private Map<String, Object> convertFoodToMap(FoodModel food) {
         Map<String, Object> data = new HashMap<>();

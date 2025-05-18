@@ -48,6 +48,8 @@
         android:inputType="textEmailAddress"
         android:layout_marginBottom="5dp"
         android:padding="12dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginLeft="20dp"
         android:enabled="false"
         android:background="@drawable/edittext_background"
         android:textColor="#333333" />
@@ -55,6 +57,8 @@
         android:id="@+id/btnChangePassword"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginRight="20dp"
+        android:layout_marginLeft="20dp"
         android:text="Đổi mật khẩu"
         android:background="@android:color/transparent"
         android:textColor="@android:color/holo_blue_dark"

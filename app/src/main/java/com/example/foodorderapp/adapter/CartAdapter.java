@@ -21,12 +21,17 @@ import com.example.foodorderapp.service.UserService;
 import com.example.foodorderapp.ui.CartActivity;
 import com.google.firebase.firestore.DocumentSnapshot;
 
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder> {
     private Context context;
     private List<CartModel> cartList;
+    private double priceInVND;
+    private NumberFormat formatter;
+    private String formattedPrice;
     public CartAdapter(Context context, List<CartModel> cartList) {
         this.context = context;
         this.cartList = cartList;
@@ -45,7 +50,10 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
         // Set data for each view
      // Assuming foodId is the food name
-        holder.tvPrice.setText(cartItem.getPrice() * cartItem.getQuantity() + "00 đ");
+        priceInVND = cartItem.getPrice() * cartItem.getQuantity() * 1000;
+        formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
+        formattedPrice = formatter.format(priceInVND);
+        holder.tvPrice.setText(formattedPrice + " đ");
         holder.tvSize.setText(cartItem.getSize());
         holder.tvQuantity.setText(String.valueOf(cartItem.getQuantity()));
 
@@ -78,7 +86,10 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
                         // Gán giá và hiển thị
                         cartItem.setPrice(finalPrice);
-                        holder.tvPrice.setText(String.format("%.3f đ", finalPrice * cartItem.getQuantity()));
+                        priceInVND =  finalPrice * cartItem.getQuantity() * 1000;
+                        formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
+                        formattedPrice = formatter.format(priceInVND);
+                        holder.tvPrice.setText(formattedPrice + " đ");
                         Glide.with(context)
                                 .load(imageUrl)
                                 .into(holder.imgFood);
@@ -96,7 +107,10 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
                 cartItem.setQuantity(quantity - 1);
                 holder.tvQuantity.setText(String.valueOf(cartItem.getQuantity()));
                 ((CartActivity) context).updateTotalPrice();
-                holder.tvPrice.setText(cartItem.getPrice() * cartItem.getQuantity() + "00 đ");
+                priceInVND = cartItem.getPrice() * cartItem.getQuantity() * 1000;
+                formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
+                formattedPrice = formatter.format(priceInVND);
+                holder.tvPrice.setText(formattedPrice + " đ");
                 cartService.updateCartItem(cartItem.getUserId(), cartItem.getFoodId(), cartItem);
                 notifyItemChanged(position);
             } else {
@@ -110,7 +124,10 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         holder.btnAdd.setOnClickListener(v -> {
             int quantity = cartItem.getQuantity();
             cartItem.setQuantity(quantity + 1);
-            holder.tvPrice.setText(cartItem.getPrice() * cartItem.getQuantity() + "00 đ");
+            priceInVND = cartItem.getPrice() * cartItem.getQuantity() * 1000;
+            formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
+            formattedPrice = formatter.format(priceInVND);
+            holder.tvPrice.setText(formattedPrice + " đ");
             ((CartActivity) context).updateTotalPrice();
             holder.tvQuantity.setText(String.valueOf(cartItem.getQuantity()));
             cartService.updateCartItem(cartItem.getUserId(), cartItem.getFoodId(), cartItem);
