@@ -27,7 +27,13 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.Locale;
 
 public class OrderActivity extends AppCompatActivity {
     private RecyclerView rvDelivery, rvHistory, rvConfirm;
@@ -187,7 +193,6 @@ public class OrderActivity extends AppCompatActivity {
     }
 
     private void reloadOrdersData() {
-
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser == null) return;
 
@@ -201,13 +206,11 @@ public class OrderActivity extends AppCompatActivity {
 
                     for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
                         OrderModel order = doc.toObject(OrderModel.class);
-
                         if (order != null) {
                             String status = order.getStatus();
                             if (status != null && (status.equalsIgnoreCase("Chờ xác nhận") || status.equalsIgnoreCase("Đang hủy"))) {
                                 confirmList.add(order);
-                            } else
-                                if (status != null && status.equalsIgnoreCase("Đang giao")) {
+                            } else if (status != null && status.equalsIgnoreCase("Đang giao")) {
                                 orderList.add(order);
                             } else if (status != null &&
                                     (status.equalsIgnoreCase("Hoàn thành") || status.equalsIgnoreCase("Đã hủy"))) {
@@ -215,10 +218,28 @@ public class OrderActivity extends AppCompatActivity {
                             }
                         }
                     }
-                    updateCurrentTab();
+
+                    Comparator<OrderModel> orderDateComparator = (o1, o2) -> {
+                        try {
+                            SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm", Locale.getDefault());
+                            Date d1 = sdf.parse(o1.getOrderDate());
+                            Date d2 = sdf.parse(o2.getOrderDate());
+                            return d2.compareTo(d1); // giảm dần
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                            return 0;
+                        }
+                    };
+
+                    Collections.sort(confirmList, orderDateComparator);
+                    Collections.sort(orderList, orderDateComparator);
+                    Collections.sort(historyList, orderDateComparator);
+
+                    updateCurrentTab(); // Cập nhật danh sách hiển thị theo tab
                 })
                 .addOnFailureListener(e -> Log.e("OrderActivity", "Lỗi reload đơn hàng: " + e.getMessage()));
     }
+
 
     @Override
     protected void onResume() {

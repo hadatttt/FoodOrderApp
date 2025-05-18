@@ -51,16 +51,18 @@
         android:gravity="center"
         android:layout_margin="16dp"
         android:layout_marginBottom="12dp">
+
         <TextView
             android:id="@+id/tabConfirm"
             android:layout_width="0dp"
-            android:layout_marginRight="10dp"
             android:layout_height="wrap_content"
+            android:minHeight="48dp"
             android:layout_weight="1"
+            android:layout_marginEnd="8dp"
             android:text="⏳ Đang chờ"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textStyle="bold"
-            android:padding="10dp"
+            android:padding="8dp"
             android:gravity="center"
             android:background="@drawable/bg_tag_selected"
             android:textColor="#FFFFFF" />
@@ -68,30 +70,33 @@
         <TextView
             android:id="@+id/tabPending"
             android:layout_width="0dp"
-            android:layout_marginRight="10dp"
             android:layout_height="wrap_content"
+            android:minHeight="48dp"
             android:layout_weight="1"
+            android:layout_marginEnd="8dp"
             android:text="🛵 Đang giao"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textStyle="bold"
-            android:padding="10dp"
+            android:padding="8dp"
             android:gravity="center"
             android:background="@drawable/bg_tag_unselected"
-            android:textColor="#F57C00"/>
+            android:textColor="#F57C00" />
 
         <TextView
             android:id="@+id/tabHistory"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:minHeight="48dp"
             android:layout_weight="1"
             android:text="📦 Lịch sử"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textStyle="bold"
-            android:padding="10dp"
+            android:padding="8dp"
             android:gravity="center"
             android:background="@drawable/bg_tag_unselected"
             android:textColor="#F57C00" />
     </LinearLayout>
+
 
     <!-- RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView

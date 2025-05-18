@@ -95,7 +95,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void setupClickableSignupText() {
-        String text = "Nếu bạn chưa có tài khoản, vui lòng Đăng kí.";
+        String text = "Chưa có tài khoản, vui lòng Đăng kí.";
         SpannableString spannableString = new SpannableString(text);
 
         int start = text.indexOf("Đăng kí");
