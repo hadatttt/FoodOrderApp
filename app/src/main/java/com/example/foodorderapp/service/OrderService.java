@@ -78,4 +78,10 @@ public class OrderService {
         data.put("price", order.getPrice());
         return data;
     }
+    public Task<QuerySnapshot> getOrdersByFoodIds(List<Integer> foodIds) {
+        return db.collection("orders")
+                .whereIn("foodId", foodIds)
+                .get();
+    }
+
 }

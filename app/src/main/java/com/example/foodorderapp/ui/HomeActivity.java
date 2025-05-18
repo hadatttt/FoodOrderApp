@@ -212,7 +212,7 @@ public class HomeActivity extends AppCompatActivity {
             if (button == selectedButton) {
                 button.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFFD700)); // vàng
             } else {
-                button.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFEEEEEE)); // xám nhạt
+                button.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFFE4B5));
             }
         }
     }

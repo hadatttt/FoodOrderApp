@@ -275,7 +275,7 @@ public class DetailShopActivity extends AppCompatActivity {
                         Color.parseColor("#FFD700"))); // Vàng
             } else {
                 button.setBackgroundTintList(ColorStateList.valueOf(
-                        Color.parseColor("#EEEEEE"))); // Xám
+                        Color.parseColor("#FFE4B5"))); // Xám
             }
         }
     }
