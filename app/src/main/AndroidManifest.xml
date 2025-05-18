@@ -42,7 +42,6 @@
         <activity
             android:name=".ui.AccountActivity"
             android:exported="false" />
-            android:value="AIzaSyB34EF17TirLMB4-NW_7bRVZbma-Qw1s40" />
 
         <activity
             android:name=".ui.InfoActivity"
