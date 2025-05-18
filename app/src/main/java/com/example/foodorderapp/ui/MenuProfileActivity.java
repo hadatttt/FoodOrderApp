@@ -127,7 +127,8 @@ public class MenuProfileActivity extends AppCompatActivity {
     }
 
     private void openFAQs() {
-        // xử lý khi bấm vào
+        Intent intent = new Intent(MenuProfileActivity.this, FAQsActivity.class);
+        startActivityForResult(intent, REQUEST_CODE);
     }
 
     private void openPayment() {
