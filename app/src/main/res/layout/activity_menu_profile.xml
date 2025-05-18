@@ -203,30 +203,6 @@
                     app:tint="#757575"/>
             </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/btnPayment"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:clickable="true"
-                android:focusable="true"
-                android:paddingVertical="8dp">
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Thanh toán"
-                    android:textSize="16sp"
-
-                    android:layout_marginStart="16dp"/>
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_arrow_right"
-                    app:tint="#757575"/>
-            </LinearLayout>
-
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>
