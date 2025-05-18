@@ -143,6 +143,7 @@ public class CartActivity extends AppCompatActivity {
                 userService.getUser().addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
                         String address = documentSnapshot.getString("address");
+                        if (tvAddress.getText().toString().equals("")) address = tvAddress.getText().toString();
                         String phone = documentSnapshot.getString("phone");
 
                         if (phone == null || phone.isEmpty()) {
