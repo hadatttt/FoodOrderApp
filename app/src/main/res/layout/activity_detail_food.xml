@@ -88,16 +88,17 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/header" />
-            <ImageButton
-                android:id="@+id/btnFavorite"
+            <CheckBox
+                android:id="@+id/btnFavourite"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
                 android:layout_margin="20dp"
-                android:background="@null"
-                android:src="@drawable/ic_white_heart"
+                android:background="@drawable/heart_checkbox_selector"
+                android:button="@null"
                 android:scaleType="fitCenter"
                 app:layout_constraintBottom_toBottomOf="@id/imgFood"
-                app:layout_constraintEnd_toEndOf="@id/imgFood" />
+                app:layout_constraintEnd_toEndOf="@id/imgFood">
+            </CheckBox>
             <TextView
                 android:id="@+id/tvStore"
                 android:layout_width="wrap_content"

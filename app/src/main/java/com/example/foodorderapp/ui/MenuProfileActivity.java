@@ -135,7 +135,8 @@ public class MenuProfileActivity extends AppCompatActivity {
     }
 
     private void openFavourite() {
-        // xử lý khi bấm vào
+        Intent intent = new Intent(MenuProfileActivity.this, FavouriteActivity.class);
+        startActivityForResult(intent, REQUEST_CODE);
     }
 
     private void openOrders() {
