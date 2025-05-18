@@ -1,10 +1,15 @@
 package com.example.foodorderapp.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -14,10 +19,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.foodorderapp.R;
 import com.example.foodorderapp.adapter.ShopOrderAdapter;
+import com.example.foodorderapp.model.FoodModel;
 import com.example.foodorderapp.model.OrderModel;
+import com.example.foodorderapp.model.ShopModel;
 import com.example.foodorderapp.service.FoodService;
 import com.example.foodorderapp.service.OrderService;
+import com.example.foodorderapp.service.ShopService;
 import com.example.foodorderapp.websocket.WebSocketManager;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.text.ParseException;
@@ -35,11 +45,14 @@ public class ShopManager extends AppCompatActivity {
     private OrderService orderService = new OrderService();
 
     private RecyclerView recyclerViewOrders;
+    private TextView tvShopname;
     private ShopOrderAdapter shopOrderAdapter;
     private List<OrderModel> orderList = new ArrayList<>();
 
     private TextView tabPending, tabHistory, tabConfirm;
     private String selectedTab = "confirm";
+    private ImageButton btnLogout;
+    private ShopService shopService;
 
     private int shopId = -1; // lưu shopId để tái sử dụng khi load lại dữ liệu
 
@@ -62,7 +75,15 @@ public class ShopManager extends AppCompatActivity {
                 }
             });
         });
-
+        shopService = new ShopService();
+        tvShopname = findViewById(R.id.tvShopname);
+        btnLogout = findViewById(R.id.btnLogout);
+        btnLogout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                logOut();
+            }
+        });
         recyclerViewOrders = findViewById(R.id.recyclerOrders);
         recyclerViewOrders.setLayoutManager(new LinearLayoutManager(this));
 
@@ -93,7 +114,15 @@ public class ShopManager extends AppCompatActivity {
             return;
         }
         Log.d(TAG, "Received shopId: " + shopIdStr);
-
+        shopService.getShopById(shopId).addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult() != null && !task.getResult().isEmpty()) {
+                DocumentSnapshot doc = task.getResult().getDocuments().get(0);
+                String shopName = doc.getString("shopName");
+                tvShopname.append(shopName);
+            } else {
+                Toast.makeText(this, "Không tìm thấy thông tin món ăn", Toast.LENGTH_SHORT).show();
+            }
+        });
         // Set sự kiện click cho các tab, khi click thì load lại dữ liệu mới từ Firestore
         tabPending.setOnClickListener(v -> {
             selectedTab = "pending";
@@ -211,5 +240,21 @@ public class ShopManager extends AppCompatActivity {
 
         unselected2.setBackgroundResource(R.drawable.bg_tag_unselected);
         unselected2.setTextColor(getResources().getColor(R.color.orange)); // màu cam
+    }
+    public void logOut(){
+        btnLogout.setOnClickListener(v -> {
+            new AlertDialog.Builder(this)
+                    .setTitle("Xác nhận")
+                    .setMessage("Bạn có chắc chắn muốn đăng xuất?")
+                    .setPositiveButton("Đăng xuất", (dialog, which) -> {
+                        FirebaseAuth.getInstance().signOut();
+
+                        Intent intent = new Intent(this, LoginActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                    })
+                    .setNegativeButton("Hủy", null)
+                    .show();
+        });
     }
 }

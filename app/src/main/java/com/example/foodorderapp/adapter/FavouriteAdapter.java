@@ -47,7 +47,7 @@ public class FavouriteAdapter extends RecyclerView.Adapter<FavouriteAdapter.Favo
     public void onBindViewHolder(@NonNull FavouriteViewHolder holder, int position) {
         FoodModel food = foodList.get(position);
         holder.tvFoodName.setText(food.getName());
-
+        holder.bind(foodList.get(position));
         // Load ảnh vào ImageView (dùng thư viện Glide hoặc Picasso)
         Glide.with(context)
                 .load(food.getImageUrl())
