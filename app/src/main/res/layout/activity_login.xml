@@ -34,7 +34,7 @@
             android:clickable="true"
             android:focusable="true"
             android:gravity="center"
-            android:text="Nếu bạn chưa có tài khoản, vui lòng Đăng kí."
+            android:text="Chưa có tài khoản, vui lòng Đăng kí."
             android:textColor="?attr/colorOnBackground"
             android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"

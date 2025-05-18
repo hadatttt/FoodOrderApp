@@ -20,8 +20,13 @@ import com.example.foodorderapp.service.OrderService;
 import com.example.foodorderapp.websocket.WebSocketManager;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class ShopManager extends AppCompatActivity {
     private static final String TAG = "ShopManager";
@@ -36,6 +41,8 @@ public class ShopManager extends AppCompatActivity {
     private TextView tabPending, tabHistory, tabConfirm;
     private String selectedTab = "confirm";
 
+    private int shopId = -1; // lưu shopId để tái sử dụng khi load lại dữ liệu
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,8 +54,8 @@ public class ShopManager extends AppCompatActivity {
                 String shopIdStr = getIntent().getStringExtra("shopid");
                 if (shopIdStr != null) {
                     try {
-                        int shopId = Integer.parseInt(shopIdStr);
-                        loadFoodsAndOrders(shopId);  // Reload lại danh sách đơn
+                        int id = Integer.parseInt(shopIdStr);
+                        loadFoodsAndOrders(id);  // Reload lại danh sách đơn
                     } catch (NumberFormatException e) {
                         Log.e(TAG, "Invalid shopId format in WebSocket callback");
                     }
@@ -60,12 +67,9 @@ public class ShopManager extends AppCompatActivity {
         recyclerViewOrders.setLayoutManager(new LinearLayoutManager(this));
 
         // Khởi tạo adapter với callback
-        shopOrderAdapter = new ShopOrderAdapter(this, new ArrayList<>(), new ShopOrderAdapter.OnOrderStatusUpdatedListener() {
-            @Override
-            public void onOrderStatusUpdated() {
-                // Khi có đơn hàng thay đổi trạng thái, gọi lại filter để cập nhật danh sách hiển thị
-                filterOrders();
-            }
+        shopOrderAdapter = new ShopOrderAdapter(this, new ArrayList<>(), () -> {
+            // Khi có đơn hàng thay đổi trạng thái, gọi lại filter để cập nhật danh sách hiển thị
+            filterOrders();
         });
         recyclerViewOrders.setAdapter(shopOrderAdapter);
 
@@ -73,24 +77,7 @@ public class ShopManager extends AppCompatActivity {
         tabHistory = findViewById(R.id.tabHistory);
         tabConfirm = findViewById(R.id.tabConfirm);
 
-        // Bắt sự kiện khi bấm tab
-        tabPending.setOnClickListener(v -> {
-            selectedTab = "pending";
-            updateTabUI(tabPending, tabConfirm, tabHistory);
-            filterOrders();
-        });
-
-        tabConfirm.setOnClickListener(v -> {
-            selectedTab = "confirm";
-            updateTabUI(tabConfirm, tabPending, tabHistory);
-            filterOrders();
-        });
-        tabHistory.setOnClickListener(v -> {
-            selectedTab = "done";
-            updateTabUI(tabHistory, tabPending, tabConfirm);
-            filterOrders();
-        });
-
+        // Lấy shopId từ Intent và lưu vào biến toàn cục
         String shopIdStr = getIntent().getStringExtra("shopid");
         if (shopIdStr == null) {
             Log.e(TAG, "Shop ID is null, finishing activity");
@@ -98,7 +85,6 @@ public class ShopManager extends AppCompatActivity {
             return;
         }
 
-        int shopId;
         try {
             shopId = Integer.parseInt(shopIdStr);
         } catch (NumberFormatException e) {
@@ -107,6 +93,33 @@ public class ShopManager extends AppCompatActivity {
             return;
         }
         Log.d(TAG, "Received shopId: " + shopIdStr);
+
+        // Set sự kiện click cho các tab, khi click thì load lại dữ liệu mới từ Firestore
+        tabPending.setOnClickListener(v -> {
+            selectedTab = "pending";
+            updateTabUI(tabPending, tabConfirm, tabHistory);
+            if (shopId != -1) {
+                loadFoodsAndOrders(shopId);  // Tải lại dữ liệu
+            }
+        });
+
+        tabConfirm.setOnClickListener(v -> {
+            selectedTab = "confirm";
+            updateTabUI(tabConfirm, tabPending, tabHistory);
+            if (shopId != -1) {
+                loadFoodsAndOrders(shopId);
+            }
+        });
+
+        tabHistory.setOnClickListener(v -> {
+            selectedTab = "done";
+            updateTabUI(tabHistory, tabPending, tabConfirm);
+            if (shopId != -1) {
+                loadFoodsAndOrders(shopId);
+            }
+        });
+
+        // Lần đầu tiên vào load dữ liệu
         loadFoodsAndOrders(shopId);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.layoutShopManager), (v, insets) -> {
@@ -130,6 +143,8 @@ public class ShopManager extends AppCompatActivity {
 
                     if (foodIdList.isEmpty()) {
                         Log.d(TAG, "No foods found for shopId: " + shopId);
+                        orderList.clear();
+                        shopOrderAdapter.setOrders(new ArrayList<>()); // Clear danh sách đơn khi ko có món
                         return;
                     }
 
@@ -140,17 +155,35 @@ public class ShopManager extends AppCompatActivity {
 
     private void loadOrdersByFoodIds(List<Integer> foodIdList) {
         Log.d(TAG, "Loading orders for food IDs: " + foodIdList);
+
         orderService.getOrdersByFoodIds(foodIdList)
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     orderList.clear();
+
                     for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                         OrderModel order = doc.toObject(OrderModel.class);
                         orderList.add(order);
                     }
-                    Log.d(TAG, "Orders loaded: " + orderList.size());
-                    filterOrders();
+
+                    // Sắp xếp orderList theo orderDate giảm dần
+                    Collections.sort(orderList, (o1, o2) -> {
+                        try {
+                            SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm", Locale.getDefault());
+                            Date d1 = sdf.parse(o1.getOrderDate());
+                            Date d2 = sdf.parse(o2.getOrderDate());
+                            return d2.compareTo(d1); // Sắp xếp giảm dần
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                            return 0;
+                        }
+                    });
+
+                    Log.d(TAG, "Orders loaded and sorted: " + orderList.size());
+                    filterOrders(); // Lọc và hiển thị theo tab hiện tại
                 })
-                .addOnFailureListener(e -> Log.e(TAG, "Failed to get orders: " + e.getMessage()));
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to get orders: " + e.getMessage());
+                });
     }
 
     private void filterOrders() {

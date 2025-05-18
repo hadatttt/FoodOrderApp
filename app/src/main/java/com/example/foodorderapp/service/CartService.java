@@ -23,6 +23,12 @@ public class CartService {
     public Task<DocumentReference> addToCart(CartModel cartModel) {
         return db.collection("carts").add(cartModel);
     }
+    public ListenerRegistration listenToCartByUserId(String userId, EventListener<QuerySnapshot> listener) {
+        return FirebaseFirestore.getInstance()
+                .collection("carts")
+                .whereEqualTo("userId", userId)
+                .addSnapshotListener(listener);
+    }
 
     public Task<QuerySnapshot> getCartByUserId(String userId) {
         return db.collection("carts").whereEqualTo("userId", userId).get();

@@ -1,9 +1,14 @@
 package com.example.foodorderapp.ui;
 
+import static android.app.PendingIntent.getActivity;
+
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -14,7 +19,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -24,11 +31,19 @@ import com.example.foodorderapp.R;
 import com.example.foodorderapp.model.CartModel;
 import com.example.foodorderapp.model.FoodModel;
 import com.example.foodorderapp.service.CartService;
+import com.example.foodorderapp.service.FavouriteService;
 import com.example.foodorderapp.service.FoodService;
 import com.example.foodorderapp.service.MapService;
 import com.example.foodorderapp.service.ShopService;
 import com.example.foodorderapp.service.UserService;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 
 import java.text.NumberFormat;
 import java.util.HashMap;
@@ -39,11 +54,12 @@ public class DetailFoodActivity extends AppCompatActivity {
     // Khai báo các biến thành phần
     private int foodId;
     private int quantity = 1;
-
+    private ListenerRegistration cartListener;
     private FoodService foodService;
     private ShopService shopService;
     private UserService userService;
     private CartService cartService;
+    private CheckBox btnFavourite;
 
     private Map<String, Double> sizePrices = new HashMap<>();
 
@@ -54,6 +70,9 @@ public class DetailFoodActivity extends AppCompatActivity {
     private LinearLayout llSizeRow;
     private ProgressBar progressTime;
     private TextView tvTime;
+    private ImageView imgCart;
+    private TextView tvCartCount;
+    private FavouriteService favouriteService;
     private final MapService mapService = new MapService();
 
     @Override
@@ -70,7 +89,14 @@ public class DetailFoodActivity extends AppCompatActivity {
         initializeServices();
         setupViews();
         setupListeners();
-
+        imgCart = findViewById(R.id.imgCartIcon);
+        imgCart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(DetailFoodActivity.this, CartActivity.class);
+                startActivity(intent);
+            }
+        });
         foodId = getIntent().getIntExtra("foodId", -1);
 
         if (foodId != -1) {
@@ -79,6 +105,7 @@ public class DetailFoodActivity extends AppCompatActivity {
             Toast.makeText(this, "Không tìm thấy món ăn! id:" + foodId, Toast.LENGTH_SHORT).show();
             finish();
         }
+        loadCartItemsRealtime();
     }
 
     private void initializeServices() {
@@ -86,8 +113,31 @@ public class DetailFoodActivity extends AppCompatActivity {
         shopService = new ShopService();
         userService = new UserService();
         cartService = new CartService();
+        favouriteService = new FavouriteService();
     }
+    public void checkHeart(){
+        userService.getUser().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult() != null) {
+                String userId = task.getResult().getId();
+                favouriteService.isFoodFavourite(userId, foodId).addOnCompleteListener(new OnCompleteListener<Boolean>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Boolean> task) {
+                        if (task.isSuccessful()) {
+                            Boolean result = task.getResult();
+                            if (result != null && result) {
+                                btnFavourite.setChecked(true);
+                            }
+                        } else {
+                            // Task thất bại
+                        }
+                    }
+                });
 
+            } else {
+                Toast.makeText(DetailFoodActivity.this, "Không tìm thấy thông tin người dùng", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
     private void setupViews() {
         // Thiết lập giao diện
         ImageButton btnBack = findViewById(R.id.btnBack);
@@ -98,6 +148,7 @@ public class DetailFoodActivity extends AppCompatActivity {
                 finish();
             }
         });
+
         imgFood = findViewById(R.id.imgFood);
         tvFoodName = findViewById(R.id.tvFoodName);
         tvRate = findViewById(R.id.tvRate);
@@ -109,10 +160,13 @@ public class DetailFoodActivity extends AppCompatActivity {
         rbM = findViewById(R.id.sizeMedium);
         rbL = findViewById(R.id.sizeLarge);
         llSizeRow = findViewById(R.id.llSizeRow);
+        imgCart = findViewById(R.id.imgCartIcon);
         tvTime = findViewById(R.id.time);
+        tvCartCount = findViewById(R.id.textCartCount);
         progressTime = findViewById(R.id.progressTime);
-
+        btnFavourite = findViewById(R.id.btnFavourite);
         tvQuantity.setText(String.valueOf(quantity));
+        checkHeart();
     }
     private void setupTime(String shopAddress) {
         runOnUiThread(() -> {
@@ -170,8 +224,40 @@ public class DetailFoodActivity extends AppCompatActivity {
                 addToCart();
             }
         });
-    }
+        btnFavourite.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            userService.getUser().addOnCompleteListener(task -> {
+                if (task.isSuccessful() && task.getResult() != null) {
+                    String userId = task.getResult().getId();
+                    if (isChecked) {
+                        addToFavourite(userId);
+                    } else {
+                        removeFromFavourite(userId);
+                    }
+                } else {
+                    Toast.makeText(DetailFoodActivity.this, "Không tìm thấy thông tin người dùng", Toast.LENGTH_SHORT).show();
+                }
+            });
+        });
 
+    }
+    public void addToFavourite(String userId){
+        favouriteService.addFoodToFavourite(userId, foodId)
+                .addOnSuccessListener(aVoid -> {
+                    //successfull
+                })
+                .addOnFailureListener(e -> {
+                    //failure
+                });
+    }
+    private void removeFromFavourite(String userId) {
+        favouriteService.removeFoodFromFavourite(userId, foodId)
+                .addOnSuccessListener(unused -> {
+                    Toast.makeText(this, "Đã xoá khỏi yêu thích", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Không thể xoá", Toast.LENGTH_SHORT).show();
+                });
+    }
     private void updateQuantity(int delta) {
         quantity = Math.max(1, quantity + delta);
         tvQuantity.setText(String.valueOf(quantity));
@@ -192,6 +278,7 @@ public class DetailFoodActivity extends AppCompatActivity {
                 Toast.makeText(this, "Không tìm thấy thông tin người dùng", Toast.LENGTH_SHORT).show();
             }
         });
+        animateToCart();
     }
 
     private void addCartItem(CartModel cartModel) {
@@ -298,4 +385,64 @@ public class DetailFoodActivity extends AppCompatActivity {
             }
         });
     }
+
+
+    private void loadCartItemsRealtime() {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser == null) return;
+
+        String userId = currentUser.getUid();
+        CartService cartService = new CartService();
+
+        cartListener = cartService.listenToCartByUserId(userId, (querySnapshot, e) -> {
+            if (e != null) {
+                Log.e("CartListener", "Lỗi khi lắng nghe thay đổi giỏ hàng", e);
+                return;
+            }
+
+            if (querySnapshot != null) {
+                int cartItemCount = querySnapshot.size();
+                tvCartCount.setText(String.valueOf(cartItemCount));
+                tvCartCount.setVisibility(cartItemCount > 0 ? View.VISIBLE : View.GONE);
+            }
+        });
+    }
+
+    private void animateToCart() {
+        ImageView imgFlying = findViewById(R.id.imgFlyingFood);
+
+        // 1. Lấy vị trí trên màn hình
+        int[] foodLocation = new int[2];
+        imgFood.getLocationOnScreen(foodLocation);
+
+        int[] cartLocation = new int[2];
+        imgCart.getLocationOnScreen(cartLocation);
+
+        // 2. Hiển thị ảnh bay tại vị trí món ăn
+        imgFlying.setImageDrawable(imgFood.getDrawable());
+        imgFlying.setX(foodLocation[0]);
+        imgFlying.setY(foodLocation[1]);
+        imgFlying.setVisibility(View.VISIBLE);
+
+        // 3. Animation
+        imgFlying.animate()
+                .x(cartLocation[0])
+                .y(cartLocation[1])
+                .setDuration(600)
+                .withEndAction(() -> imgFlying.setVisibility(View.GONE))
+                .start();
+    }
+    @Override
+    protected void onStop() {
+        super.onStop();
+        detachCartListener();
+    }
+
+    private void detachCartListener() {
+        if (cartListener != null) {
+            cartListener.remove();
+            cartListener = null;
+        }
+    }
+
 }
