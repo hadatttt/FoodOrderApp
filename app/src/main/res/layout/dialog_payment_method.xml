@@ -36,7 +36,7 @@
             android:id="@+id/radioTransferBefore"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Thanh toán bằng MoMo"
+            android:text="Thanh toán bằng chuyển khoản"
             android:textSize="16sp"
             android:padding="8dp"
             android:textColor="?attr/colorOnBackground"/>
