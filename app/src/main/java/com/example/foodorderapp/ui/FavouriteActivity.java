@@ -98,16 +98,15 @@ public class FavouriteActivity extends AppCompatActivity {
                                 if (loadedCount[0] == total) {
                                     // Tất cả món ăn đã load xong mới cập nhật adapter
                                     if (!favouriteList.isEmpty()) {
-                                        Log.d("abc","co nghe");
                                         favouriteAdapter = new FavouriteAdapter(this, favouriteList);
                                         recyclerView.setAdapter(favouriteAdapter);
-                                        favouriteAdapter.notifyDataSetChanged();
                                         favouriteAdapter.setOnItemClickListener(new FavouriteAdapter.OnItemClickListener() {
                                             @Override
                                             public void onRemoveClick(FoodModel food) {
                                                 removeFromFavourite(food);
                                             }
                                         });
+                                        favouriteAdapter.notifyDataSetChanged();
                                     } else {
                                         Toast.makeText(this, "Chưa có món yêu thích nào", Toast.LENGTH_SHORT).show();
                                     }

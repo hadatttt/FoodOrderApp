@@ -28,7 +28,7 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:fontFamily="sans-serif-medium"
-            android:text="Danh mục đồ ăn"
+            android:text="Danh mục cửa hàng"
             android:textColor="?attr/colorOnBackground"
             android:textSize="18sp" />
     </RelativeLayout>

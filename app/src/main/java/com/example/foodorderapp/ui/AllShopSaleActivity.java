@@ -70,7 +70,7 @@ public class AllShopSaleActivity extends AppCompatActivity {
 
     private void setupRecyclerView() {
         recyclerShopSale = findViewById(R.id.recyclerShopSale);
-        recyclerShopSale.setLayoutManager(new GridLayoutManager(this, 2));
+        recyclerShopSale.setLayoutManager(new GridLayoutManager(this, 1));
 
         // Truyền context và danh sách vào adapter
         shopSaleAdapter = new SaleShopAdapter(this, shopList);
