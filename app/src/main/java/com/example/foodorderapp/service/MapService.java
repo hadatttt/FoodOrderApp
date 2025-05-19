@@ -28,13 +28,15 @@ public class MapService {
         new Thread(() -> {
             try {
                 String url = String.format(
-                        "https://router.project-osrm.org/route/v1/driving/%.6f,%.6f;%.6f,%.6f?overview=full&geometries=geojson",
-                        userLng, userLat, shopLng, shopLat);
+                    java.util.Locale.US,
+                    "https://router.project-osrm.org/route/v1/driving/%.6f,%.6f;%.6f,%.6f?overview=full&geometries=geojson",
+                    userLng, userLat, shopLng, shopLat);
 
+                Log.d("SIZEEE", url);
                 OkHttpClient client = new OkHttpClient();
                 Request request = new Request.Builder()
                         .url(url)
-                        .header("User-Agent", "FastFood/1.0")
+                        .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/117 Safari/537.36")
                         .build();
 
                 Response response = client.newCall(request).execute();
@@ -66,7 +68,7 @@ public class MapService {
                 OkHttpClient client = new OkHttpClient();
                 Request request = new Request.Builder()
                         .url(url)
-                        .header("User-Agent", "FastFood/1.0")
+                        .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/117 Safari/537.36")
                         .build();
 
                 Response response = client.newCall(request).execute();
@@ -92,8 +94,10 @@ public class MapService {
         new Thread(() -> {
             try {
                 String url = String.format(
+                        java.util.Locale.US,
                         "https://router.project-osrm.org/route/v1/driving/%.6f,%.6f;%.6f,%.6f?overview=false",
                         userLng, userLat, shopLng, shopLat);
+
 
                 Log.d("SIZEEE", url);
                 OkHttpClient client = new OkHttpClient();
