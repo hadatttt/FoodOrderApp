@@ -51,6 +51,7 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-storage")
     implementation("com.google.firebase:firebase-messaging")
+    implementation("androidx.core:core-splashscreen:1.0.0")
     // Google Play Services
     implementation ("com.google.firebase:firebase-storage")
     implementation ("com.google.android.material:material:1.9.0")
